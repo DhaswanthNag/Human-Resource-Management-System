@@ -1,0 +1,22 @@
+[33m8985961[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdev[m[33m)[m HEAD@{0}: commit: m
+[33m3a8cd70[m HEAD@{1}: pull origin dev: Fast-forward
+[33meed99e8[m HEAD@{2}: commit: authenticatio updated
+[33m767e0fd[m HEAD@{3}: commit (merge): task management backend updated
+[33m675640e[m HEAD@{4}: commit: task management backend updated
+[33mdbcf944[m HEAD@{5}: commit: task management backend updated
+[33m9d45eab[m HEAD@{6}: pull: Fast-forward
+[33mabdd3e5[m HEAD@{7}: pull origin dev: Fast-forward
+[33m3a5bf14[m HEAD@{8}: commit: added calender and offerletters backend
+[33m30df639[m HEAD@{9}: pull: Fast-forward
+[33ma076bc7[m[33m ([m[1;32mmain[m[33m)[m HEAD@{10}: checkout: moving from main to dev
+[33ma076bc7[m[33m ([m[1;32mmain[m[33m)[m HEAD@{11}: checkout: moving from dev to main
+[33ma076bc7[m[33m ([m[1;32mmain[m[33m)[m HEAD@{12}: reset: moving to origin/main
+[33ma076bc7[m[33m ([m[1;32mmain[m[33m)[m HEAD@{13}: pull origin main: Fast-forward
+[33m412b577[m HEAD@{14}: checkout: moving from main to dev
+[33ma076bc7[m[33m ([m[1;32mmain[m[33m)[m HEAD@{15}: pull: Fast-forward
+[33m07f627e[m HEAD@{16}: commit: myapp chnages to frontend and added readme.md
+[33mabc0e42[m HEAD@{17}: commit: added backend demo folders
+[33m69d8250[m HEAD@{18}: commit: added config
+[33m412b577[m HEAD@{19}: commit: commit
+[33me8b25ef[m HEAD@{20}: commit: final
+[33mb3b14c4[m HEAD@{21}: clone: from https://github.com/Team-Aysqo-Projects/HRMS.git
