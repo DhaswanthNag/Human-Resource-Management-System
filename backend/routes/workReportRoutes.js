@@ -47,7 +47,7 @@ router.get(
   exportReports
 );
 
-router.get('/export/:userId', 
+router.get('/export/:userId',
   authenticateToken,
   authorizeRoles('admin', 'hr'),
   exportReports

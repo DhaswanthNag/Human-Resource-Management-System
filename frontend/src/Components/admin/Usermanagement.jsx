@@ -166,10 +166,10 @@ export default function UserManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-white to-blue-50 flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* --- Header --- */}
-      <header className="bg-blue-900 px-6 py-5 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-lg">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white">
+      <header className=" px-6 py-5 mr-4 ml-4 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-lg">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-700">
           User Management
         </h1>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -185,7 +185,7 @@ export default function UserManagement() {
           </div>
           <button
             onClick={openAddUserModal}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg flex items-center justify-center shadow-md transition"
+            className="bg-gray-600 hover:bg-gray-800 text-white px-4 py-2.5 rounded-lg flex items-center justify-center shadow-md transition"
           >
             <PlusIcon className="w-5 h-5 mr-2" /> Add Employee
           </button>
@@ -193,7 +193,7 @@ export default function UserManagement() {
       </header>
 
       {/* --- Stats Cards --- */}
-      <div className="px-6 py-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="px-6 py-6 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-6">
         <StatCard title="Total Employees" value={stats.employees} color="blue" />
         <StatCard title="Total HR's" value={stats.hr} color="green" />
         <StatCard title="Total Members" value={stats.total} color="yellow" />
@@ -251,13 +251,13 @@ export default function UserManagement() {
                         <div className="flex gap-3 justify-center">
                           <button
                             onClick={() => openEditUserModal(user)}
-                            className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
+                            className="text-yellow-500 hover:text-yellow-600 flex items-center gap-1"
                           >
                             <PencilSquareIcon className="w-4 h-4" /> Edit
                           </button>
                           <button
                             onClick={() => shareCredentials(userId)}
-                            className="text-indigo-600 hover:text-indigo-900 flex items-center gap-1"
+                            className="text-green-500 hover:text-green-700 flex items-center gap-1"
                           >
                             <ShareIcon className="w-4 h-4" /> Send Email
                           </button>
@@ -297,12 +297,12 @@ export default function UserManagement() {
             onSubmit={handleFormSubmit}
             className="bg-white w-full max-w-md rounded-xl shadow-xl transition-transform transform scale-100"
           >
-            <div className="bg-blue-700 px-6 py-4 rounded-t-xl">
+            <div className="bg-gray-700 px-6 py-4 rounded-t-xl">
               <h2 className="text-lg font-semibold text-white">
                 {editingUser ? "Edit Employee" : "Add New Employee"}
               </h2>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 ">
               <Input
                 label="Full Name"
                 name="name"
@@ -344,7 +344,7 @@ export default function UserManagement() {
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-5 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800"
               >
                 {editingUser ? "Update Employee" : "Add Employee"}
               </button>
@@ -384,7 +384,7 @@ function Input({ label, ...props }) {
       </label>
       <input
         {...props}
-        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+        className="w-full px-4 py-2.5 rounded-md  border focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 text-sm"
       />
     </div>
   );
@@ -398,7 +398,7 @@ function Select({ label, options = [], ...props }) {
       </label>
       <select
         {...props}
-        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+        className="w-full px-4 py-2.5 rounded-md border focus:ring-1 focus:ring-yellow-600 focus:border-yellow-500 text-sm"
       >
         {options.map((o) => (
           <option key={o} value={o}>

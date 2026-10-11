@@ -25,7 +25,7 @@ const addComment = async (report_id, comment, status, reviewed_by) => {
      WHERE report_id = $4 RETURNING *`,
     [comment, status, reviewed_by, report_id]
   );
-  return result.rows[0];  
+  return result.rows[0];
 };
 
 module.exports = {

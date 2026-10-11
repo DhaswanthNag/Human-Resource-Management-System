@@ -2,13 +2,12 @@ import React, { useState, useEffect } from "react";
 import {
   User,
   Calendar,
-//   CheckCircle,
+  //   CheckCircle,
   X,
   FileText,
   Eye,
 } from "lucide-react";
 import axios from "axios";
-
 
 const API_BASE_URL =
   process.env.REACT_APP_URL || "http://localhost:5000";
@@ -16,9 +15,9 @@ const API_BASE_URL =
 const HRJoiningModalities = () => {
   const [employees, setEmployees] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, ] = useState("");
   const [loading, setLoading] = useState(false);
-  const [loadingDocIndex, setLoadingDocIndex] = useState(null);
+  // const [loadingDocIndex, setLoadingDocIndex] = useState(null);
   const [error, setError] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
@@ -52,23 +51,6 @@ const HRJoiningModalities = () => {
     return { percentage, completed, total };
   };
 
-  const handleVerify = async (empIndex, docIndex) => {
-    const doc = employees[empIndex].documents[docIndex];
-    try {
-      setLoadingDocIndex(docIndex);
-      setError(null);
-      await axios.put(`${API_BASE_URL}/api/documents/status/${doc.id}`, {
-        decision: "verified",
-      });
-      await fetchEmployees();
-    } catch (err) {
-      console.error("Error verifying documents:", err);
-      setError("Failed to verify document. Please try again.");
-    } finally {
-      setLoadingDocIndex(null);
-    }
-  };
-
   const handlePreview = async (docId) => {
     try {
       const res = await axios.get(`${API_BASE_URL}/api/employees/raw/${docId}`, { responseType: "blob" });
@@ -87,16 +69,12 @@ const HRJoiningModalities = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-white to-blue-50 p-4">
-      <header className="bg-blue-800 p-6 rounded-lg mb-8 shadow-lg flex justify-between items-center">
-        <h1 className="text-white text-3xl font-bold">HR Document Verification</h1>
-        <input
-          type="text"
-          placeholder="Search employees..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-64 p-2 rounded-md border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+    // Changed padding to be responsive
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 md:p-8">
+      <header className="mt-2 mb-4 px-8">
+        <h1 className="text-gray-700 text-2xl font-bold text-center tracking-wide">
+            Verify Panel
+        </h1>
       </header>
 
       {error && <p className="text-center text-red-600 mb-4">{error}</p>}
@@ -109,56 +87,61 @@ const HRJoiningModalities = () => {
           <p>No employees found matching your criteria.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols- lg:grid-cols-1 gap-9 ml-96 mr-96">
-          {filteredEmployees.map((emp, empIndex) => {
-            const { percentage, completed, total } = calculateProgress(emp.documents);
-            return (
-              <div key={emp.emp_id} className="bg-white shadow-md rounded-lg p-6 flex flex-col">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                    <User size={24} className="text-blue-600" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold">{emp.name || "Unknown"}</h2>
-                    <p className="text-sm text-gray-500">ID: {emp.emp_id}</p>
-                  </div>
-                </div>
+        // Added a max-width container and auto margins to center the content
+        <div className="max-w-8xl mx-auto">
+            {/* Modified grid columns for responsiveness. It will be 1 col on mobile, 2 on tablets, and 3 on desktops. */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 ml-6 mr-6 gap-8">
+                {filteredEmployees.map((emp, empIndex) => {
+                const { percentage, completed, total } = calculateProgress(emp.documents);
+                return (
+                    <div key={emp.emp_id} className="bg-white shadow-md rounded-lg p-6 flex flex-col">
+                    <div className="flex items-center mb-4">
+                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
+                        <User size={24} className="text-gray-700" />
+                        </div>
+                        <div>
+                        <h2 className="text-xl font-semibold">{emp.name || "Unknown"}</h2>
+                        <p className="text-sm text-gray-500">ID: {emp.emp_id}</p>
+                        </div>
+                    </div>
 
-                <p className="flex items-center mb-4 text-gray-600 text-sm">
-                  <Calendar size={16} className="mr-2" />
-                  <span>Joining Date: {emp.joiningDate || "Not Specified"}</span>
-                </p>
+                    <p className="flex items-center mb-4 text-gray-600 text-sm">
+                        <Calendar size={16} className="mr-2" />
+                        <span>Joining Date: {emp.joiningDate || "Not Specified"}</span>
+                    </p>
 
-                <div className="mb-4">
-                  <div className="relative bg-gray-200 rounded-full h-2 w-full overflow-hidden">
-                    <div
-                      style={{ width: `${percentage}%` }}
-                      className={`absolute left-0 top-0 h-2 rounded-full transition-all duration-500 ${
-                        percentage === 100 ? "bg-green-500" : "bg-blue-600"
-                      }`}
-                    />
-                  </div>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Verification progress: {percentage}% ({completed}/{total})
-                  </p>
-                </div>
+                    <div className="mb-4">
+                        <div className="relative bg-gray-200 rounded-full h-2 w-full overflow-hidden">
+                        <div
+                            style={{ width: `${percentage}%` }}
+                            className={`absolute left-0 top-0 h-2 rounded-full transition-all duration-500 ${
+                            percentage === 100 ? "bg-green-500" : "bg-gray-900"
+                            }`}
+                        />
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">
+                        Verification progress: {percentage}% ({completed}/{total})
+                        </p>
+                    </div>
 
-                <button
-                  onClick={() => setSelectedIndex(empIndex)}
-                  className="mt-auto bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition inline-flex items-center justify-center"
-                >
-                  <Eye size={18} className="mr-2" /> View Documents
-                </button>
-              </div>
-            );
-          })}
+                    <button
+                        onClick={() => setSelectedIndex(empIndex)}
+                        className="mt-auto bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition inline-flex items-center justify-center"
+                    >
+                        <Eye size={18} className="mr-2" /> View Documents
+                    </button>
+                    </div>
+                );
+                })}
+            </div>
         </div>
       )}
 
       {/* Modal */}
       {selectedIndex !== null && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50 p-4">
-          <div className="bg-white rounded-lg overflow-hidden shadow-xl max-h-[90vh] w-full max-w-4xl flex flex-col">
+            {/* Adjusted modal width to be responsive */}
+          <div className="bg-white rounded-lg overflow-hidden shadow-xl max-h-[90vh] w-full max-w-lg md:max-w-2xl lg:max-w-4xl flex flex-col">
             <header className="flex justify-between items-center p-6 border-b border-gray-200">
               <h2 className="text-xl font-semibold">
                 Verify Documents - {employees[selectedIndex].name}
@@ -170,13 +153,14 @@ const HRJoiningModalities = () => {
 
             <main className="overflow-y-auto p-6 flex-grow">
               {employees[selectedIndex].documents.length ? (
-                employees[selectedIndex].documents.map((doc, idx) => (
-                  <div key={doc.id} className="border p-4 mb-4 rounded flex justify-between items-center">
+                employees[selectedIndex].documents.map((doc) => (
+                    // On small screens, items will stack vertically, otherwise they are in a row.
+                  <div key={doc.id} className="border p-4 mb-4 rounded flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                       {doc.file_name ? (
                         <button
                           onClick={() => handlePreview(doc.id)}
-                          className="text-blue-600 underline"
+                          className="text-blue-600 underline text-left"
                         >
                           {doc.file_name}
                         </button>
@@ -198,23 +182,6 @@ const HRJoiningModalities = () => {
                         </span>
                       </p>
                     </div>
-                    {doc.decision !== "verified" && (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleVerify(selectedIndex, idx)}
-                          disabled={loadingDocIndex === idx}
-                          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
-                        >
-                          {loadingDocIndex === idx ? "Verifying..." : "Verify"}
-                        </button>
-                        <button
-                          onClick={() => alert("Reject functionality not implemented")}
-                          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    )}
                   </div>
                 ))
               ) : (
@@ -228,7 +195,8 @@ const HRJoiningModalities = () => {
                 <iframe
                   src={previewUrl}
                   title="Document Preview"
-                  className="w-full h-96 border rounded-md"
+                  // Adjusted iframe height for smaller screens
+                  className="w-full h-80 md:h-96 border rounded-md mt-4"
                 />
               )}
             </main>

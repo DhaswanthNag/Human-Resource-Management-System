@@ -46,7 +46,7 @@ const EmployeePayslip = () => {
     employeeName: "",
     payPeriod: "",
   });
-  
+
 
   const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
   const [error, setError] = useState("");
@@ -242,7 +242,7 @@ const EmployeePayslip = () => {
   const generatePayslip = async () => {
     const trimmedId = formData.userId.trim();
     const trimmedName = formData.employeeName.trim();
-    
+
 
     if (!trimmedId || !trimmedName) {
       alert("Please enter both Employee ID and Name");
@@ -322,7 +322,7 @@ const EmployeePayslip = () => {
   <SectionTitle>
     <CreditCard className="mr-2" /> Employee Payslip Details
   </SectionTitle>
-  
+
   <div className="flex flex-wrap -mx-3">
     {/* Employee ID Field */}
     <div className="w-full md:w-1/2 px-3 mb-4">
@@ -334,7 +334,7 @@ const EmployeePayslip = () => {
         variant="outlined"
       />
     </div>
-    
+
     {/* Employee Name Field */}
     <div className="w-full md:w-1/2 px-3 mb-4">
       <TextField
@@ -345,7 +345,7 @@ const EmployeePayslip = () => {
         variant="outlined"
       />
     </div>
-    
+
     {error && <p className="text-red-600 mt-3 font-semibold w-full px-3">{error}</p>}
 
     {/* Generate Payslip Button */}
@@ -360,7 +360,7 @@ const EmployeePayslip = () => {
         Generate Payslip
       </Button>
     </div>
-    
+
     {/* Download Button */}
     <div className="w-full md:w-1/2 px-3 mb-4">
       <Button
@@ -374,7 +374,7 @@ const EmployeePayslip = () => {
         Download
       </Button>
     </div>
-    
+
     {/* Reset Form Button */}
     <div className="w-full md:w-1/2 px-3 mb-4">
       <Button
@@ -395,7 +395,7 @@ const EmployeePayslip = () => {
         <SectionTitle>
           <PayslipIcon className="mr-2" /> Request Payslip
         </SectionTitle>
-        
+
         <div className="flex flex-wrap -mx-2 items-center">
           {/* Date Picker */}
           <div className="w-full sm:w-1/2 px-2 mb-4 sm:mb-0">
@@ -409,7 +409,7 @@ const EmployeePayslip = () => {
               renderInput={(params) => <TextField {...params} helperText={null} fullWidth />}
             />
           </div>
-          
+
           {/* Request Button */}
           <div className="w-full sm:w-1/2 px-2">
             <Button
@@ -424,7 +424,7 @@ const EmployeePayslip = () => {
             </Button>
           </div>
         </div>
-        
+
         <p className="text-sm text-gray-500 mt-4">
           Send a request to the HR/Admin team to receive your payslip for the selected month.
         </p>

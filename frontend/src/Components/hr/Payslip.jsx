@@ -182,7 +182,7 @@ const HRPayslip = () => {
     const employeeEPFComputed = (parseFloat(pfPercent) / 100) * basic;
     const professionalTax = 300;
     const totalDeductions = incomeTax + employeeEPFComputed + professionalTax;
-    const netTakeHome = adjustedGross - totalDeductions; 
+    const netTakeHome = adjustedGross - totalDeductions;
     const totalCTC = gross + employerEPF + gratuity;
 
     const earnings = [

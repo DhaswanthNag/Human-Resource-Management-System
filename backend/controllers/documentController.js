@@ -21,10 +21,10 @@ const uploadDocument = async (req, res) => {
     }
 
     const result = await pool.query(
-      `INSERT INTO employee_documents 
-       (emp_id, file_name, content_type, content, status, uploaded_at) 
-       VALUES ($1, $2, $3, $4, $5, NOW()) 
-       RETURNING id, emp_id, file_name, content_type, 
+      `INSERT INTO employee_documents
+       (emp_id, file_name, content_type, content, status, uploaded_at)
+       VALUES ($1, $2, $3, $4, $5, NOW())
+       RETURNING id, emp_id, file_name, content_type,
                  COALESCE(status, 'pending') AS decision, uploaded_at`,
       [empId, file.originalname, file.mimetype, file.buffer, "pending"]
     );
@@ -44,10 +44,10 @@ const getEmployeeDocuments = async (req, res) => {
   try {
     const { empId } = req.params;
     const result = await pool.query(
-      `SELECT id, emp_id, file_name, content_type, 
-              COALESCE(status, 'pending') AS decision, uploaded_at 
-       FROM employee_documents 
-       WHERE emp_id = $1 
+      `SELECT id, emp_id, file_name, content_type,
+              COALESCE(status, 'pending') AS decision, uploaded_at
+       FROM employee_documents
+       WHERE emp_id = $1
        ORDER BY uploaded_at DESC`,
       [empId]
     );
@@ -69,8 +69,8 @@ const getRawDocument = async (req, res) => {
   try {
     const { docId } = req.params;
     const result = await pool.query(
-      `SELECT file_name, content_type, content 
-       FROM employee_documents 
+      `SELECT file_name, content_type, content
+       FROM employee_documents
        WHERE id = $1`,
       [docId]
     );
@@ -96,9 +96,9 @@ const updateDocumentStatus = async (req, res) => {
 
   try {
     const result = await pool.query(
-      `UPDATE employee_documents 
-       SET status = $1 
-       WHERE id = $2 
+      `UPDATE employee_documents
+       SET status = $1
+       WHERE id = $2
        RETURNING id, status`,
       [status, docId]
     );
@@ -122,8 +122,8 @@ const deleteDocument = async (req, res) => {
   try {
     const { docId } = req.params;
     const result = await pool.query(
-      `DELETE FROM employee_documents 
-       WHERE id = $1 
+      `DELETE FROM employee_documents
+       WHERE id = $1
        RETURNING id`,
       [docId]
     );

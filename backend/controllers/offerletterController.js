@@ -29,7 +29,7 @@ export const getOfferById = async (req, res) => {
     console.error("Error fetching offer:", err.message);
     res.status(500).json({ error: "Server error" });
   }
-};  
+};
 
 // ✅ Create offer letter
 export const createOffer = async (req, res) => {
@@ -48,9 +48,9 @@ export const createOffer = async (req, res) => {
     } = req.body;
 
     const result = await pool.query(
-      `INSERT INTO offer_letters 
-      (offer_id, candidate_name, email, mobile, designation, ctc, joining_date, address, offer_date, pdf_link, created_at) 
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,NOW()) 
+      `INSERT INTO offer_letters
+      (offer_id, candidate_name, email, mobile, designation, ctc, joining_date, address, offer_date, pdf_link, created_at)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,NOW())
       RETURNING *`,
       [offer_id, candidate_name, email, mobile, designation, ctc, joining_date, address, offer_date, pdf_link]
     );
@@ -80,7 +80,7 @@ export const updateOffer = async (req, res) => {
     } = req.body;
 
     const result = await pool.query(
-      `UPDATE offer_letters SET 
+      `UPDATE offer_letters SET
         offer_id=$1,
         candidate_name=$2,
         email=$3,

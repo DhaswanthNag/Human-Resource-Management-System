@@ -13,9 +13,19 @@ const HRTaskManagement = () => {
   const [tasks, setTasks] = useState([]);
   const [form, setForm] = useState({ title: "", description: "", assigned_to: "" });
   const [editingTask, setEditingTask] = useState(null);
-  const [filter, setFilter] = useState("All");
+  const [filter,] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+
+  // Format date as M/D/YYYY (no leading zeros)
+  const formatDateForSearch = (dateStr) => {
+    const date = new Date(dateStr);
+    if (isNaN(date)) return "";
+    const mm = date.getMonth() + 1; // no padStart
+    const dd = date.getDate(); // no padStart
+    const yyyy = date.getFullYear();
+    return `${mm}/${dd}/${yyyy}`; // e.g., "9/25/2025"
+  };
 
   useEffect(() => {
     fetchTasks();
@@ -61,12 +71,15 @@ const HRTaskManagement = () => {
 
   if (searchTerm.trim()) {
     const term = searchTerm.toLowerCase();
-    filteredTasks = filteredTasks.filter(
-      (task) =>
+    filteredTasks = filteredTasks.filter((task) => {
+      const createdAtFormatted = formatDateForSearch(task.created_at).toLowerCase();
+      return (
         task.title.toLowerCase().includes(term) ||
         task.description.toLowerCase().includes(term) ||
-        task.assigned_to.toLowerCase().includes(term)
-    );
+        task.assigned_to.toLowerCase().includes(term) ||
+        createdAtFormatted.includes(term)
+      );
+    });
   }
 
   const stats = {
@@ -76,86 +89,62 @@ const HRTaskManagement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-white to-blue-50 py-0 px-0">
-     <header className="flex items-center justify-between py-5 bg-blue-900 mb-8 px-6">
-  {/* Title on the left */}
-  <h1 className="text-white text-2xl md:text-3xl font-bold">
-    Task Assignment
-  </h1>
-
-  {/* Search bar on the right */}
-  <input
-    type="text"
-    placeholder="Search tasks..."
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    className="w-full max-w-xs p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm"
-  />
-</header>
-
-
-      <div className="max-w-5xl mx-auto">
-        <h2 className="text-3xl font-extrabold mb-8 text-indigo-900 tracking-tight">
-          HR Task Management
-        </h2>
-
-        {/* Stats Section */}
+    <div className="min-h-screen bg-gray-50 py-0 px-0 mr-6">
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full max-w-xs mb-6 p-2 bg-gray-200 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-500 shadow-sm"
+        />
+      <div className="max-w-screen mx-auto">
+        <h2 className="text-2xl font-semibold mb-8 text-gray-900 tracking-tight">HR Task Management</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           {Object.entries(stats).map(([label, count]) => (
-            <div
-              key={label}
-              className={`p-6 rounded-2xl shadow-md flex flex-col items-center ${statusColors[label]}`}
-            >
+            <div key={label} className={`p-6 rounded-2xl shadow-md flex flex-col items-center ${statusColors[label]}`}>
               <div className="text-xl font-semibold mb-2">{label}</div>
               <div className="text-4xl font-bold">{count}</div>
             </div>
           ))}
         </div>
-
-        {/* Main Content */}
         <div className="flex flex-col lg:flex-row gap-10">
-          {/* Task Form */}
           <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-7 border border-blue-100">
-            <h3 className="text-lg font-bold text-indigo-700 mb-5">
-              {editingTask ? "Edit Task" : "Assign a New Task"}
-            </h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                name="title"
-                placeholder="Title"
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                className="w-full border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-indigo-400"
-                required
-              />
-              <textarea
-                name="description"
-                placeholder="Description"
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                className="w-full border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-indigo-400"
-                required
-              />
-              <input
-                type="text"
-                name="assigned_to"
-                placeholder="Assign To (employee ID)"
-                value={form.assigned_to}
-                onChange={(e) => setForm({ ...form, assigned_to: e.target.value })}
-                className="w-full border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-indigo-400"
-                required
-              />
-              <button
-                type="submit"
-                className="w-full py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition"
-              >
-                {editingTask ? "Update Task" : "Create Task"}
-              </button>
-            </form>
+            <h3 className="text-lg font-bold text-gray-700 mb-5">{editingTask ? "Edit Task" : "Assign a New Task"}</h3>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="text"
+              name="title"
+              placeholder="Title"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              className="w-full border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300"
+              required
+            />
+            <textarea
+              name="description"
+              placeholder="Description"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              className="w-full border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300"
+              required
+            />
+            <input
+              type="text"
+              name="assigned_to"
+              placeholder="Assign To (employee ID)"
+              value={form.assigned_to}
+              onChange={(e) => setForm({ ...form, assigned_to: e.target.value })}
+              className="w-full border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300"
+              required
+            />
+            <button
+              type="submit"
+              className="w-full py-2 rounded-lg bg-gray-600 text-white font-semibold hover:bg-gray-800 transition"
+            >
+              {editingTask ? "Update Task" : "Create Task"}
+            </button>
+          </form>
           </div>
-
-          {/* Tasks List */}
           <div className="flex-1">
             {loading ? (
               <div className="text-center py-10 text-gray-500">Loading...</div>
@@ -169,34 +158,19 @@ const HRTaskManagement = () => {
                 >
                   <div>
                     <div className="font-medium text-lg">
-                      {task.title}{" "}
-                      <span className="text-indigo-600 text-sm font-semibold">
-                        — {task.assigned_to}
-                      </span>
+                      {task.title} <span className="text-indigo-600 text-sm font-semibold">— {task.assigned_to}</span>
                     </div>
                     <div className="text-gray-600">{task.description}</div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      {new Date(task.created_at).toLocaleString()}
-                    </div>
+                    <div className="text-xs text-gray-400 mt-1">{new Date(task.created_at).toLocaleString()}</div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span
-                      className={`text-xs font-semibold px-2 py-1 rounded ${
-                        statusColors[task.status]
-                      }`}
-                    >
+                    <span className={`text-xs font-semibold px-2 py-1 rounded ${statusColors[task.status]}`}>
                       {task.status}
                     </span>
-                    <button
-                      className="px-3 py-1 bg-yellow-500 text-white rounded"
-                      onClick={() => handleEdit(task)}
-                    >
+                    <button className="px-3 py-1 bg-yellow-500 text-white rounded" onClick={() => handleEdit(task)}>
                       Edit
                     </button>
-                    <button
-                      className="px-3 py-1 bg-red-500 text-white rounded"
-                      onClick={() => handleDelete(task.id)}
-                    >
+                    <button className="px-3 py-1 bg-red-500 text-white rounded" onClick={() => handleDelete(task.id)}>
                       Delete
                     </button>
                   </div>

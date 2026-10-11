@@ -1,35 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, Moon, Sun, Calendar, UserCheck,LayoutDashboard, UserPlus, Star, Users, CheckCircle, Clock, Award, X } from 'lucide-react';
+import { Calendar, UserCheck,LayoutDashboard, UserPlus, Star, Users, CheckCircle, Clock, Award, X } from 'lucide-react';
 import axios from 'axios';
 // Dashboard Component
-const Dashboard = ({ onShortlistedClick }) => {
-  const [stats, setStats] = useState({
-    total: 0,
-    completed: 0,
-    pending: 0,
-    shortlisted: 0
-  });
-
-  const fetchStats = async () => {
-    try {
-      const response = await axios.get("http://localhost:5000/api/interviews/dashboard");
-      if (response.status === 200) {
-        setStats({
-          total: response.data.totalInterviews,
-          completed: response.data.completed,
-          pending: response.data.pending,
-          shortlisted: response.data.shortlisted
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching dashboard stats:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchStats();
-  }, []);
-    const { total, completed, pending, shortlisted } = stats;
+const Dashboard = ({ onShortlistedClick, stats }) => {
+  const { total, completed, pending, shortlisted } = stats;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -42,7 +16,7 @@ const Dashboard = ({ onShortlistedClick }) => {
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white mt-1">{total}</h2>
         </div>
       </div>
-      
+
       <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center">
         <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg mr-4">
           <CheckCircle className="text-green-600 dark:text-green-400" size={24} />
@@ -52,7 +26,7 @@ const Dashboard = ({ onShortlistedClick }) => {
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white mt-1">{completed}</h2>
         </div>
       </div>
-      
+
       <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center">
         <div className="bg-amber-100 dark:bg-amber-900/30 p-3 rounded-lg mr-4">
           <Clock className="text-amber-600 dark:text-amber-400" size={24} />
@@ -62,7 +36,7 @@ const Dashboard = ({ onShortlistedClick }) => {
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white mt-1">{pending}</h2>
         </div>
       </div>
-      
+
       <div
         className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center cursor-pointer hover:shadow-md transition-shadow"
         onClick={onShortlistedClick}
@@ -123,12 +97,12 @@ const ScheduleForm = ({ onSuccess }) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
       <div className="flex items-center mb-6">
-        <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg mr-3">
-          <Calendar className="text-blue-600 dark:text-blue-400" size={20} />
+        <div className="bg-gray-200 dark:bg-gray-900/30 p-2 rounded-lg mr-3">
+          <Calendar className="text-gray-700 dark:text-blue-400" size={20} />
         </div>
         <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Schedule Interview</h2>
       </div>
-      
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Candidate Id</label>
@@ -138,11 +112,11 @@ const ScheduleForm = ({ onSuccess }) => {
             placeholder="Enter candidate Id"
             value={formData.candidate_id}
             onChange={handleChange}
-            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  transition duration-300 dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
             required
           />
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
           <input
@@ -151,11 +125,11 @@ const ScheduleForm = ({ onSuccess }) => {
             placeholder="Enter role"
             value={formData.role}
             onChange={handleChange}
-            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  transition duration-300 dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
             required
           />
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
@@ -164,11 +138,11 @@ const ScheduleForm = ({ onSuccess }) => {
               name="date"
               value={formData.date}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  transition duration-300 dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time</label>
             <input
@@ -176,28 +150,28 @@ const ScheduleForm = ({ onSuccess }) => {
               name="time"
               value={formData.time}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  transition duration-300 dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
               required
             />
           </div>
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
           <select
             name="status"
             value={formData.status}
             onChange={handleChange}
-            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  transition duration-300 dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
           >
             <option value="pending">Pending</option>
             <option value="completed">Completed</option>
           </select>
         </div>
-        
+
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
+          className="w-full bg-gray-700 hover:bg-gray-900 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
         >
           Schedule Interview
         </button>
@@ -244,12 +218,12 @@ const AssignForm = ({ onSuccess }) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
       <div className="flex items-center mb-6">
-        <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg mr-3">
-          <UserPlus className="text-blue-600 dark:text-blue-400" size={20} />
+        <div className="bg-gray-200 dark:bg-blue-900/30 p-2 rounded-lg mr-3">
+          <UserPlus className="text-gray-700 dark:text-blue-400" size={20} />
         </div>
         <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Assign Interview</h2>
       </div>
-      
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Interviewer Name</label>
@@ -259,11 +233,11 @@ const AssignForm = ({ onSuccess }) => {
             placeholder="Enter interviewer name"
             value={formData.interviewer_name}
             onChange={handleChange}
-            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  transition duration-300 dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
             required
           />
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Candidate Id</label>
           <input
@@ -272,11 +246,11 @@ const AssignForm = ({ onSuccess }) => {
             placeholder="Enter candidate Id"
             value={formData.candidate_id}
             onChange={handleChange}
-            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  transition duration-300 dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
             required
           />
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Round</label>
           <input
@@ -285,14 +259,14 @@ const AssignForm = ({ onSuccess }) => {
             placeholder="Technical, HR, etc."
             value={formData.round}
             onChange={handleChange}
-            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  transition duration-300 dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
             required
           />
         </div>
-        
+
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
+          className="w-full bg-gray-700 hover:bg-gray-900 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
         >
           Assign Interview
         </button>
@@ -352,12 +326,12 @@ const FeedbackForm = ({ onSuccess }) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
       <div className="flex items-center mb-6">
-        <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg mr-3">
-          <Star className="text-blue-600 dark:text-blue-400" size={20} />
+        <div className="bg-gray-200 dark:bg-blue-900/30 p-2 rounded-lg mr-3">
+          <Star className="text-gray-700 dark:text-blue-400" size={20} />
         </div>
         <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Submit Feedback</h2>
       </div>
-      
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Candidate Id</label>
@@ -367,7 +341,7 @@ const FeedbackForm = ({ onSuccess }) => {
             placeholder="Enter candidate id"
             value={formData.candidate_id}
             onChange={handleChange}
-            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  transition duration-300 dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
             required
           />
         </div>
@@ -380,7 +354,7 @@ const FeedbackForm = ({ onSuccess }) => {
             placeholder="Enter interviewer name"
             value={formData.interviewer}
             onChange={handleChange}
-            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  transition duration-300 dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
             required
           />
         </div>
@@ -393,7 +367,7 @@ const FeedbackForm = ({ onSuccess }) => {
             value={formData.feedback}
             onChange={handleChange}
             rows={4}
-            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  transition duration-300 dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
             required
           />
         </div>
@@ -422,7 +396,7 @@ const FeedbackForm = ({ onSuccess }) => {
 
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
+          className="w-full bg-gray-700 hover:bg-gray-900 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
         >
           Submit Feedback
         </button>
@@ -432,7 +406,7 @@ const FeedbackForm = ({ onSuccess }) => {
 };
 
 // ShortlistForm Component
-const ShortlistForm = () => {
+const ShortlistForm = ({ onShortlistUpdate }) => {
   const [formData, setFormData] = useState({
     candidate_name: "",
     status: "shortlisted",
@@ -448,6 +422,11 @@ const ShortlistForm = () => {
       const rejected = data.filter((c) => c.status === "rejected");
 
       setCandidates({ shortlisted, rejected });
+
+      // Notify parent component about the updated counts
+      if (onShortlistUpdate) {
+        onShortlistUpdate(shortlisted.length, rejected.length);
+      }
     } catch (error) {
       console.error("Error fetching candidates:", error);
     }
@@ -473,6 +452,14 @@ const ShortlistForm = () => {
         alert("Candidate shortlisted successfully!");
         setFormData({ candidate_id: "", status: "shortlisted" });
         fetchCandidates(); // Refresh list after adding
+
+        // Notify parent component about the update
+        if (onShortlistUpdate) {
+          onShortlistUpdate(
+            response.data.status === "shortlisted" ? candidates.shortlisted.length + 1 : candidates.shortlisted.length,
+            response.data.status === "rejected" ? candidates.rejected.length + 1 : candidates.rejected.length
+          );
+        }
       }
     } catch (error) {
       console.error("Error submitting shortlist:", error);
@@ -484,12 +471,12 @@ const ShortlistForm = () => {
     <div className="space-y-6">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <div className="flex items-center mb-6">
-          <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg mr-3">
-            <UserCheck className="text-blue-600 dark:text-blue-400" size={20} />
+          <div className="bg-gray-200 dark:bg-blue-900/30 p-2 rounded-lg mr-3">
+            <UserCheck className="text-gray-700 dark:text-blue-400" size={20} />
           </div>
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Candidate Evaluation</h2>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Candidate Id</label>
@@ -499,27 +486,27 @@ const ShortlistForm = () => {
               placeholder="Enter candidate Id"
               value={formData.candidate_id}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  transition duration-300 dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
             <select
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  transition duration-300 dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
             >
               <option value="shortlisted">Shortlisted</option>
               <option value="rejected">Rejected</option>
             </select>
           </div>
-          
+
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
+            className="w-full bg-gray-700 hover:bg-gray-900 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
           >
             Submit Evaluation
           </button>
@@ -573,19 +560,39 @@ const ShortlistForm = () => {
 
 // Main InterviewPanelDashboard Component
 const InterviewPanel = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [, setMenuOpen] = useState(false);
+  const [darkMode, ] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [shortlistedCandidates, setShortlistedCandidates] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const menuRef = useRef(null);
 
-  const [counts] = useState({
-    total: '',
-    completed: '',
-    pending: '',
-    shortlisted: 8,
+  const [stats, setStats] = useState({
+    total: 0,
+    completed: 0,
+    pending: 0,
+    shortlisted: 0
   });
+
+  const fetchStats = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/interviews/dashboard");
+      if (response.status === 200) {
+        setStats({
+          total: response.data.totalInterviews,
+          completed: response.data.completed,
+          pending: response.data.pending,
+          shortlisted: response.data.shortlisted
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -614,6 +621,17 @@ const InterviewPanel = () => {
     }
   };
 
+  const handleShortlistUpdate = (shortlistedCount, rejectedCount) => {
+    // Update the stats when a candidate is shortlisted or rejected
+    setStats(prevStats => ({
+      ...prevStats,
+      shortlisted: shortlistedCount
+    }));
+
+    // Refresh the dashboard stats
+    fetchStats();
+  };
+
   const closeModal = () => {
     setIsModalOpen(false);
   };
@@ -621,27 +639,22 @@ const InterviewPanel = () => {
   const tabClass = (tabName) =>
     `px-5 py-3 rounded-lg transition-all flex items-center font-medium ${
       activeTab === tabName
-        ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
+        ? 'bg-gray-700 dark:bg-blue-900/40 text-white dark:text-blue-300'
         : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
     }`;
 
   return (
     <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
-<div className="p-0 sm:p-0 bg-gradient-to-br from-blue-400 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 min-h-screen text-gray-800 dark:text-gray-200 transition-colors duration-300">
-
-
+    <div className="p-0 sm:p-0 bg-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 min-h-screen text-gray-800 dark:text-gray-200 transition-colors duration-300">
         {/* Header */}
-        <header className="flex items-center justify-between bg-blue-900 py-5 mb-8">
-          
-
-         <h1 className="flex-grow text-center text-2xl md:text-3xl font-bold text-gray-100 dark:text-white">
-    Interview Panel Dashboard
-  </h1>
-
-        </header>
+        {/* <header className="flex items-center justify-between bg-gray-50 py-5 mb-8">
+        <h1 className="flex-grow text-center text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+          Interview Panel Dashboard
+        </h1>
+        </header> */}
 
         {/* Tab Navigation */}
-        <nav className="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-2 ml-4 mr-4 mb-8 border border-gray-100 dark:border-gray-700">
+        <nav className="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-2 ml-4 mr-4 mb-8 mt-6 border border-gray-100 dark:border-gray-700">
           <div className="flex flex-wrap justify-center gap-x-8 sm:gap-x-16 lg:gap-x-32 gap-y-4 px-4">
             <button onClick={() => setActiveTab('dashboard')} className={tabClass('dashboard')}>
               <LayoutDashboard size={18} className="mr-2 inline" /> Dashboard
@@ -666,13 +679,13 @@ const InterviewPanel = () => {
           {activeTab === 'dashboard' && (
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Interview Dashboard</h1>
-              <Dashboard stats={counts} onShortlistedClick={handleShortlistedClick} />
+              <Dashboard stats={stats} onShortlistedClick={handleShortlistedClick} />
             </div>
           )}
-          {activeTab === 'schedule' && <ScheduleForm onSuccess={() => console.log("Success")} />}
-          {activeTab === 'assign' && <AssignForm onSuccess={() => console.log("Success")} />}
-          {activeTab === 'feedback' && <FeedbackForm onSuccess={() => console.log("Success")} />}
-          {activeTab === 'shortlist' && <ShortlistForm />}
+          {activeTab === 'schedule' && <ScheduleForm onSuccess={fetchStats} />}
+          {activeTab === 'assign' && <AssignForm onSuccess={fetchStats} />}
+          {activeTab === 'feedback' && <FeedbackForm onSuccess={fetchStats} />}
+          {activeTab === 'shortlist' && <ShortlistForm onShortlistUpdate={handleShortlistUpdate} />}
         </main>
 
         {/* Shortlisted Candidates Modal */}

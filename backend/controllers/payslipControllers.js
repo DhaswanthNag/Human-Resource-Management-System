@@ -1,14 +1,14 @@
 const db = require('../config/db');
- 
 
 
 
- 
+
+
 const nodemailer = require('nodemailer');
 const createPayslip = async (req, res) => {
-  console.log(" Creating payslip with data:", req.body); 
+  console.log(" Creating payslip with data:", req.body);
   const {
-    userId,                
+    userId,
     employeeName, employeeRole,
     bankName, bankAccount, ifscCode, pan,
     employeeEPF, employeeESI, specialAllowancePercent,
@@ -51,7 +51,7 @@ const createPayslip = async (req, res) => {
     res.status(201).json({
       message: "Payslip saved by HR!",
       payslip: result.rows[0] //  Return inserted record for confirmation
-     
+
     });
   } catch (error) {
     console.error("❌Error saving payslip:", error);

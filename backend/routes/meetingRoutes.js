@@ -9,10 +9,10 @@ import {
 
 const router = express.Router();
 
-router.get("/", getMeetings);        
-router.get("/:id", getMeetingById);  
-router.post("/", createMeeting);     
-router.put("/:id", updateMeeting);   
+router.get("/", getMeetings);
+router.get("/:id", getMeetingById);
+router.post("/", createMeeting);
+router.put("/:id", updateMeeting);
 router.delete("/:id", deleteMeeting);
 
 export default router;

@@ -137,12 +137,7 @@ const CandidateManagement = () => {
   );
 
   return (
-    <div className="bg-gradient-to-br from-blue-400 via-white to-blue-50 min-h-screen">
-      <header className="flex items-center justify-center bg-blue-900 border-b px-2 md:px-10 py-6">
-        <div className="text-center w-full">
-          <h1 className="text-xl md:text-2xl font-bold text-white">Candidate Management</h1>
-        </div>
-      </header>
+    <div className="bg-gray-50 min-h-screen">
 
       <div className="p-2 md:p-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-4 md:mb-6 gap-2">
@@ -152,7 +147,7 @@ const CandidateManagement = () => {
               resetForm();
               setIsModalOpen(true);
             }}
-            className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-purple-700 flex items-center text-sm md:text-base"
+            className="bg-gray-700 text-white px-3 py-2 rounded-lg hover:bg-gray-800 flex items-center text-sm md:text-base"
           >
             <FaPlus className="mr-2" />
             Add Candidate
@@ -219,7 +214,7 @@ const CandidateManagement = () => {
                   <div className="flex justify-end gap-2 pt-1">
                     <button
                       onClick={() => handleEdit(candidate)}
-                      className="text-blue-600 hover:text-blue-900 p-1"
+                      className="text-yellow-500 hover:text-yellow-600 p-1"
                       title="Edit candidate"
                     >
                       <FaEdit />
@@ -290,14 +285,14 @@ const CandidateManagement = () => {
                         <div className="flex justify-center space-x-2">
                           <button
                             onClick={() => handleEdit(candidate)}
-                            className="text-blue-600 hover:text-blue-900 p-1"
+                            className="text-yellow-600 hover:text-yellow-700 p-1"
                             title="Edit candidate"
                           >
                             <FaEdit />
                           </button>
                           <button
                             onClick={() => handleDelete(candidate.id)}
-                            className="text-red-600 hover:text-red-900 p-1"
+                            className="text-red-600 hover:text-red-700 p-1"
                             title="Delete candidate"
                           >
                             <FaTrash />
@@ -335,7 +330,7 @@ const CandidateManagement = () => {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   />
                 </div>
                 <div>
@@ -347,7 +342,7 @@ const CandidateManagement = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   />
                 </div>
                 <div>
@@ -359,7 +354,7 @@ const CandidateManagement = () => {
                     value={formData.position}
                     onChange={handleChange}
                     required
-                    className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   />
                 </div>
                 <div>
@@ -368,7 +363,7 @@ const CandidateManagement = () => {
                     name="status"
                     value={formData.status}
                     onChange={handleChange}
-                    className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   >
                     <option value="Applied">Applied</option>
                     <option value="Screening">Screening</option>
@@ -387,7 +382,7 @@ const CandidateManagement = () => {
                     name="interviewDate"
                     value={formData.interviewDate}
                     onChange={handleChange}
-                    className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   />
                 </div>
                 <div className="flex justify-end space-x-2 md:space-x-3 pt-2 md:pt-4">
@@ -403,7 +398,7 @@ const CandidateManagement = () => {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm md:text-base"
+                    className="px-4 py-2 rounded-lg bg-gray-700 text-white hover:bg-gray-800 text-sm md:text-base"
                   >
                     {formData.id ? "Update" : "Add"} Candidate
                   </button>

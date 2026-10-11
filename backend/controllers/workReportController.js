@@ -34,7 +34,7 @@ const submitWorkReport = async (req, res) => {
   }
 };
 
- 
+
 
 const viewReports = async (req, res) => {
   try {
@@ -43,15 +43,15 @@ const viewReports = async (req, res) => {
     let reports;
 
     if (role === 'admin') {
-      reports = await getAllReports(); 
+      reports = await getAllReports();
     } else if (role === 'hr') {
-      const ownReports = await getAllReports(userId); 
+      const ownReports = await getAllReports(userId);
       const allEmployeeReports = await db.query(
         `SELECT wr.* FROM work_reports wr
          JOIN users u ON wr.user_id = u.user_id
          WHERE u.role = 'employee'`
-      ).then(result => result.rows); 
-      
+      ).then(result => result.rows);
+
       reports = [...new Map(
         [...ownReports, ...allEmployeeReports].map(r => [r.report_id, r])
       ).values()];
@@ -150,7 +150,7 @@ const getMyReports = async (req, res) => {
 module.exports = {
   submitWorkReport,
   viewReports,
-  commentOnReport, 
+  commentOnReport,
   getMyReports,
   exportReports,
 };

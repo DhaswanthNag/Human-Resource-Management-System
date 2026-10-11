@@ -1,8 +1,7 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import logo from "../../assets/logo.png";
+import React, { useRef } from "react";
+// import { useNavigate } from "react-router-dom";
 import {
-  User,
+  // User,
   Users,
   UserRoundCog,
   FilePen,
@@ -15,25 +14,31 @@ import {
   Mail,
   UserCircle,
   ShieldCheck,
-  LogOut,
   LayoutDashboard,
+  PanelLeft, // Icon for the toggle button
 } from "lucide-react";
 
 export default function AdminSidebar({ sidebarOpen, setSidebarOpen, activeTab, setActiveTab }) {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
+  const sidebarRef = useRef(null); // Create a ref for the sidebar element
 
-  const handleLogout = () => {
-    // Clear any stored authentication data
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userRole");
-    localStorage.removeItem("userData");
-    
-    // Redirect to login page immediately
-    navigate("/login");
-  };
+  // Effect to handle clicks outside of the sidebar
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+  //       setSidebarOpen(false);
+  //     }
+  //   };
+  //   if (sidebarOpen) {
+  //     document.addEventListener("mousedown", handleClickOutside);
+  //   }
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, [sidebarOpen, setSidebarOpen]);
+
 
   const menuItems = [
-    { icon: User, label: "Profile" },
     { icon: LayoutDashboard, label: "Dashboard" },
     { icon: Users, label: "Interview Panel" },
     { icon: UserRoundCog, label: "Candidate Management" },
@@ -51,25 +56,22 @@ export default function AdminSidebar({ sidebarOpen, setSidebarOpen, activeTab, s
 
   return (
     <aside
+      ref={sidebarRef} // Attach the ref to the sidebar
       className={`${
-        sidebarOpen ? "w-66" : "w-20"
-      } transition-all duration-300 bg-gray-900 border-gray-100 shadow-sm fixed left-0 top-0 h-full`}
+        sidebarOpen ? "w-66" : "w-19"
+      } transition-all duration-300 bg-gray-100 border-gray-100 shadow-sm fixed left-0 top-20 h-full z-50`}
     >
-      {/* Header with toggle and logo */}
-      <div className="flex items-center justify-between p-3">
+      {/* Button to toggle the sidebar open/closed state */}
+      <div className="flex items-center p-4">
         <button
           onClick={() => setSidebarOpen((s) => !s)}
-          className="p-2 rounded-lg text-xl text-white hover:bg-gray-700 ml-2"
+          className="p-2 rounded-lg text-gray-800 hover:bg-gray-200"
         >
-          ☰
+          <PanelLeft size={22} />
         </button>
-        <div className="flex items-center gap-2">
-          {sidebarOpen && <img src={logo} alt="Logo" className="h-14 w-auto mr-5" />}
-        </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="px-2 pb-2 pt-2 space-y-1 text-sm bg-gray-900 h-full">
+      <nav className="px-2 pb-2 pt-0 space-y-1 text-sm bg-gray-100 h-full">
         {menuItems.map(({ icon: Icon, label }) => (
           <div
             key={label}
@@ -77,23 +79,17 @@ export default function AdminSidebar({ sidebarOpen, setSidebarOpen, activeTab, s
             className={`flex items-center gap-2 px-4 py-2 rounded-md cursor-pointer transition-colors text-lg hover:scale-105
               ${
                 activeTab === label
-                  ? "bg-blue-600 text-white"
-                  : "text-gray-300 hover:bg-gray-700 hover:text-blue-500"
-              }`}
+                  ? "bg-gray-700 text-white"
+                  : "text-black hover:bg-gray-200 hover:text-black"
+              }
+              // Add a class to handle overflow for a clean look when collapsed
+              ${!sidebarOpen && "overflow-hidden"}
+              `}
           >
             <Icon size={18} />
             {sidebarOpen && <span>{label}</span>}
           </div>
         ))}
-
-        {/* Logout */}
-        <div 
-          className="flex items-center text-lg gap-2 px-4 py-2 rounded-md cursor-pointer text-rose-600 hover:text-red-500 hover:scale-105 hover:bg-gray-700"
-          onClick={handleLogout}
-        >
-          <LogOut size={18} />
-          {sidebarOpen && <span>Log out</span>}
-        </div>
       </nav>
     </aside>
   );

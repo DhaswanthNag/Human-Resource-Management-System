@@ -9,14 +9,14 @@ import {
   CheckCircle,
   AlertCircle,
   Clock,
-  Menu,
+  // Menu,
 } from "lucide-react";
 
 const API_URL = "http://localhost:5000";
 
 const EmployeeJoiningFormalities = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  // const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [employeeData, setEmployeeData] = useState({
     emp_id: "",
@@ -159,35 +159,33 @@ const EmployeeJoiningFormalities = () => {
   const percentage = Math.round((docsCompleted / totalDocs) * 100);
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-400 via-white to-blue-50">
+    <div className="min-h-screen w-full bg-gray-50">
       {/* Header */}
-      <header className="sticky top-0 z-10 flex items-center justify-between px-6 py-5 bg-blue-900 border-b border-gray-200 shadow-sm">
-    <div className="flex-grow text-center">
+      {/* <header className="sticky top-0 z-10 flex items-center justify-between px-6 py-5 bg-blue-900 border-b border-gray-200 shadow-sm">
+         <div className="flex-grow text-center">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-100 dark:text-white">
              Document Uploading
             </h1>
           </div>
-        
-        
-      </header>
+      </header> */}
 
       {/* Progress Summary */}
-      <div className="bg-blue-50 py-6 px-6">
+      <div className="bg-gray-100 py-6 px-6 mr-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row  items-center justify-between">
           <div className="flex items-center mb-2 sm:mb-0">
-            <CheckCircle size={22} className="text-blue-600 mr-2" />
-            <span className="text-lg font-medium text-blue-800">
+            <CheckCircle size={22} className="text-gray-700 mr-2" />
+            <span className="text-lg font-medium text-gray-700">
               Progress: {docsCompleted}/{totalDocs} documents
             </span>
           </div>
           <div className="flex items-center w-full sm:w-auto">
             <div className="w-96 bg-gray-200 rounded-full h-4 mr-3">
               <div
-                className="bg-blue-600 h-4 rounded-full transition-all duration-300"
+                className="bg-gray-700 h-4 rounded-full transition-all duration-300"
                 style={{ width: `${percentage}%` }}
               ></div>
             </div>
-            <span className="text-sm font-medium text-blue-800">
+            <span className="text-sm font-medium text-gray-700">
               {percentage}%
             </span>
           </div>
@@ -201,7 +199,7 @@ const EmployeeJoiningFormalities = () => {
             <button
               className={`px-6 py-3 rounded-lg ${
                 activeTab === "dashboard"
-                  ? "bg-blue-100 text-blue-700 border border-blue-300 shadow-sm"
+                  ? "bg-gray-200 text-gray-800 border border-gray-300 shadow-sm"
                   : "text-gray-500 hover:bg-gray-50"
               }`}
               onClick={() => setActiveTab("dashboard")}
@@ -212,7 +210,7 @@ const EmployeeJoiningFormalities = () => {
             <button
               className={`px-6 py-3 rounded-lg ${
                 activeTab === "documents"
-                  ? "bg-blue-100 text-blue-700 border border-blue-300 shadow-sm"
+                  ? "bg-gray-200 text-gray-800 border border-gray-300 shadow-sm"
                   : "text-gray-500 hover:bg-gray-50"
               }`}
               onClick={() => setActiveTab("documents")}
@@ -225,7 +223,7 @@ const EmployeeJoiningFormalities = () => {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 p-2 bg-gradient-to-br from-blue-200 via-white to-blue-50">
+      <main className="flex-1 p-2 bg-gray-50">
         {activeTab === "dashboard" && (
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -248,13 +246,13 @@ const EmployeeJoiningFormalities = () => {
 
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
               <h2 className="text-lg font-medium text-gray-800 mb-6 flex items-center">
-                <AlertCircle size={20} className="mr-2 text-blue-600" />
+                <AlertCircle size={20} className="mr-2 text-gray-700" />
                 Next Steps
               </h2>
               <ul className="space-y-4">
                 <li className="flex items-start">
                   <div className="flex-shrink-0 h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
-                    <span className="text-blue-700 text-sm font-bold">1</span>
+                    <span className="text-gray-700 text-sm font-bold">1</span>
                   </div>
                   <div className="ml-4">
                     <p className="text-gray-800 font-medium">
@@ -265,7 +263,7 @@ const EmployeeJoiningFormalities = () => {
                     </p>
                     <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
                       <div
-                        className="bg-blue-600 h-2 rounded-full"
+                        className="bg-gray-700 h-2 rounded-full"
                         style={{ width: `${percentage}%` }}
                       ></div>
                     </div>
@@ -305,7 +303,7 @@ const EmployeeJoiningFormalities = () => {
           <div className="max-w-5xl mx-auto">
             {/* Employee ID */}
             <div className="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-100">
-              <h1 className="text-2xl font-semibold flex justify-center items-center w-full text-gray-800 mb-6">
+              <h1 className="text-2xl font-bold flex justify-center items-center w-full text-gray-800 mb-6">
                 Employee Information
               </h1>
 
@@ -324,7 +322,7 @@ const EmployeeJoiningFormalities = () => {
                       onChange={(e) =>
                         setEmployeeData({ ...employeeData, emp_id: e.target.value })
                       }
-                      className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      className="pl-10 w-full px-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300"
                       placeholder="Enter your Employee ID"
                     />
                   </div>
@@ -347,8 +345,8 @@ const EmployeeJoiningFormalities = () => {
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                       <div className="flex-1">
                         <div className="flex items-start">
-                          <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center mr-4 flex-shrink-0">
-                            <FileText size={18} className="text-blue-600" />
+                          <div className="h-10 w-10 rounded-lg bg-gray-200 flex items-center justify-center mr-4 flex-shrink-0">
+                            <FileText size={18} className="text-gray-700" />
                           </div>
                           <div>
                             <h3 className="font-medium text-gray-800">{doc.name}</h3>
@@ -360,7 +358,7 @@ const EmployeeJoiningFormalities = () => {
                                   href={doc.previewURL}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
+                                  className="text-sm text-yellow-500 hover:text-yellow-600 flex items-center"
                                 >
                                   <FileText size={16} className="mr-1" />
                                   {doc.fileName || "View uploaded file"}
@@ -419,7 +417,7 @@ const EmployeeJoiningFormalities = () => {
                 <button
                   onClick={handleSubmit}
                   disabled={!employeeData.emp_id || docsCompleted !== totalDocs}
-                  className="px-8 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-8 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gray-700 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Submit All Documents
                 </button>

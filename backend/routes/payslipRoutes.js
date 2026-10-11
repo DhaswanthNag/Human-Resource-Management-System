@@ -28,7 +28,7 @@ router.post("/create",authenticateToken,
  createPayslip);
 
 
- 
+
 router.post("/send-payslip",/*authenticateToken,
   authorizeRoles('hr'),*/
  sendPayslip);

@@ -18,7 +18,7 @@ const submitAssign = async (req, res) => {
 
 const getAssignments = async (req, res) => {
   try {
-      
+
     const result = await pool.query('SELECT * FROM assign ORDER BY id DESC');
     res.status(200).json(result.rows);
   } catch (error) {
@@ -72,7 +72,7 @@ const addSchedule = async (req, res) => {
 // GET /api/schedules
 const getAllSchedules = async (req, res) => {
   try {
-    
+
 
     const result = await pool.query('SELECT * FROM schedules ORDER BY date, time');
     res.json(result.rows);

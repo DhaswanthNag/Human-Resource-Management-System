@@ -43,15 +43,14 @@ function EmployeeTaskManagement() {
     tasks.filter((task) => task.status === status).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-white to-blue-50 py-0 px-0">
-      <header className="flex items-center justify-between py-5 bg-blue-900 mb-8 px-6">
-          {/* Centered Title */}
+    <div className="min-h-screen bg-gray-50 py-0 px-0 mr-6">
+      {/* <header className="flex items-center justify-between py-5 bg-blue-900 mb-8 px-6">
           <div className="flex-grow text-center">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-100 dark:text-white">
-             Employee Task Management 
+             Employee Task Management
             </h1>
           </div>
-        </header>
+        </header> */}
       {/* Status Overview - All Tasks */}
       <div className="grid grid-cols-3 gap-6 mb-8">
         <div className="bg-green-100 p-6 rounded-xl text-center shadow">

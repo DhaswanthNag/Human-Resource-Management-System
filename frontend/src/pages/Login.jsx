@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import background from "../assets/background.jpg"; // adjust path if file is in src/assets
+import background from "../assets/background1.jpg"; // adjust path if file is in src/assets
 import {
   FaUser,
   FaLock,
@@ -177,7 +177,7 @@ const HRMSAuth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-900/90 to-teal-800/90 relative">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-200/90 relative">
       <div
         className="absolute inset-0 bg-cover bg-center z-0"
         style={{ backgroundImage: `url(${background})` }}
@@ -192,10 +192,11 @@ const HRMSAuth = () => {
       >
         {/* LEFT (Info Section) */}
         <motion.div
-          className="md:w-1/2 bg-gradient-to-br from-blue-800/90 to-teal-700/90 text-white p-8 flex flex-col justify-center"
+          // className="md:w-1/2 bg-gradient-to-br from-blue-800/90 to-teal-700/90 text-white p-8 flex flex-col justify-center"
+          className="md:w-1/2 bg-gradient-to-br from-gray-200/90 to-gray-700/90 text-black p-8 flex flex-col justify-center"
           layout
         >
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">
+          <h2 className="text-2xl md:text-3xl text-gray-800 font-bold mb-4">
             Human Resource Management System
           </h2>
           <p className="opacity-90 mb-6">
@@ -205,18 +206,18 @@ const HRMSAuth = () => {
           </p>
           <ul className="space-y-3">
             <li className="flex items-center">
-              <FaCheckCircle className="mr-3 text-teal-300" /> Employee data
+              <FaCheckCircle className="mr-3 text-gray-700" /> Employee data
               management
             </li>
             <li className="flex items-center">
-              <FaCheckCircle className="mr-3 text-teal-300" /> Payroll & benefits
+              <FaCheckCircle className="mr-3 text-gray-700" /> Payroll & benefits
             </li>
             <li className="flex items-center">
-              <FaCheckCircle className="mr-3 text-teal-300" /> Leave &
+              <FaCheckCircle className="mr-3 text-gray-700" /> Leave &
               Attendance Tracking
             </li>
             <li className="flex items-center">
-              <FaCheckCircle className="mr-3 text-teal-300" /> Performance &
+              <FaCheckCircle className="mr-3 text-gray-700" /> Performance &
               Talent Management
             </li>
           </ul>
@@ -245,8 +246,8 @@ const HRMSAuth = () => {
           {mode === "login" ? (
             <>
               <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-100 mb-4">
-                  <span className="text-2xl font-bold text-blue-800">HRMS</span>
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-200 mb-4">
+                  <span className="text-2xl font-bold text-yellow-500">HRMS</span>
                 </div>
                 <h1 className="text-gray-900 font-bold">
                   Human Resource Management System
@@ -262,7 +263,7 @@ const HRMSAuth = () => {
                     onChange={handleChange}
                     placeholder="User ID"
                     required
-                    className="w-full pl-10 pr-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  transition duration-300"
+                    className="w-full pl-10 pr-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300"
                   />
                 </div>
                 <div className="relative">
@@ -274,7 +275,7 @@ const HRMSAuth = () => {
                     onChange={handleChange}
                     placeholder="Password"
                     required
-                    className="w-full pl-10 pr-10 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  transition duration-300"
+                    className="w-full pl-10 pr-10 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300"
                   />
                   <button
                     type="button"
@@ -288,7 +289,7 @@ const HRMSAuth = () => {
                   <button
                     type="button"
                     onClick={() => setMode("reset")}
-                    className="text-sm text-blue-600 hover:underline"
+                    className="text-sm text-yellow-600 hover:underline"
                   >
                     Forgot Password?
                   </button>
@@ -296,7 +297,7 @@ const HRMSAuth = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-blue-700 to-teal-600 text-white py-3 rounded-lg flex items-center justify-center disabled:opacity-60"
+                  className="w-full bg-gradient-to-r from-yellow-500 to-yellow-400 text-black py-3 rounded-lg flex items-center justify-center disabled:opacity-60"
                 >
                   {loading ? "Logging in..." : "Login"}{" "}
                   {!loading && <FaArrowRight className="ml-2" />}

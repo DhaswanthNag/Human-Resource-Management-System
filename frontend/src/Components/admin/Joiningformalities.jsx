@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Eye, Calendar, User, File } from "lucide-react";
+import { X, Eye, Calendar, User, File, Trash2 } from "lucide-react";
 
 const API_BASE_URL =
   process.env.REACT_APP_API_URL || "http://localhost:5000";
@@ -51,27 +51,27 @@ const AdminUI = () => {
   const selectedEmployee =
     selectedEmployeeIndex !== null ? employees[selectedEmployeeIndex] : null;
 
-  const updateDecision = async (index, decision) => {
-    const employee = employees[index];
-    const decisionLower = decision.toLowerCase();
-    try {
-      setLoadingAction(decisionLower);
-      await axios.put(
-        `${API_BASE_URL}/api/employees/${employee.emp_id}/decision`,
-        { decision: decisionLower }
-      );
-      setEmployees((prev) =>
-        prev.map((emp, i) =>
-          i === index ? { ...emp, decision: decisionLower } : emp
-        )
-      );
-      close();
-    } catch {
-      setError(`❌ Failed to ${decisionLower}. Please try again.`);
-    } finally {
-      setLoadingAction(null);
-    }
-  };
+  // const updateDecision = async (index, decision) => {
+  //   const employee = employees[index];
+  //   const decisionLower = decision.toLowerCase();
+  //   try {
+  //     setLoadingAction(decisionLower);
+  //     await axios.put(
+  //       `${API_BASE_URL}/api/employees/${employee.emp_id}/decision`,
+  //       { decision: decisionLower }
+  //     );
+  //     setEmployees((prev) =>
+  //       prev.map((emp, i) =>
+  //         i === index ? { ...emp, decision: decisionLower } : emp
+  //       )
+  //     );
+  //     close();
+  //   } catch {
+  //     setError(`❌ Failed to ${decisionLower}. Please try again.`);
+  //   } finally {
+  //     setLoadingAction(null);
+  //   }
+  // };
 
   const verifyDocument = async (empIndex, docId, status) => {
     try {
@@ -154,18 +154,59 @@ const AdminUI = () => {
     }
   };
 
-  const allVerified = (emp) =>
-    emp.documents && emp.documents.every((d) => d.decision === "verified");
+  // ✅ Approve employee
+  const approveEmployee = async () => {
+    if (!selectedEmployee) return;
+    try {
+      setLoadingAction("approve");
+      await axios.put(`${API_BASE_URL}/api/employees/approve/${selectedEmployee.emp_id}`);
+      setEmployees((prev) =>
+        prev.map((emp) =>
+          emp.emp_id === selectedEmployee.emp_id
+            ? { ...emp, decision: "approved" }
+            : emp
+        )
+      );
+      close();
+    } catch {
+      setError("❌ Failed to approve employee. Please try again.");
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
+  // ✅ Reject employee
+  const rejectEmployee = async () => {
+    if (!selectedEmployee) return;
+    try {
+      setLoadingAction("reject");
+      await axios.put(`${API_BASE_URL}/api/employees/reject/${selectedEmployee.emp_id}`);
+      setEmployees((prev) =>
+        prev.map((emp) =>
+          emp.emp_id === selectedEmployee.emp_id
+            ? { ...emp, decision: "rejected" }
+            : emp
+        )
+      );
+      close();
+    } catch {
+      setError("❌ Failed to reject employee. Please try again.");
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
+  // const allVerified = (emp) =>
+  //   emp.documents && emp.documents.every((d) => d.decision === "verified");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 to-blue-50">
-      <header className="bg-blue-900 py-6 px-8 mb-8 shadow-lg">
-        <h1 className="text-white text-4xl font-bold text-center tracking-wide">
+    <div className="min-h-screen bg-gray-50">
+      <header className="mt-2 px-8">
+        <h1 className="text-gray-700 text-2xl font-bold text-center tracking-wide">
           Approval Panel
         </h1>
       </header>
-
-      <main className="max-w-7xl mx-auto p-6">
+      <main className="max-w-8xl md:grid-cols-4 mx-auto p-6">
         {error && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -188,12 +229,17 @@ const AdminUI = () => {
             <p>No employees found.</p>
           </motion.div>
         ) : (
-          <div className="grid gap-8 sm:grid-cols-1">
+          <div className="grid gap-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 ml-6 mr-6">
             <AnimatePresence>
               {employees.map((emp, idx) => {
-                const verifiedCount = emp.documents.filter(d => d.decision === "verified").length;
+                const verifiedCount = emp.documents.filter(
+                  (d) => d.decision === "verified"
+                ).length;
                 const totalCount = emp.documents.length;
-                const progressPercent = totalCount === 0 ? 0 : Math.round((verifiedCount / totalCount) * 100);
+                const progressPercent =
+                  totalCount === 0
+                    ? 0
+                    : Math.round((verifiedCount / totalCount) * 100);
 
                 return (
                   <motion.div
@@ -206,15 +252,21 @@ const AdminUI = () => {
                     className="bg-white rounded-lg shadow-md p-6 flex flex-col hover:shadow-xl transition"
                   >
                     <div className="flex items-center mb-6 gap-4">
-                      <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center">
-                        <User size={24} className="text-blue-600" />
+                      <div className="w-14 h-14 bg-gray-200 rounded-full flex items-center justify-center">
+                        <User size={24} className="text-gray-700" />
                       </div>
                       <div>
-                        <h2 className="text-lg font-semibold">{emp.name || "Unknown"}</h2>
+                        <h2 className="text-lg font-semibold">
+                          {emp.name || "Unknown"}
+                        </h2>
                         <p className="text-sm text-gray-500">ID: {emp.emp_id}</p>
                         <p className="text-sm text-gray-500 flex items-center gap-1">
-                          <Calendar size={16} /> 
-                          <span>{emp.created_at ? new Date(emp.created_at).toLocaleDateString() : "N/A"}</span>
+                          <Calendar size={16} />
+                          <span>
+                            {emp.created_at
+                              ? new Date(emp.created_at).toLocaleDateString()
+                              : "N/A"}
+                          </span>
                         </p>
                       </div>
                     </div>
@@ -223,29 +275,37 @@ const AdminUI = () => {
                       <div
                         style={{ width: `${progressPercent}%` }}
                         className={`absolute top-0 left-0 h-2 rounded-full transition-all duration-700 ${
-                          progressPercent === 100 ? "bg-green-500" : "bg-blue-600"
+                          progressPercent === 100
+                            ? "bg-green-500"
+                            : "bg-gray-700"
                         }`}
                       />
                     </div>
 
                     <p className="text-sm text-gray-600 mb-6">
-                      {totalCount} Document{totalCount !== 1 ? "s" : ""}, {progressPercent === 100 ? "All Verified" : "Verification Pending"}
+                      {totalCount} Document
+                      {totalCount !== 1 ? "s" : ""},{" "}
+                      {progressPercent === 100
+                        ? "All Verified"
+                        : "Verification Pending"}
                     </p>
-
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
                     <button
                       onClick={() => setSelectedEmployeeIndex(idx)}
-                      className="mt-auto bg-blue-500 hover:bg-blue-700 text-white py-2 rounded flex items-center justify-center gap-2 font-semibold transition"
+                      className="bg-gray-500 hover:bg-gray-700 text-white py-2 rounded flex items-center justify-center gap-2 font-semibold transition"
                     >
                       <Eye size={18} /> View Documents
                     </button>
 
                     <button
                       onClick={() => deleteEmployee(idx)}
-                      disabled={loadingAction === "delete-employee"}
-                      className="mt-2 bg-red-500 hover:bg-red-700 text-white py-1 rounded text-sm w-full disabled:opacity-50"
+                      disabled={loadingAction === 'delete-employee'}
+                      className="bg-red-500 hover:bg-red-700 text-white py-2 rounded flex items-center justify-center gap-2 font-semibold transition disabled:opacity-50"
                     >
-                      {loadingAction === "delete-employee" ? "Deleting..." : "Delete Employee"}
+                      <Trash2 size={18} />{' '}
+                      {loadingAction === 'delete-employee' ? 'Deleting...' : 'Delete Employee'}
                     </button>
+                  </div>
                   </motion.div>
                 );
               })}
@@ -309,10 +369,14 @@ const AdminUI = () => {
                               Status:{" "}
                               <span
                                 className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
-                                  verified ? "bg-green-200 text-green-800" : "bg-yellow-200 text-yellow-800"
+                                  verified
+                                    ? "bg-green-200 text-green-800"
+                                    : "bg-yellow-200 text-yellow-800"
                                 }`}
                               >
-                                {verified ? "Verified" : doc.decision || "Pending"}
+                                {verified
+                                  ? "Verified"
+                                  : doc.decision || "Pending"}
                               </span>
                             </p>
                           </div>
@@ -320,26 +384,41 @@ const AdminUI = () => {
                             {!verified && (
                               <>
                                 <button
-                                  onClick={() => verifyDocument(selectedEmployeeIndex, doc.id, "verified")}
+                                  onClick={() =>
+                                    verifyDocument(
+                                      selectedEmployeeIndex,
+                                      doc.id,
+                                      "verified"
+                                    )
+                                  }
                                   disabled={loadingAction === doc.id}
                                   className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
                                 >
-                                  {loadingAction === doc.id ? "Verifying..." : "Verify"}
+                                  {loadingAction === doc.id
+                                    ? "Verifying..."
+                                    : "Verify"}
                                 </button>
                                 <button
-                                  onClick={() => alert("Reject not implemented")}
-                                  className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700"
+                                  onClick={rejectEmployee}
+                                  disabled={loadingAction === "reject"}
+                                  className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50"
                                 >
-                                  Reject
+                                  {loadingAction === "reject"
+                                    ? "Rejecting..."
+                                    : "Reject"}
                                 </button>
                               </>
                             )}
                             <button
-                              onClick={() => deleteDocument(selectedEmployeeIndex, doc.id)}
+                              onClick={() =>
+                                deleteDocument(selectedEmployeeIndex, doc.id)
+                              }
                               disabled={loadingAction === `delete-doc-${doc.id}`}
                               className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50"
                             >
-                              {loadingAction === `delete-doc-${doc.id}` ? "Deleting..." : "Delete"}
+                              {loadingAction === `delete-doc-${doc.id}`
+                                ? "Deleting..."
+                                : "Delete"}
                             </button>
                           </div>
                         </div>
@@ -356,8 +435,26 @@ const AdminUI = () => {
                 </main>
                 <footer className="p-6 border-t border-gray-300 flex justify-end">
                   <button
+                    onClick={approveEmployee}
+                    disabled={loadingAction === "approve"}
+                    className="px-6 py-2 mr-4 bg-green-500 rounded border hover:bg-green-600 disabled:opacity-50"
+                  >
+                    {loadingAction === "approve"
+                      ? "Approving..."
+                      : "Approve"}
+                  </button>
+                  <button
+                    onClick={rejectEmployee}
+                    disabled={loadingAction === "reject"}
+                    className="px-6 py-2 mr-4 bg-red-500 rounded border hover:bg-red-700 disabled:opacity-50"
+                  >
+                    {loadingAction === "reject"
+                      ? "Rejecting..."
+                      : "Reject"}
+                  </button>
+                  <button
                     onClick={close}
-                    className="px-6 py-2 rounded border hover:bg-gray-100"
+                    className="px-6 py-2 rounded border hover:bg-gray-200"
                   >
                     Close
                   </button>

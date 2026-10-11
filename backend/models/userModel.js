@@ -12,7 +12,7 @@ const getUserById = async (userId) => {
   const result = await db.query(
     'SELECT user_id, email, role, name, position, password FROM users WHERE user_id = $1',
     [userId]
-  ); 
+  );
   return result.rows[0];
 }
 
@@ -31,7 +31,7 @@ const updateUser = async (userId, { email, role, position, name }) => {
 
 const deleteUser = async (userId) => {
     await db.query('DELETE FROM users WHERE user_id = $1', [userId]);
-} 
+}
 
 const totalUsers = async () => {
     const result = await db.query('SELECT COUNT(*) FROM users');
@@ -50,7 +50,7 @@ const totalHR = async () => {
 
 module.exports = {
   adduser,
-  getUserById,   
+  getUserById,
   getAllUsers,
   totalUsers,
   updateUser,

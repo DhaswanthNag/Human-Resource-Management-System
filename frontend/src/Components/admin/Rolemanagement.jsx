@@ -41,6 +41,9 @@ const AdminRoleManagement = () => {
         const res = await axios.get(API_URL);
         setRoles(res.data);
         setFilteredRoles(res.data);
+
+        // Update dashboard stats when roles are fetched
+        updateDashboardStats(res.data);
       } catch (err) {
         console.error('Error fetching roles:', err);
       }
@@ -60,9 +63,36 @@ const AdminRoleManagement = () => {
     fetchUsers();
   }, []);
 
+  // Function to update dashboard statistics
+  const updateDashboardStats = (rolesData) => {
+    try {
+      const totalRoles = rolesData.length;
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+
+      // Calculate members added this month (assuming roles have a created_at field)
+      const membersThisMonth = rolesData.filter(role => {
+        if (role.created_at) {
+          const createdDate = new Date(role.created_at);
+          return createdDate.getMonth() === currentMonth && createdDate.getFullYear() === currentYear;
+        }
+        return false;
+      }).length;
+
+      // Store in localStorage for dashboard to access
+      localStorage.setItem('dashboardStats', JSON.stringify({
+        totalRoles,
+        membersThisMonth,
+        lastUpdated: new Date().toISOString()
+      }));
+    } catch (error) {
+      console.error('Error updating dashboard stats:', error);
+    }
+  };
+
   // Filter roles based on search term
   useEffect(() => {
-    const filtered = roles.filter(role => 
+    const filtered = roles.filter(role =>
       role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       role.description.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -87,10 +117,18 @@ const AdminRoleManagement = () => {
   // Handle role creation
   const handleCreateRole = async () => {
     try {
-      const res = await axios.post(API_URL, newRole);
+      const res = await axios.post(API_URL, {
+        ...newRole,
+        created_at: new Date().toISOString()
+      });
       const createdRole = res.data;
-      setRoles([...roles, createdRole]);
-      setFilteredRoles([...roles, createdRole]);
+      const updatedRoles = [...roles, createdRole];
+      setRoles(updatedRoles);
+      setFilteredRoles(updatedRoles);
+
+      // Update dashboard stats after creating new role
+      updateDashboardStats(updatedRoles);
+
       setIsCreateModalOpen(false);
       setNewRole({ name: '', description: '', permissions: [] });
     } catch (err) {
@@ -106,6 +144,9 @@ const AdminRoleManagement = () => {
         const updatedRoles = roles.filter(role => role.id !== roleId);
         setRoles(updatedRoles);
         setFilteredRoles(updatedRoles);
+
+        // Update dashboard stats after deleting role
+        updateDashboardStats(updatedRoles);
       } catch (err) {
         console.error('Error deleting role:', err);
       }
@@ -117,11 +158,15 @@ const AdminRoleManagement = () => {
     try {
       const res = await axios.put(`${API_URL}/${selectedRole.id}`, selectedRole);
       const updatedRole = res.data;
-      const updatedRoles = roles.map(role => 
+      const updatedRoles = roles.map(role =>
         role.id === updatedRole.id ? updatedRole : role
       );
       setRoles(updatedRoles);
       setFilteredRoles(updatedRoles);
+
+      // Update dashboard stats after updating role
+      updateDashboardStats(updatedRoles);
+
       setIsEditModalOpen(false);
       setSelectedRole(null);
     } catch (err) {
@@ -130,61 +175,61 @@ const AdminRoleManagement = () => {
   };
 
   return (
-    <div className='bg-gradient-to-br from-blue-400 via-white to-blue-50 min-h-screen '>
-      <header className=" flex items-center justify-center bg-blue-900 py-5 mb-8">
+    <div className='bg-gray-50 mt-6 min-h-screen '>
+      {/* <header className=" flex items-center justify-center bg-blue-900 py-5 mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-100 dark:text-white text-center ">
             Role Management
         </h1>
-      </header> 
-      
+      </header>  */}
+
       {/* Header with search and create button */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 ml-6 mr-6">
         <div className="relative w-full md:w-1/3">
           <input
             type="text"
             placeholder="Search roles..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition duration-300"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <svg 
-            className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24" 
+          <svg
+            className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth="2" 
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
             />
           </svg>
         </div>
-        
+
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center"
+          className="bg-gray-700 hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-lg flex items-center"
         >
-          <svg 
-            className="w-5 h-5 mr-2" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24" 
+          <svg
+            className="w-5 h-5 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth="2" 
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
               d="M12 6v6m0 0v6m0-6h6m-6 0H6"
             />
           </svg>
           Create New Role
         </button>
       </div>
-      
+
       {/* Roles Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ml-6 mr-6">
         {filteredRoles.map(role => (
@@ -192,18 +237,18 @@ const AdminRoleManagement = () => {
             <div className="p-6">
               <div className="flex justify-between items-start">
                 <h3 className="text-xl font-semibold text-gray-800">{role.name}</h3>
-                <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                <span className="bg-gray-200 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">
                   {role.user_count || 0} users
                 </span>
               </div>
               <p className="text-gray-600 mt-2 text-sm">{role.description}</p>
-              
+
               <div className="mt-4">
                 <h4 className="text-sm font-medium text-gray-700 mb-2">Key Permissions:</h4>
                 <div className="flex flex-wrap gap-1">
                   {role.permissions.slice(0, 3).map(permission => (
-                    <span 
-                      key={permission} 
+                    <span
+                      key={permission}
                       className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded"
                     >
                       {permission.replace('_', ' ')}
@@ -216,7 +261,7 @@ const AdminRoleManagement = () => {
                   )}
                 </div>
               </div>
-              
+
               <div className="mt-6 flex justify-between items-center">
                 <span className="text-xs text-gray-500">Created: {role.created_at ? role.created_at.split('T')[0] : ''}</span>
                 <div className="flex space-x-2">
@@ -225,7 +270,7 @@ const AdminRoleManagement = () => {
                       setSelectedRole(role);
                       setIsEditModalOpen(true);
                     }}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    className="text-gray-700 hover:text-gray-800 text-sm font-medium"
                   >
                     Edit
                   </button>
@@ -242,21 +287,21 @@ const AdminRoleManagement = () => {
           </div>
         ))}
       </div>
-      
+
       {/* Empty state */}
       {filteredRoles.length === 0 && (
         <div className="text-center py-12">
-          <svg 
-            className="mx-auto h-12 w-12 text-gray-400" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24" 
+          <svg
+            className="mx-auto h-12 w-12 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth="2" 
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
               d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
             />
           </svg>
@@ -266,7 +311,7 @@ const AdminRoleManagement = () => {
           </p>
         </div>
       )}
-      
+
       {/* Create Role Modal */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -279,7 +324,7 @@ const AdminRoleManagement = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Role Name</label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   value={newRole.name}
                   onChange={(e) => setNewRole({...newRole, name: e.target.value})}
                   placeholder="e.g., Content Manager"
@@ -288,7 +333,7 @@ const AdminRoleManagement = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   value={newRole.description}
                   onChange={(e) => setNewRole({...newRole, description: e.target.value})}
                   rows="3"
@@ -305,7 +350,7 @@ const AdminRoleManagement = () => {
                         id={`permission-${permission}`}
                         checked={newRole.permissions.includes(permission)}
                         onChange={() => togglePermission(permission)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-yellow-600 focus:ring-yellow-600 border-gray-300 rounded"
                       />
                       <label htmlFor={`permission-${permission}`} className="ml-3 block text-sm text-gray-700">
                         {permission.replace('_', ' ')}
@@ -325,7 +370,7 @@ const AdminRoleManagement = () => {
               <button
                 onClick={handleCreateRole}
                 disabled={!newRole.name.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Create Role
               </button>
@@ -333,7 +378,7 @@ const AdminRoleManagement = () => {
           </div>
         </div>
       )}
-      
+
       {/* Edit Role Modal */}
       {isEditModalOpen && selectedRole && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">

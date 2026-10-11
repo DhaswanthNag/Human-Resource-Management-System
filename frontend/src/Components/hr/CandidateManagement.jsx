@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import {
-  FaUsers,
-  FaUserCheck,
-  FaClock,
+  // FaUsers,
+  // FaUserCheck,
+  // FaClock,
   FaEdit,
   FaEnvelope,
   FaPlus,
@@ -13,7 +13,7 @@ import axios from "axios";
 const HRCandidateManagement = () => {
   const [candidates, setCandidates] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [calendarOpen, setCalendarOpen] = useState(false);
+  // const [calendarOpen, setCalendarOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     id: null,
@@ -25,14 +25,14 @@ const HRCandidateManagement = () => {
     interviewDate: "",
   });
 
-  const stats = {
-    total: candidates.length,
-    shortlisted: candidates.filter((c) => c.status === "Screening").length,
-    interview: candidates.filter(
-      (c) => c.status === "Interview" || c.status === "Interview Scheduled"
-    ).length,
-    offered: candidates.filter((c) => c.status === "Offered").length,
-  };
+  // const stats = {
+  //   total: candidates.length,
+  //   shortlisted: candidates.filter((c) => c.status === "Screening").length,
+  //   interview: candidates.filter(
+  //     (c) => c.status === "Interview" || c.status === "Interview Scheduled"
+  //   ).length,
+  //   offered: candidates.filter((c) => c.status === "Offered").length,
+  // };
 
   const fetchCandidates = async () => {
     try {
@@ -156,19 +156,19 @@ const HRCandidateManagement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-white to-blue-50">
-      <header className="flex items-center justify-center bg-blue-900 border-b px-10 py-6">
-        <h1 className="text-2xl font-bold text-white">HR Candidate Management</h1>
-      </header>
+    <div className="min-h-screen bg-gray-50">
 
-      <main className="max-w-7xl mx-auto p-6">
+      <main className="max-w-screen mx-auto p-6">
         <div className="mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-4 md:mb-6 gap-2">
+          <h3 className="text-base md:text-lg font-medium text-gray-700">Candidate Management</h3>
           <button
             onClick={() => openModal()}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center font-semibold"
+            className="bg-gray-600 hover:bg-gray-800 text-white px-4 py-2 rounded-lg flex items-center font-semibold"
           >
             <FaPlus className="mr-2" /> Add Candidate
           </button>
+          </div>
         </div>
 
         <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -204,7 +204,7 @@ const HRCandidateManagement = () => {
                 {candidates.map((candidate) => (
                   <tr key={candidate.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap flex items-center">
-                      <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center uppercase font-bold mr-4">
+                      <div className="w-10 h-10 rounded-full bg-yellow-500 text-white flex items-center justify-center uppercase font-bold mr-4">
                         {candidate.name?.charAt(0) || "-"}
                       </div>
                       <div>
@@ -227,14 +227,14 @@ const HRCandidateManagement = () => {
                     <td className="px-6 py-4 whitespace-nowrap flex items-center gap-2">
                       <button
                         onClick={() => openModal(candidate)}
-                        className="text-indigo-600 hover:text-indigo-900"
+                        className="text-yellow-500 hover:text-yellow-600"
                         aria-label="Edit"
                       >
                         <FaEdit />
                       </button>
                       <button
                         onClick={() => handleDelete(candidate)}
-                        className="text-green-600 hover:text-green-900"
+                        className="text-red-700 hover:text-red-900"
                         aria-label="Delete"
                       >
                         <FaTrash />

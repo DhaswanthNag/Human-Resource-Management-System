@@ -23,8 +23,8 @@ const RoleModel = {
 
   async update(id, { name, description, permissions }) {
     const result = await db.query(
-      `UPDATE roles 
-       SET name=$1, description=$2, permissions=$3 
+      `UPDATE roles
+       SET name=$1, description=$2, permissions=$3
        WHERE id=$4 RETURNING *`,
       [name, description, permissions, id]
     );

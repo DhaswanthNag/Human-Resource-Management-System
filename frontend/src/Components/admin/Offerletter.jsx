@@ -103,10 +103,10 @@ function OfferLetter() {
     try {
       // First generate the PDF to get the actual content
       const { pdfBlob, fileName } = await generatePDF();
-      
+
       // Create a blob URL for the PDF
       const pdfUrl = URL.createObjectURL(pdfBlob);
-      
+
       const newLetter = {
         offer_id: draftData.offer_id,
         candidate_name: draftData.candidate_name,
@@ -122,7 +122,7 @@ function OfferLetter() {
       };
 
       const response = await axios.post(`${API_BASE_URL}/offer-letters`, newLetter);
-      
+
       // Add to local state with the ID returned from backend
       const savedLetter = {
         id: response.data.id,
@@ -144,7 +144,7 @@ function OfferLetter() {
     } catch (err) {
       console.error("Error saving offer:", err);
       setError("Failed to save offer letter");
-      
+
       // Fallback to localStorage if API fails
       const fileName = `OfferLetter_${draftData.offer_id || "AYSQO"}.pdf`;
       const newLetter = {
@@ -162,7 +162,7 @@ function OfferLetter() {
         pdf_file_name: fileName,
         created_at: new Date().toISOString()
       };
-      
+
       setGeneratedLetters([...generatedLetters, newLetter]);
       localStorage.setItem("generatedOfferLetters", JSON.stringify([...generatedLetters, newLetter]));
     }
@@ -178,7 +178,7 @@ function OfferLetter() {
 
       const pdf = new jsPDF("p", "mm", "a4");
       const pages = input.querySelectorAll(".page");
-      
+
       // Show all pages temporarily for capture
       pages.forEach(page => {
         page.style.display = 'block';
@@ -193,11 +193,11 @@ function OfferLetter() {
             allowTaint: true,
             backgroundColor: '#ffffff'
           });
-          
+
           const imgData = canvas.toDataURL("image/png");
           const pdfWidth = pdf.internal.pageSize.getWidth();
           const pdfHeight = pdf.internal.pageSize.getHeight();
-          
+
           if (i !== 0) pdf.addPage();
           pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
         } catch (pageError) {
@@ -215,7 +215,7 @@ function OfferLetter() {
 
       const fileName = `OfferLetter_${formData.offer_id || "AYSQO"}.pdf`;
       const pdfBlob = pdf.output('blob');
-      
+
       return { pdfBlob, fileName };
     } catch (err) {
       console.error("Error generating PDF:", err);
@@ -228,7 +228,7 @@ function OfferLetter() {
   const handleDownload = async () => {
     try {
       const { pdfBlob, fileName } = await generatePDF();
-      
+
       // Create download link
       const downloadUrl = URL.createObjectURL(pdfBlob);
       const link = document.createElement('a');
@@ -237,22 +237,22 @@ function OfferLetter() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       // Clean up URL
       setTimeout(() => URL.revokeObjectURL(downloadUrl), 100);
-      
+
       // Update the PDF link in the database if we have an ID
       if (generatedLetters.length > 0) {
         const latestId = generatedLetters[generatedLetters.length - 1].id;
         const pdfUrl = URL.createObjectURL(pdfBlob);
-        
+
         try {
           await axios.put(`${API_BASE_URL}/offer-letters/${latestId}`, {
             ...generatedLetters[generatedLetters.length - 1],
             pdf_link: pdfUrl,
             pdf_file_name: fileName
           });
-          
+
           // Update local state with the updated PDF link
           const updatedLetters = [...generatedLetters];
           updatedLetters[updatedLetters.length - 1].pdf_link = pdfUrl;
@@ -283,7 +283,7 @@ function OfferLetter() {
         address: letter.address || "",
         offer_date: letter.offer_date || new Date().toISOString().split("T")[0],
       });
-      
+
       // Wait a moment for the form data to update, then download
       setTimeout(() => {
         handleDownload();
@@ -376,11 +376,11 @@ function OfferLetter() {
     });
     setViewMode("form");
   };
-  
+
 
 
   return (
-    
+
     <div className="p-0 sm:p-0 bg-gradient-to-br from-blue-400 via-white to-blue-50 min-h-screen">
 
       {/* Error message */}
@@ -479,7 +479,7 @@ function OfferLetter() {
                       <td className="border px-3 py-2">{letter.joining_date}</td>
                       <td className="border px-3 py-2">
                         {letter.pdf_link ? (
-                          <button 
+                          <button
                             onClick={() => handleDownloadSpecific(letter)}
                             className="text-blue-600 hover:underline bg-transparent border-none cursor-pointer"
                           >
@@ -524,23 +524,23 @@ function OfferLetter() {
           {/* RIGHT PREVIEW */}
           <div className="bg-gray-300 p-4 rounded-lg shadow">
             <div className="flex justify-between items-center mb-4 bg-gray-100 p-2 rounded">
-              <button 
-                onClick={prevPage} 
+              <button
+                onClick={prevPage}
                 disabled={currentPage === 0}
                 className={`p-1 rounded ${currentPage === 0 ? "text-gray-400 cursor-not-allowed" : "text-black hover:bg-gray-200"}`}
               >
                 <ChevronLeft size={24} />
               </button>
               <span className="font-medium">Page {currentPage + 1} of {totalPages}</span>
-              <button 
-                onClick={nextPage} 
+              <button
+                onClick={nextPage}
                 disabled={currentPage === totalPages - 1}
                 className={`p-1 rounded ${currentPage === totalPages - 1 ? "text-gray-400 cursor-not-allowed" : "text-black hover:bg-gray-200"}`}
               >
                 <ChevronRight size={24} />
               </button>
             </div>
-            
+
             <div ref={letterRef} className="overflow-y-auto h-[calc(100vh-200px)] border rounded-lg">
               {/* Your page content remains the same */}
               {/* PAGE 1 */}
@@ -548,7 +548,7 @@ function OfferLetter() {
                 <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none select-none">
                   <img src={logo2} alt="Watermark" className="w-[500px]" />
                 </div>
-                <img src={logo} alt="Company Logo" className="absolute top-4 left-4 h-12" /> 
+                <img src={logo} alt="Company Logo" className="absolute top-4 left-4 h-12" />
 
                 <div className="text-right mb-4">
                   <p className="font-semibold text-sm text-green-700">
@@ -569,42 +569,42 @@ function OfferLetter() {
                 <p className="font-bold mt-2">Congratulations! We welcome you on board.</p>
                 <p className="mt-4 text-justify">
                   Thank you for showing interest in being a part of our organization. We are delighted to inform you
-                  that, following your successful interview process, <span className="font-semibold">AYSQO TECHNOLOGY SOLUTIONS PVT LTD</span> 
-                  is offering you a position with our team. On behalf of Aysqo Technology Solutions Pvt. Ltd., 
+                  that, following your successful interview process, <span className="font-semibold">AYSQO TECHNOLOGY SOLUTIONS PVT LTD</span>
+                  is offering you a position with our team. On behalf of Aysqo Technology Solutions Pvt. Ltd.,
                   I am pleased to formally extend this offer of employment.
                 </p>
 
                 <p className="mt-4 text-justify">
                   Upon your acceptance, you will be appointed as <span className="font-semibold">
-                  {formData.designation || "Associate Software Engineer (ASE)"}</span>, with your joining date scheduled for 
+                  {formData.designation || "Associate Software Engineer (ASE)"}</span>, with your joining date scheduled for
                   <span className="font-semibold"> {formData.joining_date || "---------"}</span> at our office premises.
                 </p>
 
                 <p className="mt-4 text-justify">
-                  This offer is contingent upon the standard terms and conditions of employment set forth by Aysqo Technology 
-                  Solutions and will be governed by the company's policies, rules, and guidelines. Upon joining, you will be 
-                  required to sign and adhere to the Employee Non-Disclosure, Non-Solicitation, and Non-Competition Agreement. 
+                  This offer is contingent upon the standard terms and conditions of employment set forth by Aysqo Technology
+                  Solutions and will be governed by the company's policies, rules, and guidelines. Upon joining, you will be
+                  required to sign and adhere to the Employee Non-Disclosure, Non-Solicitation, and Non-Competition Agreement.
                   Your total annual Cost to Company (CTC) will be <span className="font-semibold">
                   INR {formData.ctc || "---------"}</span> and a detailed breakup of your CTC will be provided at the time of joining.
                 </p>
 
                 <p className="mt-4 text-justify">
-                  This employment offer from Aysqo Technology Solutions Pvt Ltd is conditional upon the successful verification 
+                  This employment offer from Aysqo Technology Solutions Pvt Ltd is conditional upon the successful verification
                   of the information you have provided.
                 </p>
 
                 <h2 className="mt-6 font-semibold">By accepting this offer, you also acknowledge and confirm that â€“</h2>
                 <ol className="list-decimal ml-6 mt-2 space-y-2 text-justify">
-                  <li>You have lawfully ended your employment with your previous employer (if applicable), in accordance with their terms 
+                  <li>You have lawfully ended your employment with your previous employer (if applicable), in accordance with their terms
                   and conditions.</li>
-                  <li>You confirm that you have no outstanding contractual obligations from any previous employment that would hinder your 
-                  ability to undertake responsibilities or accept this position with the Company. Aysqo Technology Solutions Pvt Ltd will not 
+                  <li>You confirm that you have no outstanding contractual obligations from any previous employment that would hinder your
+                  ability to undertake responsibilities or accept this position with the Company. Aysqo Technology Solutions Pvt Ltd will not
                   be held responsible for any dues or liabilities arising from the termination of your prior employment. </li>
-                  <li>Additionally, you confirm that you are not bringing any intellectual property to the Company for which you do not hold sole 
+                  <li>Additionally, you confirm that you are not bringing any intellectual property to the Company for which you do not hold sole
                   ownership rights.</li>
-                  <li>This offer will remain valid for a period of 2 days from the date of this letter. If you choose to accept the offer, please 
-                  confirm your acceptance by email or telephone within 1 day of receiving this letter and submit a signed copy of this 
-                  document by post. If we do not receive a response within this time frame, the offer will be considered withdrawn, and the 
+                  <li>This offer will remain valid for a period of 2 days from the date of this letter. If you choose to accept the offer, please
+                  confirm your acceptance by email or telephone within 1 day of receiving this letter and submit a signed copy of this
+                  document by post. If we do not receive a response within this time frame, the offer will be considered withdrawn, and the
                   Company will not be obligated to keep the position open</li>
                   <li>You will undergo training under your designated Team Lead/Developer/Senior.</li>
                   <li>Your official joining date will be <span className="font-semibold"> {formData.joining_date || "---------"}</span>. In case of changes, inform the Company in advance.</li>
@@ -654,7 +654,7 @@ function OfferLetter() {
                     </tr>
                     <tr>
                       <td className="border border-black p-2 font-bold">B</td>
-                      <td className="border border-black p-2"> 
+                      <td className="border border-black p-2">
                         <b>DATE OF BIRTH PROOF:</b> Mandatory is Aadhar Card. If no Aadhar Card or incomplete details on
                         Aadhar card then the following will apply: (Any ONE of the following: Birth Certificate, Xth, XIIth
                         Mark Sheet with DOB details on it, Passport, PAN Card, Driving License, School/College Leaving
@@ -750,83 +750,83 @@ function OfferLetter() {
                   <img src={logo2} alt="Watermark" className="w-[500px]" />
                 </div>
                               <img src={logo} alt="Company Logo" className="absolute top-4 left-4 h-12" />
-              
+
                               <div className="text-right mb-4">
                                 <p className="font-semibold text-sm text-green-700">
                     AYSQO/HYD/HR/2025/OFR-ASE/{formData.offer_id || "-------"}
                   </p>
                               </div>
-              
+
                               <p className="mt-4 text-justify">
                                 We are delighted to welcome you to our organization and look forward to a long, rewarding, and mutually
                                 beneficial association. We trust that you will find this offer satisfactory and eagerly await your
                                 addition to the Aysqo Technology Solutions Pvt Ltd family.
                               </p>
-              
+
                               <p className="mt-4">Best Regards</p>
-              
+
                               <h2 className="mt-6 font-bold">APPENDIX A: Employment Terms and Conditions Profile Verification</h2>
-              
+
                               <p className="mt-4 text-justify font-semibold">
                                 This offer is conditional upon the successful verification of the information you have provided during the
                                 interview and selection process. Should any discrepancies or falsified details be discovered at any stage of
                                 your employment, this offer letter and/or your employment with the Company will be terminated with immediate effect.
                               </p>
-              
+
                               <h3 className="mt-6 font-bold">Employee Duties and Responsibilities</h3>
-              
+
                               <p className="mt-2 text-justify">
                                 You will begin your employment with the Company in the position specified in your Offer Letter. However, you
                                 may be assigned additional duties and responsibilities from time to time, as deemed necessary by the Company.
                               </p>
-              
+
                               <p className="mt-2 text-justify">
                                 You are expected to demonstrate a high level of initiative, efficiency, and dedication in all your work. All
                                 tasks—whether within your job profile or reasonably expected as part of your role—must be carried out diligently,
                                 competently, and to the satisfaction of the Company.
                               </p>
-              
+
                               <p className="mt-2 text-justify">
                                 It is your responsibility to ensure the quality and integrity of all work you are involved in, whether individually
                                 or as part of a team. As a valuable employee, you are expected to devote your time, effort, and skills exclusively
                                 toward fulfilling your responsibilities with the Company.
                               </p>
-              
+
                               <p className="mt-2 text-justify">
                                 During your employment, you agree not to engage in any commercial or business activity that may interfere with
                                 the availability or conflict with your professional obligations. However, you are free to participate in
                                 non-commercial, not-for-profit activities outside of your normal working hours, provided they do not affect your
                                 performance.
                               </p>
-              
+
                               <h3 className="mt-6 font-bold">CTC - Allowances & Components</h3>
-              
+
                               <p className="mt-2 text-justify">
                                 The Gross Cost to Company (CTC), outlined in this contract, includes all statutory and associated components
                                 such as Provident Fund (PF), allowances, gratuity, insurance, and other applicable benefits. You will have the
                                 opportunity to discuss a detailed pay breakup at the time of joining, including the variable components with the
                                 Company.
                               </p>
-              
+
                               <h3 className="mt-6 font-bold">Performance & Appraisal</h3>
                               <p className="mt-2 text-justify">
                                 The Company at its sole discretion may award performance bonuses to employees, based on individual
                                 contributions and the overall performance of the organization.
                               </p>
-              
+
                               <h3 className="mt-6 font-bold">Tax</h3>
                               <p className="mt-2 text-justify">
                                 You will be solely responsible for any tax liabilities arising from your employment, including those owed to
                                 statutory authorities.
                               </p>
-              
+
                               <h3 className="mt-6 font-bold">Expenses and Reimbursement</h3>
                               <p className="mt-2 text-justify">
                                 You will be reimbursed for all reasonable and necessary out-of-pocket expenses incurred in the course of fulfilling
                                 your responsibilities, subject to the submission of valid bills, tickets, or supporting documents, and approved by
                                 your immediate supervisor.
                               </p>
-              
+
                               <div className="mt-10 text-sm text-center">
                                 <p className="font-bold">Aysqo Technology Solutions Pvt. Ltd.</p>
                                 <p>4th Floor, Bizness Square, Opp Hitec Entrance, Jubilee Enclave, HITEC City, Hyderabad, Telangana 500081</p>
@@ -834,82 +834,82 @@ function OfferLetter() {
                                 <p>Website: <a href="http://www.aysqo.com" className="text-blue-600">www.aysqo.com</a></p>
                               </div>
                             </div>
-              
+
                             {/* PAGE 4 - Travel, Increments, Posting, Medical, etc. */}
                             <div className="page bg-white shadow rounded p-10 min-h-[1123px] w-[794px] mx-auto relative" style={{display: 'none'}}>
                                <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none select-none">
                   <img src={logo2} alt="Watermark" className="w-[500px]" />
                 </div>
                               <img src={logo} alt="Company Logo" className="absolute top-4 left-4 h-12" />
-              
+
                               <div className="text-right mb-4">
                                <p className="font-semibold text-sm text-green-700">
                     AYSQO/HYD/HR/2025/OFR-ASE/{formData.offer_id || "-------"}
                   </p>
                               </div>
-              
+
                               <h3 className="mt-6 font-bold">Travel</h3>
                               <p className="mt-2 text-justify">
                                 As part of your employment, you may be required to travel. In such cases, you will be informed in
                                 advance to allow adequate time for preparation.
                               </p>
-              
+
                               <h3 className="mt-6 font-bold">Increments and Promotions</h3>
                               <p className="mt-2 text-justify">
-                                Your career progression within the Company will be determined solely by your performance and capabilities. 
-                                Your individual contributions will be regularly evaluated by your managers, as well as through peer feedback, 
-                                forming the basis for decisions regarding salary increments and promotions. Performance reviews will be conducted 
+                                Your career progression within the Company will be determined solely by your performance and capabilities.
+                                Your individual contributions will be regularly evaluated by your managers, as well as through peer feedback,
+                                forming the basis for decisions regarding salary increments and promotions. Performance reviews will be conducted
                                 every six months to assess and guide your professional growth.
                               </p>
                               <p className="mt-2 text-justify">
-                                You will be expected to continuously learn and adapt to the processes implemented at Aysqo Technology Solutions Pvt Ltd. 
-                                as the business evolves. Compliance with the Company's established quality standards is mandatory. 
-                                Demonstrating adherence to these standards, along with your overall attitude toward maintaining quality, will 
+                                You will be expected to continuously learn and adapt to the processes implemented at Aysqo Technology Solutions Pvt Ltd.
+                                as the business evolves. Compliance with the Company's established quality standards is mandatory.
+                                Demonstrating adherence to these standards, along with your overall attitude toward maintaining quality, will
                                 be key factors in evaluating your performance.
                               </p>
-              
+
                               <h3 className="mt-6 font-bold">Posting / Transfer</h3>
                               <p className="mt-2 text-justify">
-                                While your initial posting will be as stated in the Offer Letter, you may be assigned to any department, office, or 
-                                location of the Company, its partners, or customers—whether in India or abroad—based on your job requirements 
+                                While your initial posting will be as stated in the Offer Letter, you may be assigned to any department, office, or
+                                location of the Company, its partners, or customers—whether in India or abroad—based on your job requirements
                                 and the business needs, at the Company's discretion.
                               </p>
-              
+
                               <h3 className="mt-6 font-bold">Medical</h3>
                               <p className="mt-2 text-justify">
-                                The Company reserves the right to terminate your employment if valid medical evidence indicates that you are 
+                                The Company reserves the right to terminate your employment if valid medical evidence indicates that you are
                                 physically or mentally incapacitated to a degree that prevents you from fulfilling your assigned responsibilities.
                               </p>
-              
+
                               <h3 className="mt-6 font-bold">Working Hours, Holidays and Leave</h3>
                               <p className="mt-2 text-justify">
-                                Your standard weekly working hours are from <b>10:00 AM to 6:00 PM, Monday through Friday</b>. 
-                                Saturdays and Sundays will generally be non-working days. Employees are entitled to 12 paid leaves annually, 
-                                accrued at the rate of one leave per month of service. The Company provides 12 annual holidays, including 
-                                national and festival holidays, applicable across all office branches. Except in cases of emergencies or medical 
+                                Your standard weekly working hours are from <b>10:00 AM to 6:00 PM, Monday through Friday</b>.
+                                Saturdays and Sundays will generally be non-working days. Employees are entitled to 12 paid leaves annually,
+                                accrued at the rate of one leave per month of service. The Company provides 12 annual holidays, including
+                                national and festival holidays, applicable across all office branches. Except in cases of emergencies or medical
                                 necessity, leave requests must be submitted in advance through an online system and approved by your manager.
                               </p>
-              
+
                               <h3 className="mt-6 font-bold">Intellectual Property Rights</h3>
                               <p className="mt-2 text-justify">
-                                During your employment, all materials or intellectual property created or developed by you during the course 
-                                of your employment, whether performed individually or as part of a team, in connection with your duties and 
-                                responsibilities, will belong exclusively to Aysqo Technology Solutions Pvt Ltd. You agree that all rights of 
-                                intellectual property created during your employment shall be the sole property of the Company, and you shall 
-                                execute all necessary documents to assign such rights unconditionally. Unauthorized use of such intellectual 
+                                During your employment, all materials or intellectual property created or developed by you during the course
+                                of your employment, whether performed individually or as part of a team, in connection with your duties and
+                                responsibilities, will belong exclusively to Aysqo Technology Solutions Pvt Ltd. You agree that all rights of
+                                intellectual property created during your employment shall be the sole property of the Company, and you shall
+                                execute all necessary documents to assign such rights unconditionally. Unauthorized use of such intellectual
                                 property for personal benefit is strictly prohibited.
                               </p>
-              
+
                               <h3 className="mt-6 font-bold">Non-Solicitation</h3>
                               <p className="mt-2 text-justify">
-                                During your employment with Aysqo Technology Solutions Pvt Ltd, and for a period of one year following its 
-                                termination, you agree not to solicit or encourage any employees of the Company to leave their employment for 
-                                other pursuits. Additionally, you agree not to provide services, directly or indirectly, to any competitor, 
-                                vendor, client, or affiliate that is in conflict with Aysqo Technology Solutions Pvt Ltd. Furthermore, you agree 
-                                not to, on your own behalf or on behalf of any other person or entity, solicit or attempt to entice any customers 
+                                During your employment with Aysqo Technology Solutions Pvt Ltd, and for a period of one year following its
+                                termination, you agree not to solicit or encourage any employees of the Company to leave their employment for
+                                other pursuits. Additionally, you agree not to provide services, directly or indirectly, to any competitor,
+                                vendor, client, or affiliate that is in conflict with Aysqo Technology Solutions Pvt Ltd. Furthermore, you agree
+                                not to, on your own behalf or on behalf of any other person or entity, solicit or attempt to entice any customers
                                 or prospective customers away from the Company.
                               </p>
-              
+
                               <div className="mt-10 text-sm text-center">
                                 <p className="font-bold">Aysqo Technology Solutions Pvt. Ltd.</p>
                                 <p>4th Floor, Bizness Square, Opp Hitec Entrance, Jubilee Enclave, HITEC City, Hyderabad, Telangana 500081</p>
@@ -923,80 +923,80 @@ function OfferLetter() {
                                 <img src={logo2} alt="Watermark" className="w-[500px]" />
                               </div>
                                             <img src={logo} alt="Company Logo" className="absolute top-4 left-4 h-12" />
-                            
+
                                             <div className="text-right mb-4">
                                               <p className="font-semibold text-sm text-green-700">
                     AYSQO/HYD/HR/2025/OFR-ASE/{formData.offer_id || "-------"}
                   </p>
                                             </div>
-                            
+
                                             <h3 className="mt-6 font-bold">Non-Disclosure</h3>
                                             <p className="mt-2 text-justify">
-                                              You agree to sign and be legally bound by the terms of the Non-Disclosure, Non-Solicitation, and 
-                                              Non-Competition Agreement throughout the duration of your employment with the Company and thereafter. 
-                                              Additionally, you commit to adhering to all Company policies regarding the protection of confidential 
-                                              information as updated from time to time. You are strictly required to maintain confidentiality concerning 
-                                              your remuneration and terms of employment and must not disclose or discuss such information with any other 
-                                              employee, except your immediate supervisor. Any unauthorized disclosure of confidential information will be 
+                                              You agree to sign and be legally bound by the terms of the Non-Disclosure, Non-Solicitation, and
+                                              Non-Competition Agreement throughout the duration of your employment with the Company and thereafter.
+                                              Additionally, you commit to adhering to all Company policies regarding the protection of confidential
+                                              information as updated from time to time. You are strictly required to maintain confidentiality concerning
+                                              your remuneration and terms of employment and must not disclose or discuss such information with any other
+                                              employee, except your immediate supervisor. Any unauthorized disclosure of confidential information will be
                                               regarded as a serious breach of conduct and a violation of your employment terms.
                                             </p>
-                            
+
                                             <h3 className="mt-6 font-bold">Non-Compete</h3>
                                             <p className="mt-2 text-justify">
-                                              By accepting this position with the Company, you agree not to engage in any competing business or activities 
-                                              during your employment and for a period of one year following the termination of your employment. However, 
-                                              this restriction does not prevent you from seeking employment with other IT companies after your tenure with 
+                                              By accepting this position with the Company, you agree not to engage in any competing business or activities
+                                              during your employment and for a period of one year following the termination of your employment. However,
+                                              this restriction does not prevent you from seeking employment with other IT companies after your tenure with
                                               Aysqo Technology Solutions Pvt Ltd has ended.
                                             </p>
-                            
+
                                             <h3 className="mt-6 font-bold">Training</h3>
                                             <p className="mt-2 text-justify">
-                                              The Company may, at its discretion, arrange training sessions for employees either at the Company premises 
-                                              or at external locations. You will be required to attend these trainings and complete any associated assignments. 
-                                              During the training period, you will remain under evaluation until you meet the criteria established by Aysqo. 
-                                              Please note that the salary during this training phase may differ from the amount stated in your offer letter, 
+                                              The Company may, at its discretion, arrange training sessions for employees either at the Company premises
+                                              or at external locations. You will be required to attend these trainings and complete any associated assignments.
+                                              During the training period, you will remain under evaluation until you meet the criteria established by Aysqo.
+                                              Please note that the salary during this training phase may differ from the amount stated in your offer letter,
                                               and the Company reserves the right to revise your compensation based on your progress and development.
                                             </p>
-                            
+
                                             <h3 className="mt-6 font-bold">Personal Information</h3>
                                             <p className="mt-2 text-justify">
-                                              It is the employee's responsibility to keep their personal contact information current with the Company and 
-                                              promptly notify the Company of any changes. Additionally, you are required to inform the Company of any 
+                                              It is the employee's responsibility to keep their personal contact information current with the Company and
+                                              promptly notify the Company of any changes. Additionally, you are required to inform the Company of any
                                               changes in your civil or marital status.
                                             </p>
-                            
+
                                             <h3 className="mt-6 font-bold">Termination</h3>
                                             <p className="mt-2 text-justify">
-                                              On termination of your employment with the Company irrespective of the circumstances, you are bound to return 
+                                              On termination of your employment with the Company irrespective of the circumstances, you are bound to return
                                               to the Company:
                                             </p>
                                             <ol className="list-decimal ml-6 mt-2 space-y-2 text-justify">
                                               <li>
-                                                Any material items belonging to the Company per inventory, and all non-material items in your possession 
-                                                including but not limited to intellectual property (documentation, software, email correspondence) and any 
-                                                other information required for the continued execution of the duties of your role (login credentials, 
+                                                Any material items belonging to the Company per inventory, and all non-material items in your possession
+                                                including but not limited to intellectual property (documentation, software, email correspondence) and any
+                                                other information required for the continued execution of the duties of your role (login credentials,
                                                 business contact information).
                                               </li>
                                               <li>
-                                                Any physical company documents that you may have in your possession. You are also bound to repay any and all 
-                                                outstanding debts or loans due to the Company and the Company is hereby authorized to deduct from any payments 
+                                                Any physical company documents that you may have in your possession. You are also bound to repay any and all
+                                                outstanding debts or loans due to the Company and the Company is hereby authorized to deduct from any payments
                                                 due to the employee the amount due to the Company.
                                               </li>
                                               <li>
-                                                You will also be bound by any previous confidentiality, non-disclosure or non-compete agreements that you had 
+                                                You will also be bound by any previous confidentiality, non-disclosure or non-compete agreements that you had
                                                 signed as part of your employment until the individual termination of such contracts.
                                               </li>
                                             </ol>
-                            
+
                                             <h3 className="mt-6 font-bold">Warranty</h3>
                                             <p className="mt-2 text-justify">
-                                              You represent and warrant that the terms and conditions of your employment with the Company are lawful, valid, 
-                                              and binding upon you. By accepting this offer and fulfilling your obligations under this employment, you affirm 
+                                              You represent and warrant that the terms and conditions of your employment with the Company are lawful, valid,
+                                              and binding upon you. By accepting this offer and fulfilling your obligations under this employment, you affirm
                                               that you are not, and will not be, in violation of any other agreement or understanding to which you are a party—
-                                              including, but not limited to, any prior employment contracts—and that no such agreement will be breached or 
+                                              including, but not limited to, any prior employment contracts—and that no such agreement will be breached or
                                               conflicted with as a result of your engagement with the Company.
                                             </p>
-                            
+
                                             <div className="mt-10 text-sm text-center">
                                               <p className="font-bold">Aysqo Technology Solutions Pvt. Ltd.</p>
                                               <p>4th Floor, Bizness Square, Opp Hitec Entrance, Jubilee Enclave, HITEC City, Hyderabad, Telangana 500081</p>
@@ -1004,79 +1004,79 @@ function OfferLetter() {
                                               <p>Website: <a href="http://www.aysqo.com" className="text-blue-600">www.aysqo.com</a></p>
                                             </div>
                                           </div>
-                            
+
                                           {/* PAGE 6 - Breaches, Notice Period, Jurisdiction, Amendments */}
                                           <div className="page bg-white shadow rounded p-10 min-h-[1123px] w-[794px] mx-auto relative" style={{display: 'none'}}>
                                              <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none select-none">
                                 <img src={logo2} alt="Watermark" className="w-[500px]" />
                               </div>
                                             <img src={logo} alt="Company Logo" className="absolute top-4 left-4 h-12" />
-                            
+
                                             <div className="text-right mb-4">
                                              <p className="font-semibold text-sm text-green-700">
                     AYSQO/HYD/HR/2025/OFR-ASE/{formData.offer_id || "-------"}
                   </p>
                                             </div>
-                            
+
                                             <h3 className="mt-6 font-bold">Breaches and Violations</h3>
                                             <p className="mt-2 text-justify">
-                                              In addition to the terms outlined in this document, you may be subject to disciplinary actions—including 
-                                              but not limited to warnings, suspensions, demotion, or denial of promotions and increments—for any 
-                                              violations of the Company's code of conduct or policies. These policies and related Company manuals are 
-                                              considered integral parts of this Agreement. The Company reserves the right to modify or amend these terms 
-                                              and will notify employees accordingly. Employment may also be terminated following disciplinary action and 
+                                              In addition to the terms outlined in this document, you may be subject to disciplinary actions—including
+                                              but not limited to warnings, suspensions, demotion, or denial of promotions and increments—for any
+                                              violations of the Company's code of conduct or policies. These policies and related Company manuals are
+                                              considered integral parts of this Agreement. The Company reserves the right to modify or amend these terms
+                                              and will notify employees accordingly. Employment may also be terminated following disciplinary action and
                                               a thorough investigation.
                                             </p>
                                             <p className="mt-2 text-justify">
-                                              Throughout your employment, you are required to comply with all rules, regulations, and policies established 
-                                              by the Company, including any revisions made at the Company's discretion from time to time, regardless of 
-                                              whether such updates are individually communicated to you. It is your responsibility to stay informed of 
-                                              these policies by regularly consulting the Company intranet or employee manual. Failure to adhere to these 
+                                              Throughout your employment, you are required to comply with all rules, regulations, and policies established
+                                              by the Company, including any revisions made at the Company's discretion from time to time, regardless of
+                                              whether such updates are individually communicated to you. It is your responsibility to stay informed of
+                                              these policies by regularly consulting the Company intranet or employee manual. Failure to adhere to these
                                               guidelines may result in disciplinary action by the Company.
                                             </p>
-                            
+
                                             <h3 className="mt-6 font-bold">Notice Period</h3>
                                             <p className="mt-2 text-justify">
-                                              During your first year of employment, either party must provide a minimum of six months' notice to terminate 
-                                              this contract. After the first year, termination may be made by either party with a one-month notice period. 
-                                              The notice period begins from the date the termination letter is received by your manager. However, in cases 
-                                              such as policy violations or other serious breaches, the Company reserves the right to terminate your employment 
-                                              immediately, without prior notice. Additionally, your manager may terminate your employment on the spot without 
+                                              During your first year of employment, either party must provide a minimum of six months' notice to terminate
+                                              this contract. After the first year, termination may be made by either party with a one-month notice period.
+                                              The notice period begins from the date the termination letter is received by your manager. However, in cases
+                                              such as policy violations or other serious breaches, the Company reserves the right to terminate your employment
+                                              immediately, without prior notice. Additionally, your manager may terminate your employment on the spot without
                                               any prior intimation if circumstances warrant.
                                             </p>
-                            
+
                                             <h3 className="mt-6 font-bold">Jurisdiction</h3>
                                             <p className="mt-2 text-justify">
-                                              Your employment shall be governed by and interpreted in accordance with the laws of India. Any disputes arising 
-                                              out of or in connection with your employment, including the terms and conditions thereof, shall fall under the 
+                                              Your employment shall be governed by and interpreted in accordance with the laws of India. Any disputes arising
+                                              out of or in connection with your employment, including the terms and conditions thereof, shall fall under the
                                               exclusive jurisdiction of the courts located in Telangana/Hyderabad.
                                             </p>
                                             <p className="mt-2 text-justify">
-                                              Both parties further agree that any such disputes shall first be referred to arbitration in accordance with the 
-                                              Arbitration and Conciliation Act, 1996. The arbitrator shall be appointed by the Company, and the arbitration 
+                                              Both parties further agree that any such disputes shall first be referred to arbitration in accordance with the
+                                              Arbitration and Conciliation Act, 1996. The arbitrator shall be appointed by the Company, and the arbitration
                                               process will commence within fifteen (15) days of either party receiving written notice of the dispute.
                                             </p>
-                            
+
                                             <h3 className="mt-6 font-bold">Amendments</h3>
                                             <p className="mt-2 text-justify">
-                                              The Company reserves the right, at its sole discretion, to amend, replace, or revoke any of the terms mentioned 
-                                              above, as may be required by statutory changes or other circumstances. Any such modifications will be updated 
-                                              on the Company intranet and formally communicated to employees through appropriate channels. All employees are 
+                                              The Company reserves the right, at its sole discretion, to amend, replace, or revoke any of the terms mentioned
+                                              above, as may be required by statutory changes or other circumstances. Any such modifications will be updated
+                                              on the Company intranet and formally communicated to employees through appropriate channels. All employees are
                                               expected to comply with Company rules and policies as they evolve over time.
                                             </p>
-                            
+
                                             <p className="mt-4 text-justify font-semibold">
-                                              If you agree to accept this position, please confirm your acceptance in writing by signing below and specifying 
-                                              your intended date of joining. A copy of this letter will be provided for your records. Regardless of your decision 
-                                              to join Aysqo Technology Solutions Pvt. Ltd., you are required to maintain strict confidentiality regarding the 
+                                              If you agree to accept this position, please confirm your acceptance in writing by signing below and specifying
+                                              your intended date of joining. A copy of this letter will be provided for your records. Regardless of your decision
+                                              to join Aysqo Technology Solutions Pvt. Ltd., you are required to maintain strict confidentiality regarding the
                                               contents of this letter. All related correspondence should be clearly marked as "Confidential."
                                             </p>
-                            
+
                                             <p className="mt-6 font-bold">
-                                             <span className="font-semibold">{formData.candidate_name || "---------"}</span> , we take this opportunity to warmly welcome you to Aysqo Technology Solutions 
+                                             <span className="font-semibold">{formData.candidate_name || "---------"}</span> , we take this opportunity to warmly welcome you to Aysqo Technology Solutions
                                               Pvt. Ltd., and look forward to a successful association.
                                             </p>
-                            
+
                                             <div className="mt-10 text-sm text-center">
                                               <p className="font-bold">Aysqo Technology Solutions Pvt. Ltd.</p>
                                               <p>4th Floor, Bizness Square, Opp Hitec Entrance, Jubilee Enclave, HITEC City, Hyderabad, Telangana 500081</p>
@@ -1084,41 +1084,41 @@ function OfferLetter() {
                                               <p>Website: <a href="http://www.aysqo.com" className="text-blue-600">www.aysqo.com</a></p>
                                             </div>
                                           </div>
-                            
+
                                           {/* PAGE 7 - Annexure II (Compensation Structure) */}
                                           <div className="page bg-white shadow rounded p-10 min-h-[1123px] w-[794px] mx-auto relative" style={{display: 'none'}}>
                                              <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none select-none">
                                 <img src={logo2} alt="Watermark" className="w-[500px]" />
                               </div>
                                             <img src={logo} alt="Company Logo" className="absolute top-4 left-4 h-12" />
-                            
+
                                             <div className="text-right mb-4">
                                               <p className="font-semibold text-sm text-green-700">
                     AYSQO/HYD/HR/2025/OFR-ASE/{formData.offer_id || "-------"}
                   </p>
                                             </div>
-                            
+
                                             <h2 className="text-center font-bold text-lg mb-6">Annexure II</h2>
                                             <p className="text-justify">
                                               AYSQO Technology Solutions Private Limited is pleased to extend the following compensation structure for your role,
                                               which includes statutory and company-level deductions:
                                             </p>
-                            
+
                                             {(() => {
                                               const ctc = parseInt(formData.ctc || 300000);
-                                              const basic = Math.round(ctc * 0.48); 
-                                              const hra = Math.round(ctc * 0.192); 
+                                              const basic = Math.round(ctc * 0.48);
+                                              const hra = Math.round(ctc * 0.192);
                                               const conveyance = 19000;
                                               const medicalAllowance = 15000;
                                               const special = ctc - (basic + hra + conveyance + medicalAllowance + Math.round(basic * 0.12) + Math.round(basic * 0.0481));
-                            
+
                                               const epf = Math.round(basic * 0.12);
                                               const gratuity = Math.round(basic * 0.0481);
-                            
+
                                               const gross = ctc - (epf + 2400 + 30000 + 1440);
                                               const deductions = epf + 2400 + 30000 + 1440;
                                               const netTakeHome = gross;
-                            
+
                                               return (
                                                 <>
                                                   <table className="w-full border-collapse border text-sm mt-6">
@@ -1140,7 +1140,7 @@ function OfferLetter() {
                                                       <tr className="bg-gray-100 font-bold"><td className="border px-2 py-1">Total Cost to Company (CTC)</td><td className="border px-2 py-1">--</td><td className="border px-2 py-1">₹{ctc.toLocaleString()}</td></tr>
                                                     </tbody>
                                                   </table>
-                            
+
                                                   <table className="w-full border-collapse border text-sm mt-6">
                                                     <thead>
                                                       <tr className="bg-gray-100">
@@ -1157,7 +1157,7 @@ function OfferLetter() {
                                                       <tr className="bg-gray-100 font-bold"><td className="border px-2 py-1">Total Deductions</td><td className="border px-2 py-1">{(deductions/12).toLocaleString()}</td><td className="border px-2 py-1">{deductions.toLocaleString()}</td></tr>
                                                     </tbody>
                                                   </table>
-                            
+
                                                   <table className="w-full border-collapse border text-sm mt-6">
                                                     <tbody>
                                                       <tr><td className="border px-2 py-1 font-bold">Gross Salary (before deductions)</td><td className="border px-2 py-1">{(gross/12).toLocaleString()}</td><td className="border px-2 py-1">{gross.toLocaleString()}</td></tr>
@@ -1167,7 +1167,7 @@ function OfferLetter() {
                                                 </>
                                               )
                                             })()}
-                            
+
                                             <div className="mt-6 text-sm">
                                               <p><b>1.</b> Gratuity is payable upon completion of 5 years of continuous service with AYSQO.</p>
                                               <p><b>2.</b> Professional Tax is deducted as per Telangana regulations.</p>
@@ -1175,7 +1175,7 @@ function OfferLetter() {
                                               <p><b>4.</b> Structure may be revised based on performance, statutory compliance, or company policy.</p>
                                               <p><b>5.</b> Net take-home salary is indicative and may vary based on applicable deductions and tax declarations.</p>
                                             </div><br /><br /><br /><br /><br /><br />
-                            
+
                                             <div className="mt-10 text-sm text-center">
                                               <p className="font-bold">Aysqo Technology Solutions Pvt. Ltd.</p>
                                               <p>4th Floor, Bizness Square, Opp Hitec Entrance, Jubilee Enclave, HITEC City, Hyderabad</p>
@@ -1183,7 +1183,7 @@ function OfferLetter() {
                                               <p>Website: <a href="http://www.aysqo.com" className="text-blue-600">www.aysqo.com</a></p>
                                             </div>
                                           </div>
-                            
+
 
               {/* PAGE 8 - Acceptance */}
               <div className="page bg-white shadow rounded p-10 min-h-[1123px] w-[794px] mx-auto relative" style={{display: 'none'}}>
@@ -1200,7 +1200,7 @@ function OfferLetter() {
 
                 <h2 className="font-bold text-lg mb-6">Acceptance</h2>
                 <p className="text-justify mb-6">
-                  I, <span className="font-semibold">{formData.candidate_name || "---------"}</span>, hereby confirm my acceptance 
+                  I, <span className="font-semibold">{formData.candidate_name || "---------"}</span>, hereby confirm my acceptance
                   of all the above-mentioned terms and conditions, and I agree to join as per the offer.
                 </p>
 
@@ -1254,7 +1254,7 @@ function OfferLetter() {
           </button>
         </div>
       )}
-      
+
 
     </div>
   );

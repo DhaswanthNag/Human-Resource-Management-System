@@ -103,16 +103,8 @@ const Workreports = () => {
   const totalPages = Math.ceil(filteredReports.length / reportsPerPage);
 
   return (
-    <div className="min-h-screen  bg-gradient-to-br from-blue-400 via-white to-blue-50 py-0 px-0 ">
-      <header className="flex items-center justify-between py-5 bg-blue-900 mb-8 px-6">
-          {/* Centered Title */}
-          <div className="flex-grow text-center">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-100 dark:text-white">
-              Work Reports
-            </h1>
-          </div>
-        </header>
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen  bg-gray-50 mr-6 ">
+      <div className="max-w-screen mx-auto">
         {/* Submit Report Form */}
         <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border p-4 sm:p-8 mb-8 sm:mb-10">
           <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
@@ -129,7 +121,7 @@ const Workreports = () => {
                 <select
                   value={reportType}
                   onChange={(e) => setReportType(e.target.value)}
-                  className="w-full border rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-yellow-500"
                 >
                   <option>Daily</option>
                   <option>Weekly</option>
@@ -144,7 +136,7 @@ const Workreports = () => {
                   value={workSummary}
                   onChange={(e) => setWorkSummary(e.target.value)}
                   placeholder="Describe your work..."
-                  className="w-full border rounded-lg px-3 py-3 h-28 resize-none text-sm sm:text-base focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border rounded-lg px-3 py-3 h-28 resize-none text-sm sm:text-base focus:ring-2 focus:ring-yellow-500"
                 />
               </div>
             </div>
@@ -152,7 +144,7 @@ const Workreports = () => {
             <button
               type="submit"
               disabled={!workSummary.trim() || loading}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 sm:px-5 py-2.5 sm:py-3 rounded-lg shadow-md flex items-center justify-center font-semibold hover:scale-[1.02] disabled:opacity-50 text-sm sm:text-base"
+              className="bg-gray-700 hover:bg-gray-800 text-white px-4 sm:px-5 py-2.5 sm:py-3 rounded-lg shadow-md flex items-center justify-center font-semibold hover:scale-[1.02] disabled:opacity-50 text-sm sm:text-base"
             >
               {loading ? "Submitting..." : "Submit Report"}
             </button>

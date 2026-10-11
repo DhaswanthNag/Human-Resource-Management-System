@@ -106,18 +106,8 @@ const HRWorkReports = () => {
   const totalPages = Math.ceil(filteredReports.length / reportsPerPage);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-white to-blue-50 py-0 px-0">
-         <header className="flex items-center justify-between py-5 bg-blue-900 mb-8 px-6">
-          {/* Centered Title */}
-          <div className="flex-grow text-center">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-100 dark:text-white">
-              Work Reports
-            </h1>
-          </div>
-        </header>
-      <div className="max-w-7xl mx-auto space-y-8">
-       
-
+    <div className="min-h-screen bg-gray-50 py-0 px-0 mr-6">
+      <div className="max-w-screen mx-auto space-y-8">
         {error && (
           <div className="bg-red-100 text-red-700 px-4 py-2 rounded-lg shadow-sm text-sm">
             {error}
@@ -138,7 +128,7 @@ const HRWorkReports = () => {
                 <select
                   value={hrReportType}
                   onChange={(e) => setHrReportType(e.target.value)}
-                  className="w-full mt-1 border rounded-lg px-3 py-2 text-sm"
+                  className="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-yellow-500"
                 >
                   <option>Daily</option>
                   <option>Weekly</option>
@@ -152,14 +142,14 @@ const HRWorkReports = () => {
                   value={hrWorkSummary}
                   onChange={(e) => setHrWorkSummary(e.target.value)}
                   placeholder="Describe your work..."
-                  className="w-full mt-1 border rounded-lg px-3 py-2 h-24 resize-none text-sm"
+                  className="w-full mt-1 border rounded-lg px-3 py-2 h-24 resize-none text-sm focus:ring-2 focus:ring-yellow-500"
                 />
               </div>
             </div>
             <button
               type="submit"
               disabled={!hrWorkSummary.trim() || submitting}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+              className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
             >
               {submitting ? "Submitting..." : "Submit Report"}
             </button>
@@ -220,14 +210,14 @@ const HRWorkReports = () => {
         <div className="bg-white rounded-xl shadow-md border overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-indigo-600 text-white text-xs">
+              <thead className="bg-gray-600 text-white text-xs">
                 <tr>
                   <th className="px-4 py-3">Report ID</th>
                   <th className="px-4 py-3">Type</th>
                   <th className="px-4 py-3">Summary</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Date/Time</th>
-                  <th className="px-4 py-3">Admin Comment</th>
+                  <th className="px-4 py-3">Comment</th>
                 </tr>
               </thead>
               <tbody>
@@ -274,7 +264,11 @@ const HRWorkReports = () => {
                         <td className="px-4 py-3 text-xs text-white-700">
                           {r.comment ? (
                             <div className="bg-white-100 px-2 py-1 rounded">
-                              <b>Admin:</b> {r.comment}
+                              <b>
+                                {r.commented_by_role === 'admin' ? 'Admin' :
+                                r.commented_by_role === 'hr' ? 'HR' :
+                                r.commented_by_role || 'User'}:
+                              </b> {r.comment}
                             </div>
                           ) : (
                             <span className="text-white-200">No comment</span>

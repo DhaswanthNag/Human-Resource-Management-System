@@ -21,7 +21,7 @@ router.delete("/:empId", employeeController.deleteEmployee);
 router.post("/:empId/documents", upload.single("file"), documentController.uploadDocument);
 router.get("/:empId/documents", documentController.getEmployeeDocuments);
 router.get("/raw/:docId", documentController.getRawDocument);
-// router.put("/documents/status/:docId", documentController.updateDocumentStatus); 
+// router.put("/documents/status/:docId", documentController.updateDocumentStatus);
 router.put("/status/:docId", documentController.updateDocumentStatus);
 router.delete("/documents/:docId", documentController.deleteDocument);
 

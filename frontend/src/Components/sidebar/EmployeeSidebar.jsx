@@ -1,80 +1,75 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import logo from "../../assets/logo.png";
+import React, {useRef } from "react";
 import {
-  User,
-  FileText,
+  LayoutDashboard,
   Upload,
   ClipboardList,
   CalendarDays,
   Mail,
-  Briefcase,
-  LogOut,
-  Activity,
-  Menu,
+  CreditCard,
+  BarChart2,
   CalendarX,
+  PanelLeft, // Icon for the toggle button
 } from "lucide-react";
 
 const SidebarItem = ({ icon: Icon, label, active, onClick, isSidebarOpen, className = "" }) => (
   <div
     onClick={onClick}
-    className={`flex items-center gap-2 px-4 py-2 rounded-md cursor-pointer transition-colors
+    className={`flex items-center gap-2 px-4 py-2 rounded-md cursor-pointer transition-colors text-lg hover:scale-105
       ${
         active
-          ? "bg-blue-600 text-white"
-          : "text-gray-300 hover:bg-gray-700 hover:text-blue-500 hover:scale-105"
-      }`}
+          ? "bg-gray-700 text-white"
+          : "text-black hover:bg-gray-200 hover:text-black"
+      }
+      ${!isSidebarOpen && "overflow-hidden"}
+    `}
   >
     <Icon size={18} className={className} />
-    {isSidebarOpen && (
-      <span className={`text-lg ${className}`}>{label}</span>
-    )}
+    {isSidebarOpen && <span className={`text-lg ${className}`}>{label}</span>}
   </div>
 );
 
 const EmployeeSidebar = ({ isSidebarOpen, setIsSidebarOpen, activeTab, setActiveTab }) => {
-  const navigate = useNavigate();
+  const sidebarRef = useRef(null); // Create a ref for the sidebar element
 
-  const handleLogout = () => {
-    // Clear any stored authentication data
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userRole");
-    localStorage.removeItem("userData");
-    
-    // Redirect to login page immediately
-    navigate("/login");
-  };
+  // Effect to handle clicks outside of the sidebar
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+  //       setIsSidebarOpen(false);
+  //     }
+  //   };
+
+  //   if (isSidebarOpen) {
+  //     document.addEventListener("mousedown", handleClickOutside);
+  //   }
+
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, [isSidebarOpen, setIsSidebarOpen]);
+
 
   return (
     <aside
+      ref={sidebarRef} // Attach the ref to the sidebar
       className={`${
-        isSidebarOpen ? "w-64" : "w-20"
-      } transition-all duration-300 bg-gray-900 text-white fixed left-0 top-0 h-full`}
+        isSidebarOpen ? "w-66" : "w-19"
+      } transition-all duration-300 bg-gray-100 border-gray-100 shadow-sm fixed left-0 top-20 h-full z-50`}
     >
       {/* Sidebar header */}
-      <div className="flex items-center justify-between bg-gray-900 p-3">
+      <div className="flex items-center p-4">
         <button
           onClick={() => setIsSidebarOpen((s) => !s)}
-          className="p-2 rounded-lg text-xl text-white hover:bg-gray-700"
+          className="p-2 rounded-lg text-gray-800 hover:bg-gray-200"
         >
-          <Menu size={20} />
+          <PanelLeft size={22} />
         </button>
-        {isSidebarOpen && (
-          <img src={logo} alt="Logo" className="h-14 w-auto mr-16" />
-        )}
       </div>
 
       {/* Sidebar navigation */}
-      <nav className="mt-4 ml-2 flex-1 space-y-1 px-2">
+      <nav className="px-2 pb-2 pt-0 space-y-1 text-sm bg-gray-100 h-full">
         <SidebarItem
-          icon={User}
-          label="Profile"
-          active={activeTab === "Profile"}
-          onClick={() => setActiveTab("Profile")}
-          isSidebarOpen={isSidebarOpen}
-        />
-        <SidebarItem
-          icon={Activity}
+          icon={LayoutDashboard}
           label="Dashboard"
           active={activeTab === "Dashboard"}
           onClick={() => setActiveTab("Dashboard")}
@@ -97,19 +92,19 @@ const EmployeeSidebar = ({ isSidebarOpen, setIsSidebarOpen, activeTab, setActive
         <SidebarItem
           icon={CalendarX}
           label="Leave Management"
-          active={activeTab === "Leavemanagement"}
+          active={activeTab === "Leave Management"}
           onClick={() => setActiveTab("Leave Management")}
           isSidebarOpen={isSidebarOpen}
         />
         <SidebarItem
-          icon={FileText}
+          icon={BarChart2}
           label="Work Reports"
           active={activeTab === "Work Reports"}
           onClick={() => setActiveTab("Work Reports")}
           isSidebarOpen={isSidebarOpen}
         />
         <SidebarItem
-          icon={Briefcase}
+          icon={CreditCard}
           label="Payslips"
           active={activeTab === "Payslips"}
           onClick={() => setActiveTab("Payslips")}
@@ -130,17 +125,6 @@ const EmployeeSidebar = ({ isSidebarOpen, setIsSidebarOpen, activeTab, setActive
           isSidebarOpen={isSidebarOpen}
         />
       </nav>
-
-      {/* Logout */}
-      <div className="p-2 ml-2 mt-0 mb-4">
-        <SidebarItem
-          icon={LogOut}
-          label="Logout"
-          isSidebarOpen={isSidebarOpen}
-          className="text-red-500"
-          onClick={handleLogout}
-        />
-      </div>
     </aside>
   );
 };

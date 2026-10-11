@@ -19,7 +19,7 @@ export const getCandidatesModel = async () => {
 // Update candidate
 export const updateCandidateModel = async (id, { name, email, jobApplied, status, assignedTo, interviewDate }) => {
   const result = await pool.query(
-    `UPDATE candidates 
+    `UPDATE candidates
      SET name=$1, email=$2, job_applied=$3, status=$4, assigned_to=$5, interview_date=$6
      WHERE candidate_id=$7 RETURNING *`,
     [name, email, jobApplied, status, assignedTo, interviewDate, id]

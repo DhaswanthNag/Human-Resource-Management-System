@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer";
+const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -8,7 +8,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendEmail = async (to, subject, text) => {
+const sendEmail = async (to, subject, text) => {
   try {
     await transporter.sendMail({ from: process.env.EMAIL_USER, to, subject, text });
     console.log(`✅ Email sent successfully to ${to}`);
@@ -18,7 +18,13 @@ export const sendEmail = async (to, subject, text) => {
   }
 };
 
-export const sendEmailWithAttachment = async (to, subject, text, pdfBuffer, filename = "OfferLetter.pdf") => {
+const sendEmailWithAttachment = async (
+  to,
+  subject,
+  text,
+  pdfBuffer,
+  filename = "OfferLetter.pdf"
+) => {
   try {
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -39,3 +45,5 @@ export const sendEmailWithAttachment = async (to, subject, text, pdfBuffer, file
     throw new Error("Failed to send email with attachment");
   }
 };
+
+module.exports = { sendEmail, sendEmailWithAttachment };

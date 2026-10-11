@@ -19,8 +19,8 @@ const createEmployee = async (req, res) => {
     }
 
     const result = await pool.query(
-      `INSERT INTO employees (emp_id, created_at, decision) 
-       VALUES ($1, NOW(), 'pending') 
+      `INSERT INTO employees (emp_id, created_at, decision)
+       VALUES ($1, NOW(), 'pending')
        RETURNING emp_id, created_at, decision`,
       [emp_id]
     );
@@ -40,7 +40,7 @@ const getEmployees = async (req, res) => {
   try {
     const employees = await pool.query(
       `SELECT emp_id, created_at, COALESCE(decision, 'pending') AS decision
-       FROM employees 
+       FROM employees
        ORDER BY emp_id ASC`
     );
     return res.json({ employees: employees.rows });
@@ -54,12 +54,12 @@ const getEmployees = async (req, res) => {
 const getEmployeesWithDocuments = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT e.emp_id, e.created_at, 
+      `SELECT e.emp_id, e.created_at,
               COALESCE(e.decision, 'pending') AS decision,
-              d.id AS doc_id, d.file_name, d.content_type, 
+              d.id AS doc_id, d.file_name, d.content_type,
               COALESCE(d.status, 'pending') AS doc_status, d.uploaded_at
        FROM employees e
-       LEFT JOIN employee_documents d 
+       LEFT JOIN employee_documents d
        ON e.emp_id = d.emp_id
        ORDER BY e.emp_id, d.uploaded_at DESC`
     );
@@ -158,13 +158,23 @@ const updateEmployeeDecision = async (req, res) => {
 
 // ---------------------- Approve/Reject Employee (Alias) ----------------------
 const approveEmployee = async (req, res) => {
-  req.body.decision = "approved";
-  return updateEmployeeDecision(req, res);
+  try {
+    req.body = { ...req.body, decision: "approved" };
+    return updateEmployeeDecision(req, res);
+  } catch (err) {
+    console.error("❌ Error in approveEmployee:", err);
+    return res.status(500).json({ error: "Failed to approve employee" });
+  }
 };
 
 const rejectEmployee = async (req, res) => {
-  req.body.decision = "rejected";
-  return updateEmployeeDecision(req, res);
+  try {
+    req.body = { ...req.body, decision: "rejected" };
+    return updateEmployeeDecision(req, res);
+  } catch (err) {
+    console.error("❌ Error in rejectEmployee:", err);
+    return res.status(500).json({ error: "Failed to reject employee" });
+  }
 };
 
 // ---------------------- Delete Employee + Documents ----------------------
