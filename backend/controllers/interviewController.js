@@ -18,8 +18,22 @@ const submitAssign = async (req, res) => {
 
 const getAssignments = async (req, res) => {
   try {
+    const result = await pool.query(`
+      SELECT *
+      FROM assign
+      ORDER BY
+        CASE
+          WHEN EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = 'assign'
+              AND column_name = 'id'
+          ) THEN 1
+          ELSE 0
+        END DESC
+    `);
 
-    const result = await pool.query('SELECT * FROM assign ORDER BY id DESC');
     res.status(200).json(result.rows);
   } catch (error) {
     console.error('Error fetching assignments:', error);
@@ -29,8 +43,6 @@ const getAssignments = async (req, res) => {
 
 
 /* dashboardcontrollers*/
-
-
 
 const getDashboardStats = async (req, res) => {
   try {
@@ -89,7 +101,6 @@ module.exports = {
 /* feedbackcontrollers*/
 
 
-
 // POST /api/feedbacks
 const submitFeedback = async (req, res) => {
   const { candidate_id, interviewer, feedback, rating } = req.body;
@@ -110,8 +121,6 @@ const submitFeedback = async (req, res) => {
     res.status(500).json({ error: 'Failed to submit feedback' });
   }
 };
-
-
 
 
 /*shortlistcontrollers*/
@@ -136,7 +145,11 @@ const submitShortlist = async (req, res) => {
 
 const getShortlists = async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM shortlist ORDER BY id DESC');
+    const result = await pool.query(`
+      SELECT *
+      FROM shortlist
+    `);
+
     res.status(200).json(result.rows);
   } catch (error) {
     console.error('Error fetching shortlists:', error.message);

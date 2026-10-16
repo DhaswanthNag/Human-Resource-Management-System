@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import EmployeeSidebar from "../sidebar/EmployeeSidebar";
 import TaskManagement from "./Taskmanagement";
@@ -26,10 +26,14 @@ const Navbar = ({ onProfileSettings, onLogout, profilePhoto }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
-    <nav className="sticky bg-gradient-to-r from-white via-gray-400 to-gray-100  flex items-center justify-between h-20 px-8 fixed top-0 left-0 right-0 z-30 select-none">
+    <nav className="sticky bg-gradient-to-r from-white via-gray-400 to-gray-100 flex items-center justify-between h-20 px-8 fixed top-0 left-0 right-0 z-30 select-none">
       {/* Left logo */}
       <div className="flex items-center">
-        <img src={logo} alt="Logo" className="h-11 w-auto mr-2" />
+        <img
+          src={logo}
+          alt="Logo"
+          className="h-12 w-auto ml-2 shrink-0 transform scale-[1.5] origin-left"
+        />
       </div>
 
       {/* Centered text */}
@@ -46,7 +50,7 @@ const Navbar = ({ onProfileSettings, onLogout, profilePhoto }) => {
           onClick={() => setDropdownOpen(!dropdownOpen)}
         >
           <img
-            src={profilePhoto}
+            src={profilePhoto || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='50' fill='%23e5e7eb'/%3E%3Ccircle cx='50' cy='37' r='18' fill='%239ca3af'/%3E%3Cpath d='M15 92c2-22 16-33 35-33s33 11 35 33' fill='%239ca3af'/%3E%3C/svg%3E"}
             alt="Profile"
             className="h-10 w-10 rounded-full object-cover border-2 border-black shadow-md"
           />
@@ -103,6 +107,104 @@ const EmployeeDashboard = () => {
   const [activeTab, setActiveTab] = useState("Dashboard");
   const navigate = useNavigate();
 
+  // Load the profile photo belonging to the logged-in employee.
+  const loadProfilePhoto = useCallback(() => {
+    const photo =
+      localStorage.getItem("employeeProfilePhoto") ||
+      localStorage.getItem("profilePhoto") ||
+      "";
+
+    return photo;
+  }, []);
+
+  const [profilePhoto, setProfilePhoto] = useState(() => {
+    const photo =
+      localStorage.getItem("employeeProfilePhoto") ||
+      localStorage.getItem("profilePhoto") ||
+      "";
+
+    return photo;
+  });
+
+  // Load the saved profile photo from the database after login.
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchProfilePhoto = async () => {
+      try {
+        const token =
+          localStorage.getItem("employeeAuthToken") ||
+          localStorage.getItem("authToken");
+
+        if (!token) {
+          return;
+        }
+
+        const response = await fetch(
+          "http://localhost:5000/api/users/profile/me",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to load employee profile photo.");
+        }
+
+        const result = await response.json();
+        const profile = result.profile || result.user || result;
+
+        const photo =
+          profile.profilePhoto ||
+          profile.profile_photo ||
+          profile.photo ||
+          "";
+
+        if (isMounted && photo) {
+          setProfilePhoto(photo);
+          localStorage.setItem("employeeProfilePhoto", photo);
+          localStorage.setItem("profilePhoto", photo);
+        } else if (isMounted && !photo) {
+          setProfilePhoto(loadProfilePhoto());
+        }
+      } catch (error) {
+        console.error("Error loading employee profile photo:", error);
+
+        if (isMounted) {
+          setProfilePhoto(loadProfilePhoto());
+        }
+      }
+    };
+
+    fetchProfilePhoto();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [loadProfilePhoto]);
+
+  useEffect(() => {
+    setProfilePhoto(loadProfilePhoto());
+  }, [activeTab, loadProfilePhoto]);
+
+  useEffect(() => {
+    const handleProfilePhotoUpdate = (event) => {
+      if (event.key === "employeeProfilePhoto" || event.key === "profilePhoto") {
+        setProfilePhoto(loadProfilePhoto());
+      }
+    };
+
+    window.addEventListener("storage", handleProfilePhotoUpdate);
+
+    return () => {
+      window.removeEventListener("storage", handleProfilePhotoUpdate);
+    };
+  }, [loadProfilePhoto]);
+
   // ✅ Centralized events state for Calendar & Sidebar
   const [events, setEvents] = useState([
     {
@@ -126,12 +228,14 @@ const EmployeeDashboard = () => {
   // ✅ Modified handleLogout to navigate to the login page and prevent going back
   const handleLogout = () => {
     // Clear any authentication tokens or user data
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userData');
-    localStorage.removeItem('employeeAuthToken');
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userData");
+    localStorage.removeItem("employeeAuthToken");
+    localStorage.removeItem("employeeProfilePhoto");
+    localStorage.removeItem("profilePhoto");
 
     // Replace the current entry in history stack to prevent going back
-    navigate('/login', { replace: true });
+    navigate("/login", { replace: true });
 
     // Optional: Force reload to clear any remaining state
     setTimeout(() => {
@@ -217,7 +321,7 @@ const EmployeeDashboard = () => {
         return <Leavemanagement />;
 
       case "Notifications":
-        return <EmployeeEmailNotifications/>;
+        return <EmployeeEmailNotifications />;
 
       case "Own Activity":
         return (
@@ -231,9 +335,6 @@ const EmployeeDashboard = () => {
         return null;
     }
   };
-
-  const profilePhoto =
-    "https://i.pinimg.com/1200x/38/79/47/387947599416cc6f6e64bd57936d730f.jpg";
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 relative">

@@ -1,5 +1,7 @@
+
 import React, { useState } from "react";
 import background from "../assets/background1.jpg"; // adjust path if file is in src/assets
+
 import {
   FaUser,
   FaLock,
@@ -8,6 +10,7 @@ import {
   FaEye,
   FaEyeSlash,
 } from "react-icons/fa";
+
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion"; // ✅ for smooth animation
@@ -33,9 +36,7 @@ const HRMSAuth = () => {
   const navigate = useNavigate();
 
   const isPasswordStrong = (password) =>
-    /^(?=.{8,})(?=^[A-Z])(?=.*\d)(?=.*[!@#$%^&~()[\]{};:'",.<>/?\\|`+=_-]).*$/.test(
-      password
-    );
+    typeof password === "string" && password.length > 0;
 
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -97,7 +98,7 @@ const HRMSAuth = () => {
     setLoading(true);
     try {
       const res = await axios.post(`${API_BASE}/send-otp`, { email });
-      if (res.data.success) {
+      if (res.data.success || res.data.message === "OTP sent to email") {
         setMessage({ text: "OTP sent to your email", type: "success" });
         setMode("reset");
       } else {
@@ -125,7 +126,7 @@ const HRMSAuth = () => {
       return setMessage({ text: "Fill in all password fields", type: "error" });
     if (!isPasswordStrong(newPassword))
       return setMessage({
-        text: "Password must be at least 8 characters, first letter uppercase, contain a digit and special symbol.",
+        text: "Password cannot be empty.",
         type: "error",
       });
     if (newPassword !== confirmPassword)
@@ -138,14 +139,14 @@ const HRMSAuth = () => {
         otp: verificationCode,
         newPassword,
       });
-      if (res.data.success) {
+      if (res.data.success || res.data.message === "Password updated successfully") {
         setMessage({
           text: "Password reset successfully! Please login.",
           type: "success",
         });
         setTimeout(() => {
           setMode("login");
-          setCredentials({ userId: email, password: "" });
+          setCredentials({ userId: "hr001", password: "" });
           setEmail("");
           setVerificationCode("");
           setNewPassword("");
@@ -263,7 +264,7 @@ const HRMSAuth = () => {
                     onChange={handleChange}
                     placeholder="User ID"
                     required
-                    className="w-full pl-10 pr-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300"
+                    className="w-full pl-10 pr-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 transition duration-300"
                   />
                 </div>
                 <div className="relative">
@@ -275,7 +276,7 @@ const HRMSAuth = () => {
                     onChange={handleChange}
                     placeholder="Password"
                     required
-                    className="w-full pl-10 pr-10 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300"
+                    className="w-full pl-10 pr-10 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 transition duration-300"
                   />
                   <button
                     type="button"
@@ -341,6 +342,9 @@ const HRMSAuth = () => {
                       required
                       disabled={loading}
                     />
+                    <div className="text-xs text-gray-500 mb-1">
+                      Enter any non-empty password. No uppercase, digit, symbol, or minimum-length rule.
+                    </div>
                     <div className="relative">
                       <input
                         type={showNewPassword ? "text" : "password"}
@@ -359,10 +363,6 @@ const HRMSAuth = () => {
                       >
                         {showNewPassword ? <FaEyeSlash /> : <FaEye />}
                       </button>
-                    </div>
-                    <div className="text-xs text-gray-500 mb-1">
-                      At least 8 characters, first letter uppercase, one digit,
-                      one special symbol.
                     </div>
                     <div className="relative">
                       <input

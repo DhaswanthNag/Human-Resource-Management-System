@@ -1,7 +1,5 @@
 import React, { useRef } from "react";
-// import { useNavigate } from "react-router-dom";
 import {
-  // User,
   Users,
   UserRoundCog,
   FilePen,
@@ -37,7 +35,6 @@ export default function AdminSidebar({ sidebarOpen, setSidebarOpen, activeTab, s
   //   };
   // }, [sidebarOpen, setSidebarOpen]);
 
-
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard" },
     { icon: Users, label: "Interview Panel" },
@@ -64,27 +61,38 @@ export default function AdminSidebar({ sidebarOpen, setSidebarOpen, activeTab, s
       {/* Button to toggle the sidebar open/closed state */}
       <div className="flex items-center p-4">
         <button
+          type="button"
           onClick={() => setSidebarOpen((s) => !s)}
           className="p-2 rounded-lg text-gray-800 hover:bg-gray-200"
+          aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          aria-expanded={sidebarOpen}
         >
           <PanelLeft size={22} />
         </button>
       </div>
 
-      <nav className="px-2 pb-2 pt-0 space-y-1 text-sm bg-gray-100 h-full">
+      <nav
+        className="px-2 pb-24 pt-0 space-y-1 text-sm bg-gray-100 h-[calc(100vh-5rem)] overflow-y-auto overflow-x-hidden"
+        aria-label="Admin navigation"
+      >
         {menuItems.map(({ icon: Icon, label }) => (
           <div
             key={label}
+            role="button"
+            tabIndex={0}
+            aria-current={activeTab === label ? "page" : undefined}
             onClick={() => setActiveTab(label)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md cursor-pointer transition-colors text-lg hover:scale-105
-              ${
-                activeTab === label
-                  ? "bg-gray-700 text-white"
-                  : "text-black hover:bg-gray-200 hover:text-black"
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                setActiveTab(label);
               }
-              // Add a class to handle overflow for a clean look when collapsed
-              ${!sidebarOpen && "overflow-hidden"}
-              `}
+            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md cursor-pointer transition-colors text-lg hover:scale-105 ${
+              activeTab === label
+                ? "bg-gray-700 text-white"
+                : "text-black hover:bg-gray-200 hover:text-black"
+            } ${!sidebarOpen ? "overflow-hidden" : ""}`}
           >
             <Icon size={18} />
             {sidebarOpen && <span>{label}</span>}

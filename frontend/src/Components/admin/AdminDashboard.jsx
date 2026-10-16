@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom"; // ✅ Import useNavigate for redirection
 import AdminSidebar from "../sidebar/AdminSidebar";
 import Calendarandmeeting from "./Calendarandmeeting";
@@ -28,16 +28,23 @@ import Workreports from "./Workreports";
 import Leavemanagement from "./Leavemanagement";
 import Usermanagement from "./Usermanagement";
 import logo from "../../assets/logo.png";
+import adminProfile from "../../assets/admin-profile.jpg";
 import axios from "axios";
+
+const API_URL = process.env.REACT_APP_API_BASE || "http://localhost:5000/api";
 
 const Navbar = ({ onProfileSettings, onLogout, profilePhoto }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
-    <nav className="sticky bg-gradient-to-r from-white via-gray-400 to-gray-100  flex items-center justify-between h-20 px-8 fixed top-0 left-0 right-0 z-30 select-none">
+    <nav className="sticky bg-gradient-to-r from-white via-gray-400 to-gray-100 flex items-center justify-between h-20 px-8 fixed top-0 left-0 right-0 z-30 select-none">
       {/* Left logo */}
       <div className="flex items-center">
-        <img src={logo} alt="Logo" className="h-11 w-auto mr-2" />
+        <img
+          src={logo}
+          alt="Logo"
+          className="h-12 w-auto ml-2 shrink-0 transform scale-[1.5] origin-left"
+        />
       </div>
 
       {/* Centered text */}
@@ -50,11 +57,11 @@ const Navbar = ({ onProfileSettings, onLogout, profilePhoto }) => {
       {/* Right profile dropdown */}
       <div className="relative">
         <button
-          className="flex items-center focus:outline-none"
+          className="flex items-center gap-3 focus:outline-none"
           onClick={() => setDropdownOpen(!dropdownOpen)}
         >
           <img
-            src={profilePhoto}
+            src={profilePhoto || adminProfile}
             alt="Profile"
             className="h-10 w-10 rounded-full object-cover border-2 border-black shadow-md"
           />
@@ -108,9 +115,7 @@ const StatCard = ({ title, amount, percent, up }) => (
     </div>
     <div className="w-full h-1 mt-3 rounded bg-gray-200">
       <div
-        className={`h-full rounded ${
-          up ? "bg-green-500" : "bg-red-500"
-        }`}
+        className={`h-full rounded ${up ? "bg-green-500" : "bg-red-500"}`}
         style={{ width: `${percent}%` }}
       ></div>
     </div>
@@ -143,6 +148,56 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState("Dashboard");
   const navigate = useNavigate(); // ✅ Initialize useNavigate
+
+  const [adminProfileData, setAdminProfileData] = useState({
+    profilePhoto: "",
+  });
+
+  // Fetch the logged-in admin's saved profile from the backend.
+  const fetchAdminProfile = useCallback(async () => {
+    try {
+      let token =
+        localStorage.getItem("authToken") ||
+        localStorage.getItem("token");
+
+      if (!token) {
+        try {
+          const userData = JSON.parse(
+            localStorage.getItem("userData") || "{}"
+          );
+          token = userData.token || userData.authToken || "";
+        } catch {
+          token = "";
+        }
+      }
+
+      if (!token) {
+        console.warn(
+          "Admin profile cannot be loaded: authentication token not found."
+        );
+        return;
+      }
+
+      const response = await axios.get(`${API_URL}/users/profile/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const profile =
+        response.data?.profile ||
+        response.data?.user ||
+        response.data;
+
+      setAdminProfileData({
+        profilePhoto:
+          profile?.profilePhoto || profile?.profile_photo || "",
+      });
+    } catch (error) {
+      console.error(
+        "Error fetching admin profile:",
+        error.response?.data || error.message || error
+      );
+    }
+  }, []);
 
   const [meetings, setMeetings] = useState([
     { id: 1, title: "HR Sync", start: new Date() },
@@ -183,10 +238,18 @@ export default function AdminDashboard() {
   // Fetch shortlisted/rejected candidates
   const fetchShortlistedCandidates = async () => {
     try {
+      const token =
+        localStorage.getItem("authToken") ||
+        localStorage.getItem("token");
+
       const response = await axios.get(
-        "http://localhost:5000/api/interviews/shortlist"
+        `${API_URL}/interviews/shortlist`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
       );
-      const data = response.data;
+
+      const data = Array.isArray(response.data) ? response.data : [];
 
       const shortlisted = data.filter((c) => c.status === "shortlisted");
       const rejected = data.filter((c) => c.status === "rejected");
@@ -196,12 +259,13 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error(
         "Error fetching shortlisted/rejected candidates:",
-        error
+        error.response?.data || error.message || error
       );
     }
   };
 
   useEffect(() => {
+    fetchAdminProfile();
     fetchShortlistedCandidates();
     fetchRoleStats(); // Initial fetch of role statistics
 
@@ -218,15 +282,39 @@ export default function AdminDashboard() {
       clearInterval(statsInterval);
       clearInterval(candidatesInterval);
     };
-  }, []);
+  }, [fetchAdminProfile]);
 
-  const handleProfileSettings = () => setActiveTab("Profile");
+  // Refresh the navbar when the profile page reports a successful save.
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      fetchAdminProfile();
+    };
+
+    window.addEventListener("admin-profile-updated", handleProfileUpdate);
+    window.addEventListener("adminProfileUpdated", handleProfileUpdate);
+    window.addEventListener("hrProfilePhotoUpdated", handleProfileUpdate);
+    window.addEventListener("profilePhotoUpdated", handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener("admin-profile-updated", handleProfileUpdate);
+      window.removeEventListener("adminProfileUpdated", handleProfileUpdate);
+      window.removeEventListener("hrProfilePhotoUpdated", handleProfileUpdate);
+      window.removeEventListener("profilePhotoUpdated", handleProfileUpdate);
+    };
+  }, [fetchAdminProfile]);
+
+  const handleProfileSettings = () => {
+    fetchAdminProfile();
+    setActiveTab("Profile");
+  };
 
   // ✅ Modified handleLogout to navigate to the login page and prevent going back
   const handleLogout = () => {
     // Clear any authentication tokens or user data
     localStorage.removeItem("authToken");
+    localStorage.removeItem("token");
     localStorage.removeItem("userData");
+    localStorage.removeItem("user");
 
     // Replace the current entry in history stack to prevent going back
     navigate("/login", { replace: true });
@@ -471,8 +559,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const profilePhoto =
-    "https://i.pinimg.com/736x/0e/85/e0/0e85e0188510df676e3de7be49b35302.jpg";
+  const profilePhoto = adminProfileData.profilePhoto || adminProfile;
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 relative">

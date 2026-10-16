@@ -12,10 +12,17 @@ const pool = new Pool({
       : false,
 });
 
-pool.on("connect", () => console.log("Connected to PostgreSQL"));
+let isConnected = false;
 
-pool.on("error", (err) =>
-  console.error("Unexpected PostgreSQL error:", err.message)
-);
+pool.on("connect", () => {
+  if (!isConnected) {
+    isConnected = true;
+    console.log("Connected to PostgreSQL");
+  }
+});
+
+pool.on("error", (err) => {
+  console.error("Unexpected PostgreSQL error:", err.message);
+});
 
 module.exports = pool;

@@ -1,4 +1,5 @@
-// src/Components/hr/HRDashboard.jsx
+
+ // src/Components/hr/HRDashboard.jsx
 import React, {useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // ✅ Import useNavigate for redirection
 import HrSidebar from "../sidebar/HrSidebar";
@@ -43,7 +44,11 @@ const Navbar = ({ onProfileSettings, onLogout, profilePhoto }) => {
     <nav className="sticky bg-gradient-to-r from-white via-gray-400 to-gray-100 flex items-center justify-between h-20 px-8 fixed top-0 left-0 right-0 z-30 select-none">
       {/* Left logo */}
       <div className="flex items-center">
-        <img src={logo} alt="Logo" className="h-11 w-auto mr-2" />
+        <img
+          src={logo}
+          alt="Logo"
+          className="h-12 w-auto ml-2 shrink-0 transform scale-[1.5] origin-left"
+        />
       </div>
 
       {/* Centered text */}
@@ -143,6 +148,10 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("Dashboard");
   const navigate = useNavigate(); // ✅ Initialize useNavigate
 
+  const [profilePhoto, setProfilePhoto] = useState(
+    "https://ui-avatars.com/api/?name=HR&background=e5e7eb&color=374151"
+  );
+
   const [meetings, setMeetings] = useState([
     { id: 1, title: "HR Sync", start: new Date() },
     { id: 2, title: "Budget Review", start: new Date() },
@@ -161,6 +170,53 @@ export default function AdminDashboard() {
   });
 
   const totalEmployees = genderData.reduce((acc, x) => acc + x.value, 0);
+
+  // Fetch HR profile photo from the authenticated user's profile
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchHRProfile = async () => {
+      try {
+        const storedUser = JSON.parse(localStorage.getItem('userData') || '{}');
+        const token =
+          localStorage.getItem('hrAuthToken') ||
+          localStorage.getItem('authToken') ||
+          localStorage.getItem('token') ||
+          storedUser.token ||
+          storedUser.authToken ||
+          '';
+
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_BASE || 'http://localhost:5000/api'}/users/profile/me`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        const data = response.data.profile || response.data.user || response.data;
+        const photo = data.profilePhoto || data.profile_photo;
+
+        if (isMounted && photo) {
+          setProfilePhoto(photo);
+        }
+      } catch (error) {
+        console.error('Error fetching HR profile photo:', error);
+      }
+    };
+
+    fetchHRProfile();
+
+    const handlePhotoUpdate = (event) => {
+      if (event.detail?.profilePhoto) {
+        setProfilePhoto(event.detail.profilePhoto);
+      }
+    };
+
+    window.addEventListener('hrProfilePhotoUpdated', handlePhotoUpdate);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('hrProfilePhotoUpdated', handlePhotoUpdate);
+    };
+  }, []);
 
   // Fetch role statistics from localStorage (updated by RoleManagement component)
   const fetchRoleStats = () => {
@@ -222,6 +278,7 @@ export default function AdminDashboard() {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userData');
     localStorage.removeItem('hrAuthToken');
+    localStorage.removeItem('token');
 
     // Replace the current entry in history stack to prevent going back
     navigate('/login', { replace: true });
@@ -417,9 +474,6 @@ export default function AdminDashboard() {
         );
     }
   };
-
-  const profilePhoto =
-    "https://i.pinimg.com/736x/2c/36/88/2c3688d7e305ec9057d76f2d0e567e4a.jpg";
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 relative">

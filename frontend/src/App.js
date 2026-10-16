@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 // Page imports
 import Homepage from "./pages/Homepage";
 import Login from "./pages/Login"; // ✅ Make sure file exists as src/pages/LoginForm.jsx
+import SetupPassword from './Components/SetupPassword';
 
 // Dashboard imports
 import AdminDashboard from "./Components/admin/AdminDashboard";   // ✅ src/Components/admin/Dashboard.jsx
@@ -30,6 +31,9 @@ function App() {
 
         {/* Login Page */}
         <Route path="/login" element={<Login />} />
+
+        {/* Setup Password Page */}
+        <Route path="/setup-password/:token" element={<SetupPassword />} />
 
         {/* Dashboard section */}
         <Route path="/admin" element={<AdminDashboard />} />
