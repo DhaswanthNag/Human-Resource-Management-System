@@ -388,7 +388,7 @@ const HRProfilePage = () => {
                   </>
                 )}
                 <div className="mt-2 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-                  <span className="rounded bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-700">{userData.department || 'Human Resources'}</span>
+                  {/* <span className="rounded bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-700">{userData.department || 'Human Resources'}</span> */}
                   <span className="rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-semibold text-gray-800">HR</span>
                 </div>
               </div>

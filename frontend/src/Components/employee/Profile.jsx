@@ -571,14 +571,12 @@ const EmpProfilePage = () => {
                   </>
                 ) : (
                   <>
-                    <h1 className="mt-6 text-3xl font-bold text-gray-900">{userData.name}</h1>
+                    <h1 className="mt-6 mb-4 text-3xl font-bold text-gray-900">{userData.name}</h1>
                     <p className="mt-2 text-lg text-gray-600">{userData.title}</p>
                   </>
                 )}
                 <div className="mt-2 flex flex-wrap items-center justify-center sm:justify-start">
-                  <span className="rounded bg-yellow-100 px-2.5 py-0.5 text-xs font-semibold text-yellow-800">
-                    {userData.department}
-                  </span>
+                  <span className="rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-semibold text-gray-800">EMPLOYEE</span>
                 </div>
               </div>
               <div className="mt-4 flex space-x-3 sm:ml-auto sm:mt-0">
