@@ -22,6 +22,11 @@ const {
   changeUserPassword
 } = require('../models/userModel');
 
+const {
+  updateHeartbeat,
+  isUserOnline
+} = require('../utils/presenceStore');
+
 const router = Router();
 
 router.post('/add', authenticateToken, authorizeRoles("admin"), createUser);
@@ -117,6 +122,29 @@ router.post(
       console.error('Change password error:', error.message);
       return res.status(500).json({ message: 'Unable to change password' });
     }
+  }
+);
+
+// Update the logged-in user's online status.
+router.post(
+  '/presence/heartbeat',
+  authenticateToken,
+  authorizeRoles('admin', 'hr', 'employee'),
+  (req, res) => {
+    updateHeartbeat(req.user.userId, req.user.role);
+    return res.status(200).json({ online: true });
+  }
+);
+
+// Check the logged-in user's current online status.
+router.get(
+  '/presence/me',
+  authenticateToken,
+  authorizeRoles('admin', 'hr', 'employee'),
+  (req, res) => {
+    return res.status(200).json({
+      online: isUserOnline(req.user.userId, req.user.role)
+    });
   }
 );
 

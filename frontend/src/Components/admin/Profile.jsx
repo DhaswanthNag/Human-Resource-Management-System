@@ -109,6 +109,7 @@ const AdminProfilePage = () => {
     newPassword: '',
     confirmPassword: ''
   });
+  const [isOnline, setIsOnline] = useState(false);
 
   const fetchProfile = useCallback(async () => {
     setIsLoading(true);
@@ -134,6 +135,48 @@ const AdminProfilePage = () => {
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
+
+  useEffect(() => {
+  let isMounted = true;
+  let heartbeatInProgress = false;
+
+  const sendHeartbeat = async () => {
+    if (heartbeatInProgress) return;
+    heartbeatInProgress = true;
+
+    try {
+      const token = getToken();
+      if (!token) {
+        if (isMounted) setIsOnline(false);
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/users/presence/heartbeat`, {
+        method: 'POST',
+        headers: getHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error('Unable to verify online status');
+      }
+
+      const result = await response.json();
+      if (isMounted) setIsOnline(result.online === true);
+    } catch {
+      if (isMounted) setIsOnline(false);
+    } finally {
+      heartbeatInProgress = false;
+    }
+  };
+
+  sendHeartbeat();
+  const heartbeatInterval = setInterval(sendHeartbeat, 20000);
+
+  return () => {
+    isMounted = false;
+    clearInterval(heartbeatInterval);
+  };
+}, []);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -379,7 +422,16 @@ const AdminProfilePage = () => {
                   src={isEditing ? editFormData.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(editFormData.name || 'Admin')}&background=e5e7eb&color=374151` : userData.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.name || 'Admin')}&background=e5e7eb&color=374151`}
                   alt="Admin profile"
                 />
-                <div className="absolute bottom-2 right-2 h-6 w-6 rounded-full border-2 border-white bg-green-500"></div>
+                <div
+                  className={`absolute bottom-2 right-2 h-6 w-6 rounded-full border-[3px] border-white ${
+                    isOnline
+                      ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.7)] animate-status-online'
+                      : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)] animate-status-offline'
+                  }`}
+                  title={isOnline ? 'Online' : 'Offline'}
+                  role="status"
+                  aria-label={isOnline ? 'Admin is online' : 'Admin is offline'}
+                />
                 {isEditing && (
                   <label className="absolute bottom-0 left-0 right-0 cursor-pointer bg-black/70 py-1 text-center text-xs text-white">
                     Change Photo

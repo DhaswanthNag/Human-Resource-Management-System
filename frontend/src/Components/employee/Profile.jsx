@@ -1,37 +1,100 @@
+
 import React, { useState, useEffect } from 'react';
 // import eren from "../../assets/eren.png";
+
+const API_URL = process.env.REACT_APP_API_BASE || 'http://localhost:5000/api';
+const EMPTY_PROFILE = {
+  name: '',
+  title: '',
+  department: '',
+  email: '',
+  phone: '',
+  location: '',
+  hireDate: '',
+  manager: '',
+  bio: '',
+  skills: [],
+  experience: [],
+  education: [],
+  profilePhoto: ''
+};
+const EMPTY_CONTACT = { name: '', relationship: '', phone: '' };
+const INPUT_CLASS = 'mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500';
+
+const getToken = () => {
+  let storedUser = {};
+  try {
+    storedUser = JSON.parse(localStorage.getItem('userData') || '{}');
+  } catch (error) {
+    console.error('Unable to read saved user data:', error);
+  }
+  return localStorage.getItem('employeeAuthToken') ||
+    localStorage.getItem('authToken') ||
+    localStorage.getItem('token') ||
+    storedUser.token ||
+    storedUser.authToken ||
+    localStorage.getItem('hams_token');
+};
+
+const getHeaders = () => ({
+  Authorization: `Bearer ${getToken()}`,
+  'Content-Type': 'application/json'
+});
+
+const parseArray = (value) => {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
+const getProfileResult = (result = {}) =>
+  result.profile || result.user || result.data?.profile ||
+  result.data?.user || result.data || result;
+
+const normalizeProfile = (profile = {}) => ({
+  ...EMPTY_PROFILE,
+  ...profile,
+  name: profile.name || '',
+  title: profile.position || profile.title || '',
+  department: profile.department || profile.position || profile.title || '',
+  email: profile.email || '',
+  phone: profile.phone || '',
+  location: profile.location || '',
+  hireDate: profile.created_at
+    ? new Date(profile.created_at).toLocaleDateString()
+    : profile.hireDate || profile.hire_date || '',
+  manager: profile.manager || '',
+  bio: profile.bio || '',
+  skills: parseArray(profile.skills),
+  experience: parseArray(profile.experience),
+  education: parseArray(profile.education),
+  profilePhoto: profile.profilePhoto || profile.profile_photo ||
+    profile.photo || profile.profilePicture || profile.profile_picture || ''
+});
+
 const EmpProfilePage = () => {
   const [activeTab, setActiveTab] = useState('personal');
-  const [profilePhoto, setProfilePhoto] = useState(() => localStorage.getItem('employeeProfilePhoto') || localStorage.getItem('profilePhoto') || '');
+  const [profilePhoto, setProfilePhoto] = useState(() =>
+    localStorage.getItem('employeeProfilePhoto') ||
+    localStorage.getItem('profilePhoto') || ''
+  );
   // const [profilePhoto] = useState(eren);
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const [userData, setUserData] = useState({
-    name: '',
-    title: '',
-    department: '',
-    // employeeId: 'EMP31',
-    email: '',
-    phone: '',
-    location: '',
-    hireDate: '',
-    manager: '',
-    bio: '',
-    skills: [],
-    experience: [],
-    education: [],
-    // profilePhoto: 'https://i.pinimg.com/1200x/38/79/47/387947599416cc6f6e64bd57936d730f.jpg'
-  });
-  const [editFormData, setEditFormData] = useState({ ...userData });
-  const [emergencyContact, setEmergencyContact] = useState({
-    name: '',
-    relationship: '',
-    phone: '',
-  });
+  const [userData, setUserData] = useState(EMPTY_PROFILE);
+  const [editFormData, setEditFormData] = useState(EMPTY_PROFILE);
+  const [emergencyContact, setEmergencyContact] = useState(EMPTY_CONTACT);
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
-    confirmPassword: '',
+    confirmPassword: ''
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState('');
@@ -40,259 +103,241 @@ const EmpProfilePage = () => {
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMessage, setProfileMessage] = useState('');
   const [profileError, setProfileError] = useState(false);
+  const [isOnline, setIsOnline] = useState(false);
 
   // Load the logged-in employee's profile from the database
   useEffect(() => {
+    let isMounted = true;
+
     const loadProfile = async () => {
-      let storedUser = {};
-
-      try {
-        storedUser = JSON.parse(localStorage.getItem('userData') || '{}');
-      } catch (error) {
-        console.error('Unable to read saved user data:', error);
-      }
-
-      const token =
-        localStorage.getItem('employeeAuthToken') ||
-        localStorage.getItem('authToken') ||
-        localStorage.getItem('token') ||
-        storedUser.token ||
-        storedUser.authToken ||
-        localStorage.getItem('hams_token');
-
+      const token = getToken();
       if (!token) {
-        setProfileError(true);
-        setProfileMessage('Your session token was not found. Please log in again.');
-        setProfileLoading(false);
+        if (isMounted) {
+          setProfileError(true);
+          setProfileMessage('Your session token was not found. Please log in again.');
+          setProfileLoading(false);
+        }
         return;
       }
 
       try {
-        const response = await fetch('http://localhost:5000/api/users/profile/me', {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const response = await fetch(`${API_URL}/users/profile/me`, {
+          headers: getHeaders()
         });
-        const result = await response.json();
+        const result = await response.json().catch(() => ({}));
 
         if (!response.ok) {
           throw new Error(result.message || 'Unable to load your profile.');
         }
 
-        const profile = result.profile || result.user || result.data?.profile || result.data?.user || result.data || result;
+        const profile = getProfileResult(result);
+        const loadedUserData = normalizeProfile(profile);
+        const contact = profile.emergency_contact || profile.emergencyContact || {};
 
-        const savedPhoto =
-          profile.profilePhoto ||
-          profile.profile_photo ||
-          profile.photo ||
-          profile.profilePicture ||
-          profile.profile_picture ||
-          localStorage.getItem('employeeProfilePhoto') ||
-          localStorage.getItem('profilePhoto') ||
-          '';
-
-        const loadedUserData = {
-          ...userData,
-          name: profile.name || '',
-          title: profile.position || profile.title || '',
-          department: profile.department || profile.position || profile.title || '',
-          email: profile.email || '',
-          phone: profile.phone || '',
-          location: profile.location || '',
-          hireDate: profile.created_at
-            ? new Date(profile.created_at).toLocaleDateString()
-            : userData.hireDate,
-          manager: profile.manager || '',
-          bio: profile.bio || '',
-          skills: Array.isArray(profile.skills) ? profile.skills : [],
-          experience: Array.isArray(profile.experience) ? profile.experience : [],
-          education: Array.isArray(profile.education) ? profile.education : [],
-          profilePhoto: savedPhoto,
-        };
+        if (!isMounted) return;
 
         setUserData(loadedUserData);
         setEditFormData(loadedUserData);
+        setEmergencyContact({
+          name: contact.name || '',
+          relationship: contact.relationship || '',
+          phone: contact.phone || ''
+        });
 
-        if (savedPhoto) {
-          setProfilePhoto(savedPhoto);
-          localStorage.setItem('employeeProfilePhoto', savedPhoto);
-          localStorage.setItem('profilePhoto', savedPhoto);
+        if (loadedUserData.profilePhoto) {
+          setProfilePhoto(loadedUserData.profilePhoto);
+          localStorage.setItem('employeeProfilePhoto', loadedUserData.profilePhoto);
+          localStorage.setItem('profilePhoto', loadedUserData.profilePhoto);
           window.dispatchEvent(new CustomEvent('employeeProfilePhotoUpdated', {
-            detail: { profilePhoto: savedPhoto },
+            detail: { profilePhoto: loadedUserData.profilePhoto }
           }));
-        }
-
-        if (profile.emergency_contact) {
-          setEmergencyContact({
-            name: profile.emergency_contact.name || '',
-            relationship: profile.emergency_contact.relationship || '',
-            phone: profile.emergency_contact.phone || '',
-          });
         }
 
         setProfileMessage('');
       } catch (error) {
-        setProfileError(true);
-        setProfileMessage(error.message || 'Unable to connect to the server.');
+        if (isMounted) {
+          setProfileError(true);
+          setProfileMessage(error.message || 'Unable to connect to the server.');
+        }
       } finally {
-        setProfileLoading(false);
+        if (isMounted) setProfileLoading(false);
       }
     };
 
     loadProfile();
     // Load the profile once when this page opens.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Keep the employee's online status updated while this page is open.
+  useEffect(() => {
+    let isMounted = true;
+    let heartbeatInProgress = false;
+
+    const sendHeartbeat = async () => {
+      if (heartbeatInProgress || !isMounted) return;
+      heartbeatInProgress = true;
+
+      try {
+        const token = getToken();
+        if (!token) {
+          if (isMounted) setIsOnline(false);
+          return;
+        }
+
+        const response = await fetch(`${API_URL}/users/presence/heartbeat`, {
+          method: 'POST',
+          headers: getHeaders()
+        });
+
+        if (!response.ok) {
+          const result = await response.json().catch(() => ({}));
+          throw new Error(result.message || `Heartbeat failed with status ${response.status}`);
+        }
+
+        const result = await response.json();
+        if (isMounted) setIsOnline(result.online === true);
+      } catch (error) {
+        console.error('Unable to update employee online status:', error);
+        if (isMounted) setIsOnline(false);
+      } finally {
+        heartbeatInProgress = false;
+      }
+    };
+
+    sendHeartbeat();
+    const heartbeatInterval = setInterval(sendHeartbeat, 20000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(heartbeatInterval);
+    };
   }, []);
 
   // Handle input changes for edit form
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setEditFormData({
-      ...editFormData,
-      [name]: value,
-    });
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setEditFormData((previous) => ({ ...previous, [name]: value }));
   };
 
   // Handle emergency contact changes
-  const handleEmergencyContactChange = (e) => {
-    const { name, value } = e.target;
-    setEmergencyContact({
-      ...emergencyContact,
-      [name]: value,
-    });
+  const handleEmergencyContactChange = (event) => {
+    const { name, value } = event.target;
+    setEmergencyContact((previous) => ({ ...previous, [name]: value }));
   };
 
   // Handle skill level changes
   const handleSkillChange = (index, value) => {
-    const updatedSkills = [...editFormData.skills];
-    updatedSkills[index] = { ...updatedSkills[index], level: parseInt(value, 10) || 0 };
-    setEditFormData({ ...editFormData, skills: updatedSkills });
+    const level = Math.max(0, Math.min(100, Number(value) || 0));
+    updateArrayItem('skills', index, 'level', level);
   };
 
   // Handle skill name changes
   const handleSkillNameChange = (index, value) => {
-    const updatedSkills = [...editFormData.skills];
-    updatedSkills[index] = { ...updatedSkills[index], name: value };
-    setEditFormData({ ...editFormData, skills: updatedSkills });
+    updateArrayItem('skills', index, 'name', value);
   };
 
   // Add a skill
   const handleAddSkill = () => {
-    setEditFormData({
-      ...editFormData,
-      skills: [...editFormData.skills, { name: '', level: 50 }],
-    });
+    addArrayItem('skills', { name: '', level: 50 });
   };
 
   // Remove a skill
   const handleRemoveSkill = (index) => {
-    setEditFormData({
-      ...editFormData,
-      skills: editFormData.skills.filter((_, skillIndex) => skillIndex !== index),
-    });
+    removeArrayItem('skills', index);
   };
 
   // Handle experience changes
   const handleExperienceChange = (index, field, value) => {
-    const updatedExperience = [...editFormData.experience];
-    updatedExperience[index] = { ...updatedExperience[index], [field]: value };
-    setEditFormData({ ...editFormData, experience: updatedExperience });
+    updateArrayItem('experience', index, field, value);
   };
 
   // Add experience
   const handleAddExperience = () => {
-    setEditFormData({
-      ...editFormData,
-      experience: [
-        ...editFormData.experience,
-        {
-          id: Date.now(),
-          title: '',
-          company: '',
-          period: '',
-          description: '',
-        },
-      ],
+    addArrayItem('experience', {
+      title: '',
+      company: '',
+      period: '',
+      description: ''
     });
   };
 
   // Remove experience
   const handleRemoveExperience = (index) => {
-    setEditFormData({
-      ...editFormData,
-      experience: editFormData.experience.filter((_, experienceIndex) => experienceIndex !== index),
-    });
+    removeArrayItem('experience', index);
   };
 
   // Handle education changes
   const handleEducationChange = (index, field, value) => {
-    const updatedEducation = [...editFormData.education];
-    updatedEducation[index] = { ...updatedEducation[index], [field]: value };
-    setEditFormData({ ...editFormData, education: updatedEducation });
+    updateArrayItem('education', index, field, value);
   };
 
   // Add education
   const handleAddEducation = () => {
-    setEditFormData({
-      ...editFormData,
-      education: [
-        ...editFormData.education,
-        {
-          id: Date.now(),
-          degree: '',
-          institution: '',
-          year: '',
-        },
-      ],
-    });
+    addArrayItem('education', { degree: '', institution: '', year: '' });
   };
 
   // Remove education
   const handleRemoveEducation = (index) => {
-    setEditFormData({
-      ...editFormData,
-      education: editFormData.education.filter((_, educationIndex) => educationIndex !== index),
-    });
+    removeArrayItem('education', index);
+  };
+
+  const updateArrayItem = (field, index, key, value) => {
+    setEditFormData((previous) => ({
+      ...previous,
+      [field]: previous[field].map((item, itemIndex) =>
+        itemIndex === index ? { ...item, [key]: value } : item
+      )
+    }));
+  };
+
+  const addArrayItem = (field, item) => {
+    setEditFormData((previous) => ({
+      ...previous,
+      [field]: [...previous[field], { ...item, id: Date.now() }]
+    }));
+  };
+
+  const removeArrayItem = (field, index) => {
+    setEditFormData((previous) => ({
+      ...previous,
+      [field]: previous[field].filter((_, itemIndex) => itemIndex !== index)
+    }));
   };
 
   // Handle profile photo change
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
+  const handlePhotoChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-    if (file) {
-      if (!file.type.startsWith('image/')) {
-        setProfileError(true);
-        setProfileMessage('Please select a valid image file.');
-        e.target.value = '';
-        return;
-      }
-
-      const maxSize = 2 * 1024 * 1024;
-
-      if (file.size > maxSize) {
-        setProfileError(true);
-        setProfileMessage('Please select an image smaller than 2 MB.');
-        e.target.value = '';
-        return;
-      }
-
-      const reader = new FileReader();
-
-      reader.onload = (event) => {
-        const photo = event.target.result;
-
-        setEditFormData((previousData) => ({
-          ...previousData,
-          profilePhoto: photo,
-        }));
-
-        setProfileMessage('Photo selected. Click Save Changes to store it in your profile.');
-        setProfileError(false);
-      };
-
-      reader.readAsDataURL(file);
+    if (!file.type.startsWith('image/')) {
+      setProfileError(true);
+      setProfileMessage('Please select a valid image file.');
+      event.target.value = '';
+      return;
     }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setProfileError(true);
+      setProfileMessage('Please select an image smaller than 2 MB.');
+      event.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const photo = reader.result;
+      setEditFormData((previous) => ({ ...previous, profilePhoto: photo }));
+      setProfileMessage('Photo selected. Click Save Changes to store it in your profile.');
+      setProfileError(false);
+    };
+    reader.onerror = () => {
+      setProfileError(true);
+      setProfileMessage('Unable to read the selected image.');
+    };
+    reader.readAsDataURL(file);
   };
 
   // Save edited data
@@ -300,23 +345,7 @@ const EmpProfilePage = () => {
     setProfileMessage('');
     setProfileError(false);
 
-    let storedUser = {};
-
-    try {
-      storedUser = JSON.parse(localStorage.getItem('userData') || '{}');
-    } catch (error) {
-      console.error('Unable to read saved user data:', error);
-    }
-
-    const token =
-      localStorage.getItem('employeeAuthToken') ||
-      localStorage.getItem('authToken') ||
-      localStorage.getItem('token') ||
-      storedUser.token ||
-      storedUser.authToken ||
-      localStorage.getItem('hams_token');
-
-    if (!token) {
+    if (!getToken()) {
       setProfileError(true);
       setProfileMessage('Your session token was not found. Please log in again.');
       return;
@@ -325,12 +354,9 @@ const EmpProfilePage = () => {
     setProfileSaving(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/users/profile/me', {
+      const response = await fetch(`${API_URL}/users/profile/me`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        headers: getHeaders(),
         body: JSON.stringify({
           name: editFormData.name,
           email: editFormData.email,
@@ -342,41 +368,37 @@ const EmpProfilePage = () => {
           experience: editFormData.experience,
           education: editFormData.education,
           emergency_contact: emergencyContact,
-          profilePhoto: editFormData.profilePhoto || null,
-        }),
+          profilePhoto: editFormData.profilePhoto || null
+        })
       });
 
-      const result = await response.json();
-
+      const result = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(result.message || 'Unable to save your profile.');
       }
 
-      const profile = result.profile || result.user || result.data?.profile || result.data?.user || result.data || result;
-
-      const savedUserData = {
+      const returnedProfile = getProfileResult(result);
+      const savedUserData = normalizeProfile({
         ...editFormData,
-        name: profile.name ?? editFormData.name,
-        title: profile.position ?? profile.title ?? editFormData.title,
-        department: profile.department || profile.position || editFormData.department,
-        email: profile.email ?? editFormData.email,
-        phone: profile.phone ?? editFormData.phone,
-        location: profile.location ?? editFormData.location,
-        bio: profile.bio ?? editFormData.bio,
-        skills: Array.isArray(profile.skills) ? profile.skills : editFormData.skills,
-        experience: Array.isArray(profile.experience)
-          ? profile.experience
-          : editFormData.experience,
-        education: Array.isArray(profile.education) ? profile.education : editFormData.education,
-        profilePhoto:
-          profile.profilePhoto ||
-          profile.profile_photo ||
-          profile.photo ||
+        ...returnedProfile,
+        name: returnedProfile.name ?? editFormData.name,
+        title: returnedProfile.position ?? returnedProfile.title ?? editFormData.title,
+        department: returnedProfile.department || returnedProfile.position || editFormData.department,
+        email: returnedProfile.email ?? editFormData.email,
+        phone: returnedProfile.phone ?? editFormData.phone,
+        location: returnedProfile.location ?? editFormData.location,
+        bio: returnedProfile.bio ?? editFormData.bio,
+        skills: returnedProfile.skills ?? editFormData.skills,
+        experience: returnedProfile.experience ?? editFormData.experience,
+        education: returnedProfile.education ?? editFormData.education,
+        profilePhoto: returnedProfile.profilePhoto ||
+          returnedProfile.profile_photo ||
+          returnedProfile.photo ||
           editFormData.profilePhoto ||
           localStorage.getItem('employeeProfilePhoto') ||
           localStorage.getItem('profilePhoto') ||
-          '',
-      };
+          ''
+      });
 
       setUserData(savedUserData);
       setEditFormData(savedUserData);
@@ -387,12 +409,12 @@ const EmpProfilePage = () => {
         localStorage.setItem('profilePhoto', savedUserData.profilePhoto);
 
         window.dispatchEvent(new CustomEvent('employeeProfilePhotoUpdated', {
-          detail: { profilePhoto: savedUserData.profilePhoto },
+          detail: { profilePhoto: savedUserData.profilePhoto }
         }));
 
         window.dispatchEvent(new StorageEvent('storage', {
           key: 'employeeProfilePhoto',
-          newValue: savedUserData.profilePhoto,
+          newValue: savedUserData.profilePhoto
         }));
       }
 
@@ -408,28 +430,26 @@ const EmpProfilePage = () => {
 
   // Cancel editing
   const handleCancel = () => {
-    setEditFormData({ ...userData });
+    setEditFormData(userData);
+    setEmergencyContact({
+      name: userData.emergencyContact?.name || '',
+      relationship: userData.emergencyContact?.relationship || '',
+      phone: userData.emergencyContact?.phone || ''
+    });
     setIsEditing(false);
   };
 
-  const handlePasswordInputChange = (e) => {
-    const { name, value } = e.target;
-    setPasswordData((previousData) => ({
-      ...previousData,
-      [name]: value,
-    }));
+  const handlePasswordInputChange = (event) => {
+    const { name, value } = event.target;
+    setPasswordData((previous) => ({ ...previous, [name]: value }));
   };
 
-  const handleChangePassword = async (e) => {
-    e.preventDefault();
+  const handleChangePassword = async (event) => {
+    event.preventDefault();
     setPasswordMessage('');
     setPasswordError(false);
 
-    if (
-      !passwordData.currentPassword ||
-      !passwordData.newPassword ||
-      !passwordData.confirmPassword
-    ) {
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
       setPasswordError(true);
       setPasswordMessage('Please fill in all password fields.');
       return;
@@ -441,29 +461,19 @@ const EmpProfilePage = () => {
       return;
     }
 
+    if (passwordData.newPassword.length < 8) {
+      setPasswordError(true);
+      setPasswordMessage('New password must contain at least 8 characters.');
+      return;
+    }
+
     if (passwordData.currentPassword === passwordData.newPassword) {
       setPasswordError(true);
       setPasswordMessage('Your new password must be different from your current password.');
       return;
     }
 
-    let storedUser = {};
-
-    try {
-      storedUser = JSON.parse(localStorage.getItem('userData') || '{}');
-    } catch (error) {
-      console.error('Unable to read saved user data:', error);
-    }
-
-    const token =
-      localStorage.getItem('employeeAuthToken') ||
-      localStorage.getItem('authToken') ||
-      localStorage.getItem('token') ||
-      storedUser.token ||
-      storedUser.authToken ||
-      localStorage.getItem('hams_token');
-
-    if (!token) {
+    if (!getToken()) {
       setPasswordError(true);
       setPasswordMessage('Your session token was not found. Please log in again.');
       return;
@@ -472,20 +482,16 @@ const EmpProfilePage = () => {
     setPasswordLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/users/change-password', {
+      const response = await fetch(`${API_URL}/users/change-password`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        headers: getHeaders(),
         body: JSON.stringify({
           currentPassword: passwordData.currentPassword,
-          newPassword: passwordData.newPassword,
-        }),
+          newPassword: passwordData.newPassword
+        })
       });
 
-      const result = await response.json();
-
+      const result = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(result.message || 'Unable to change password.');
       }
@@ -494,7 +500,7 @@ const EmpProfilePage = () => {
       setPasswordData({
         currentPassword: '',
         newPassword: '',
-        confirmPassword: '',
+        confirmPassword: ''
       });
     } catch (error) {
       setPasswordError(true);
@@ -504,20 +510,23 @@ const EmpProfilePage = () => {
     }
   };
 
+  const displayValue = (value) => value || 'Not provided';
+
+  if (profileLoading) {
+    return (
+      <div className="mt-8 min-h-screen bg-gray-50 py-8">
+        <p className="mb-4 text-center text-sm text-gray-600" role="status">
+          Loading your profile...
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-8 min-h-screen bg-gray-50 py-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {profileLoading && (
-          <p className="mb-4 text-sm text-gray-600" role="status">
-            Loading your profile...
-          </p>
-        )}
-
         {profileMessage && (
-          <p
-            className={`mb-4 text-sm ${profileError ? 'text-red-600' : 'text-green-600'}`}
-            role="status"
-          >
+          <p className={`mb-4 text-sm ${profileError ? 'text-red-600' : 'text-green-600'}`} role="status">
             {profileMessage}
           </p>
         )}
@@ -535,10 +544,19 @@ const EmpProfilePage = () => {
               <div className="relative">
                 <img
                   className="h-32 w-32 rounded-full border-4 border-white bg-gray-100 object-cover shadow-lg"
-                  src={editFormData.profilePhoto || profilePhoto || undefined}
+                  src={editFormData.profilePhoto || profilePhoto || 'https://ui-avatars.com/api/?name=Employee&background=e5e7eb&color=374151'}
                   alt="Profile"
                 />
-                <div className="absolute bottom-2 right-2 h-6 w-6 rounded-full border-2 border-white bg-green-500"></div>
+                <div
+                  className={`absolute bottom-2 right-2 h-6 w-6 rounded-full border-[3px] border-white ${
+                    isOnline
+                      ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.7)] animate-status-online'
+                      : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)] animate-status-offline'
+                  }`}
+                  title={isOnline ? 'Online' : 'Offline'}
+                  role="status"
+                  aria-label={isOnline ? 'Employee is online' : 'Employee is offline'}
+                ></div>
                 {isEditing && (
                   <label className="absolute bottom-0 left-0 right-0 cursor-pointer bg-black bg-opacity-70 py-1 text-center text-xs text-white">
                     Change Photo
@@ -597,14 +615,12 @@ const EmpProfilePage = () => {
                     </button>
                   </>
                 ) : (
-                  <>
-                    <button
-                      className="rounded-md bg-yellow-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                      onClick={() => setIsEditing(true)}
-                    >
-                      Edit Profile
-                    </button>
-                  </>
+                  <button
+                    className="rounded-md bg-yellow-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    Edit Profile
+                  </button>
                 )}
               </div>
             </div>
@@ -619,55 +635,27 @@ const EmpProfilePage = () => {
             <div className="mb-6 rounded-lg bg-white p-6 shadow-md">
               <h2 className="mb-4 text-lg font-semibold text-gray-900">Personal Information</h2>
               <div className="space-y-4">
-                <div>
-                  <p className="text-sm text-gray-500">Email</p>
-                  {isEditing ? (
-                    <input
-                      type="email"
-                      name="email"
-                      value={editFormData.email}
-                      onChange={handleInputChange}
-                      className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{userData.email}</p>
-                  )}
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Phone</p>
-                  {isEditing ? (
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={editFormData.phone}
-                      onChange={handleInputChange}
-                      className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{userData.phone}</p>
-                  )}
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Location</p>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="location"
-                      value={editFormData.location}
-                      onChange={handleInputChange}
-                      className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{userData.location}</p>
-                  )}
-                </div>
+                {[
+                  ['email', 'Email', 'email'],
+                  ['phone', 'Phone', 'tel'],
+                  ['location', 'Location', 'text']
+                ].map(([name, label, type]) => (
+                  <div key={name}>
+                    <p className="text-sm text-gray-500">{label}</p>
+                    {isEditing ? (
+                      <input type={type} name={name} value={editFormData[name] || ''} onChange={handleInputChange} className={INPUT_CLASS} />
+                    ) : (
+                      <p className="text-gray-900">{displayValue(userData[name])}</p>
+                    )}
+                  </div>
+                ))}
                 <div>
                   <p className="text-sm text-gray-500">Hire Date</p>
-                  <p className="text-gray-900">{userData.hireDate}</p>
+                  <p className="text-gray-900">{displayValue(userData.hireDate)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Manager</p>
-                  <p className="text-gray-900">{userData.manager}</p>
+                  <p className="text-gray-900">{displayValue(userData.manager)}</p>
                 </div>
               </div>
             </div>
@@ -676,62 +664,50 @@ const EmpProfilePage = () => {
             <div className="rounded-lg bg-white p-6 shadow-md">
               <h2 className="mb-4 text-lg font-semibold text-gray-900">Skills & Expertise</h2>
               <div className="space-y-5">
-                {(isEditing ? editFormData.skills : userData.skills).map((skill, index) => (
-                  <div key={skill.id || index}>
-                    <div className="mb-2 flex items-center justify-between gap-3">
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          value={skill.name || ''}
-                          onChange={(e) => handleSkillNameChange(index, e.target.value)}
-                          placeholder="Skill name"
-                          aria-label={`Skill ${index + 1} name`}
-                          className="min-w-0 flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                        />
-                      ) : (
-                        <span className="text-sm font-medium text-gray-900">{skill.name}</span>
-                      )}
-                      <span className="text-sm font-medium text-gray-900">
-                        {Number(skill.level) || 0}%
-                      </span>
+                {(isEditing ? editFormData.skills : userData.skills).map((skill, index) => {
+                  const level = Math.max(0, Math.min(100, Number(skill.level) || 0));
+                  return (
+                    <div key={skill.id || index}>
+                      <div className="mb-2 flex items-center justify-between gap-3">
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={skill.name || ''}
+                            onChange={(event) => handleSkillNameChange(index, event.target.value)}
+                            placeholder="Skill name"
+                            aria-label={`Skill ${index + 1} name`}
+                            className="min-w-0 flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                          />
+                        ) : (
+                          <span className="text-sm font-medium text-gray-900">{skill.name}</span>
+                        )}
+                        <span className="text-sm font-medium text-gray-900">{level}%</span>
+                        {isEditing && (
+                          <button type="button" onClick={() => handleRemoveSkill(index)} className="text-sm text-red-600 hover:text-red-800">
+                            Remove
+                          </button>
+                        )}
+                      </div>
                       {isEditing && (
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveSkill(index)}
-                          className="text-sm text-red-600 hover:text-red-800"
-                        >
-                          Remove
-                        </button>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={level}
+                          onChange={(event) => handleSkillChange(index, event.target.value)}
+                          aria-label={`${skill.name || `Skill ${index + 1}`} proficiency`}
+                          className="w-full cursor-pointer accent-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                          style={{ background: `linear-gradient(to right, #eab308 0%, #eab308 ${level}%, #e5e7eb ${level}%, #e5e7eb 100%)` }}
+                        />
                       )}
+                      <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-200">
+                        <div className="h-2.5 rounded-full bg-yellow-500 transition-all duration-300" style={{ width: `${level}%` }}></div>
+                      </div>
                     </div>
-                    {isEditing && (
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={Number(skill.level) || 0}
-                        onChange={(e) => handleSkillChange(index, e.target.value)}
-                        aria-label={`${skill.name || `Skill ${index + 1}`} proficiency`}
-                        className="w-full cursor-pointer accent-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                        style={{ background: `linear-gradient(to right, #eab308 0%, #eab308 ${Math.min(100, Math.max(0, Number(skill.level) || 0))}%, #e5e7eb ${Math.min(100, Math.max(0, Number(skill.level) || 0))}%, #e5e7eb 100%)` }}
-                      />
-                    )}
-                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-200">
-                      <div
-                        className="h-2.5 rounded-full bg-yellow-500 transition-all duration-300"
-                        style={{
-                          width: `${Math.min(100, Math.max(0, Number(skill.level) || 0))}%`,
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {isEditing && (
-                  <button
-                    type="button"
-                    onClick={handleAddSkill}
-                    className="rounded-md bg-yellow-100 px-3 py-2 text-sm font-medium text-yellow-800 transition-colors hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                  >
+                  <button type="button" onClick={handleAddSkill} className="rounded-md bg-yellow-100 px-3 py-2 text-sm font-medium text-yellow-800 transition-colors hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-500">
                     + Add Skill
                   </button>
                 )}
@@ -770,140 +746,76 @@ const EmpProfilePage = () => {
                   <div>
                     <h2 className="mb-4 text-lg font-semibold text-gray-900">About</h2>
                     {isEditing ? (
-                      <textarea
-                        name="bio"
-                        value={editFormData.bio}
-                        onChange={handleInputChange}
-                        className="h-32 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                      />
+                      <textarea name="bio" value={editFormData.bio} onChange={handleInputChange} className="h-32 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500" />
                     ) : (
-                      <p className="text-gray-700">{userData.bio}</p>
+                      <p className="text-gray-700">{displayValue(userData.bio)}</p>
                     )}
-                    <h2 className="mb-4 mt-6 text-lg font-semibold text-gray-900">
-                      Emergency Contact
-                    </h2>
+                    <h2 className="mb-4 mt-6 text-lg font-semibold text-gray-900">Emergency Contact</h2>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div>
-                        <p className="text-sm text-gray-500">Name</p>
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            name="name"
-                            value={emergencyContact.name}
-                            onChange={handleEmergencyContactChange}
-                            className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                          />
-                        ) : (
-                          <p className="text-gray-900">{emergencyContact.name}</p>
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Relationship</p>
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            name="relationship"
-                            value={emergencyContact.relationship}
-                            onChange={handleEmergencyContactChange}
-                            className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                          />
-                        ) : (
-                          <p className="text-gray-900">{emergencyContact.relationship}</p>
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Phone</p>
-                        {isEditing ? (
-                          <input
-                            type="tel"
-                            name="phone"
-                            value={emergencyContact.phone}
-                            onChange={handleEmergencyContactChange}
-                            className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                          />
-                        ) : (
-                          <p className="text-gray-900">{emergencyContact.phone}</p>
-                        )}
-                      </div>
+                      {[
+                        ['name', 'Name', 'text'],
+                        ['relationship', 'Relationship', 'text'],
+                        ['phone', 'Phone', 'tel']
+                      ].map(([name, label, type]) => (
+                        <div key={name}>
+                          <p className="text-sm text-gray-500">{label}</p>
+                          {isEditing ? (
+                            <input type={type} name={name} value={emergencyContact[name] || ''} onChange={handleEmergencyContactChange} className={INPUT_CLASS} />
+                          ) : (
+                            <p className="text-gray-900">{displayValue(emergencyContact[name])}</p>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
 
                 {activeTab === 'experience' && (
                   <div className="space-y-6">
-                    {(isEditing ? editFormData.experience : userData.experience).map(
-                      (exp, index) => (
-                        <div key={exp.id || index} className="border-l-4 border-yellow-500 py-1 pl-4">
-                          {isEditing ? (
-                            <div className="space-y-3">
-                              <input
-                                type="text"
-                                value={exp.title || ''}
-                                onChange={(e) =>
-                                  handleExperienceChange(index, 'title', e.target.value)
-                                }
-                                placeholder="Job title"
-                                aria-label="Job title"
-                                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                              />
-                              <input
-                                type="text"
-                                value={exp.company || ''}
-                                onChange={(e) =>
-                                  handleExperienceChange(index, 'company', e.target.value)
-                                }
-                                placeholder="Company"
-                                aria-label="Company"
-                                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                              />
-                              <input
-                                type="text"
-                                value={exp.period || ''}
-                                onChange={(e) =>
-                                  handleExperienceChange(index, 'period', e.target.value)
-                                }
-                                placeholder="Period (e.g. 2022 - Present)"
-                                aria-label="Employment period"
-                                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                              />
-                              <textarea
-                                value={exp.description || ''}
-                                onChange={(e) =>
-                                  handleExperienceChange(index, 'description', e.target.value)
-                                }
-                                placeholder="Describe your responsibilities and achievements"
-                                aria-label="Experience description"
-                                className="min-h-24 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveExperience(index)}
-                                className="text-sm text-red-600 hover:text-red-800"
-                              >
-                                Remove experience
-                              </button>
-                            </div>
-                          ) : (
-                            <>
-                              <h3 className="text-lg font-semibold text-gray-900">{exp.title}</h3>
-                              <p className="text-gray-600">
-                                {exp.company} • {exp.period}
-                              </p>
-                              <p className="mt-2 text-gray-700">{exp.description}</p>
-                            </>
-                          )}
-                        </div>
-                      )
-                    )}
                     {isEditing && (
-                      <button
-                        type="button"
-                        onClick={handleAddExperience}
-                        className="rounded-md bg-yellow-100 px-3 py-2 text-sm font-medium text-yellow-800 transition-colors hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                      >
+                      <button type="button" onClick={handleAddExperience} className="rounded-md bg-yellow-100 px-3 py-2 text-sm font-medium text-yellow-800 transition-colors hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-500">
                         + Add Experience
                       </button>
                     )}
+                    {(isEditing ? editFormData.experience : userData.experience).map((exp, index) => (
+                      <div key={exp.id || index} className="border-l-4 border-yellow-500 py-1 pl-4">
+                        {isEditing ? (
+                          <div className="space-y-3">
+                            {[
+                              ['title', 'Job title'],
+                              ['company', 'Company'],
+                              ['period', 'Period (e.g. 2022 - Present)']
+                            ].map(([field, placeholder]) => (
+                              <input
+                                key={field}
+                                type="text"
+                                value={exp[field] || ''}
+                                onChange={(event) => handleExperienceChange(index, field, event.target.value)}
+                                placeholder={placeholder}
+                                aria-label={placeholder}
+                                className={INPUT_CLASS}
+                              />
+                            ))}
+                            <textarea
+                              value={exp.description || ''}
+                              onChange={(event) => handleExperienceChange(index, 'description', event.target.value)}
+                              placeholder="Describe your responsibilities and achievements"
+                              aria-label="Experience description"
+                              className="min-h-24 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                            />
+                            <button type="button" onClick={() => handleRemoveExperience(index)} className="text-sm text-red-600 hover:text-red-800">
+                              Remove experience
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <h3 className="text-lg font-semibold text-gray-900">{exp.title}</h3>
+                            <p className="text-gray-600">{exp.company}{exp.period ? ` • ${exp.period}` : ''}</p>
+                            <p className="mt-2 whitespace-pre-wrap text-gray-700">{exp.description}</p>
+                          </>
+                        )}
+                      </div>
+                    ))}
                     {!isEditing && userData.experience.length === 0 && (
                       <p className="text-sm text-gray-500">No experience added yet.</p>
                     )}
@@ -912,65 +824,42 @@ const EmpProfilePage = () => {
 
                 {activeTab === 'education' && (
                   <div className="space-y-6">
+                    {isEditing && (
+                      <button type="button" onClick={handleAddEducation} className="rounded-md bg-yellow-100 px-3 py-2 text-sm font-medium text-yellow-800 transition-colors hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                        + Add Education
+                      </button>
+                    )}
                     {(isEditing ? editFormData.education : userData.education).map((edu, index) => (
                       <div key={edu.id || index} className="border-l-4 border-yellow-500 py-1 pl-4">
                         {isEditing ? (
                           <div className="space-y-3">
-                            <input
-                              type="text"
-                              value={edu.degree || ''}
-                              onChange={(e) =>
-                                handleEducationChange(index, 'degree', e.target.value)
-                              }
-                              placeholder="Degree / qualification"
-                              aria-label="Degree or qualification"
-                              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                            />
-                            <input
-                              type="text"
-                              value={edu.institution || ''}
-                              onChange={(e) =>
-                                handleEducationChange(index, 'institution', e.target.value)
-                              }
-                              placeholder="Institution / university"
-                              aria-label="Institution or university"
-                              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                            />
-                            <input
-                              type="text"
-                              value={edu.year || ''}
-                              onChange={(e) => handleEducationChange(index, 'year', e.target.value)}
-                              placeholder="Year"
-                              aria-label="Graduation year"
-                              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveEducation(index)}
-                              className="text-sm text-red-600 hover:text-red-800"
-                            >
+                            {[
+                              ['degree', 'Degree / qualification'],
+                              ['institution', 'Institution / university'],
+                              ['year', 'Graduation year']
+                            ].map(([field, placeholder]) => (
+                              <input
+                                key={field}
+                                type="text"
+                                value={edu[field] || ''}
+                                onChange={(event) => handleEducationChange(index, field, event.target.value)}
+                                placeholder={placeholder}
+                                aria-label={placeholder}
+                                className={INPUT_CLASS}
+                              />
+                            ))}
+                            <button type="button" onClick={() => handleRemoveEducation(index)} className="text-sm text-red-600 hover:text-red-800">
                               Remove education
                             </button>
                           </div>
                         ) : (
                           <>
                             <h3 className="text-lg font-semibold text-gray-900">{edu.degree}</h3>
-                            <p className="text-gray-600">
-                              {edu.institution} • {edu.year}
-                            </p>
+                            <p className="text-gray-600">{edu.institution}{edu.year ? ` • ${edu.year}` : ''}</p>
                           </>
                         )}
                       </div>
                     ))}
-                    {isEditing && (
-                      <button
-                        type="button"
-                        onClick={handleAddEducation}
-                        className="rounded-md bg-yellow-100 px-3 py-2 text-sm font-medium text-yellow-800 transition-colors hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                      >
-                        + Add Education
-                      </button>
-                    )}
                     {!isEditing && userData.education.length === 0 && (
                       <p className="text-sm text-gray-500">No education added yet.</p>
                     )}
@@ -998,70 +887,31 @@ const EmpProfilePage = () => {
 
               {showPasswordForm && (
                 <form onSubmit={handleChangePassword} className="mt-4 space-y-4">
-                  <div>
-                    <label
-                      htmlFor="currentPassword"
-                      className="mb-1 block text-sm font-medium text-gray-700"
-                    >
-                      Current Password
-                    </label>
-                    <input
-                      id="currentPassword"
-                      name="currentPassword"
-                      type="password"
-                      autoComplete="current-password"
-                      value={passwordData.currentPassword}
-                      onChange={handlePasswordInputChange}
-                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="newPassword"
-                      className="mb-1 block text-sm font-medium text-gray-700"
-                    >
-                      New Password
-                    </label>
-                    <input
-                      id="newPassword"
-                      name="newPassword"
-                      type="password"
-                      autoComplete="new-password"
-                      minLength={8}
-                      value={passwordData.newPassword}
-                      onChange={handlePasswordInputChange}
-                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="confirmPassword"
-                      className="mb-1 block text-sm font-medium text-gray-700"
-                    >
-                      Confirm New Password
-                    </label>
-                    <input
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type="password"
-                      autoComplete="new-password"
-                      minLength={8}
-                      value={passwordData.confirmPassword}
-                      onChange={handlePasswordInputChange}
-                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                      required
-                    />
-                  </div>
+                  {[
+                    ['currentPassword', 'Current Password', 'current-password'],
+                    ['newPassword', 'New Password', 'new-password'],
+                    ['confirmPassword', 'Confirm New Password', 'new-password']
+                  ].map(([name, label, autoComplete]) => (
+                    <div key={name}>
+                      <label htmlFor={name} className="mb-1 block text-sm font-medium text-gray-700">
+                        {label}
+                      </label>
+                      <input
+                        id={name}
+                        name={name}
+                        type="password"
+                        autoComplete={autoComplete}
+                        minLength={name === 'currentPassword' ? undefined : 8}
+                        value={passwordData[name]}
+                        onChange={handlePasswordInputChange}
+                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                        required
+                      />
+                    </div>
+                  ))}
 
                   {passwordMessage && (
-                    <p
-                      className={`text-sm ${passwordError ? 'text-red-600' : 'text-green-600'}`}
-                      role="status"
-                    >
+                    <p className={`text-sm ${passwordError ? 'text-red-600' : 'text-green-600'}`} role="status">
                       {passwordMessage}
                     </p>
                   )}
@@ -1076,7 +926,6 @@ const EmpProfilePage = () => {
                 </form>
               )}
             </div>
-
           </div>
         </div>
       </div>
