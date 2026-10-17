@@ -70,7 +70,7 @@ const Navbar = ({ onProfileSettings, onLogout, profilePhoto, setActiveTab }) => 
           type="button"
           aria-label="Open HR profile menu"
           aria-expanded={dropdownOpen}
-          className="rounded-full p-1 transition hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+          className="rounded-full p-1 transition hover:bg-gray-100 focus:outline-none"
           onClick={() => setDropdownOpen((open) => !open)}
         >
           <img
