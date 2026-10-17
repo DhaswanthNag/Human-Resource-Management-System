@@ -7,6 +7,7 @@ import Joiningformalities from "./Joiningformalities";
 import Leavemanagement from "./Leavemanagement";
 import EmpProfilePage from "./Profile";
 import EmployeeEmailNotifications from "./Emailnotifications";
+import Attendance from "./Attendance";
 import {
   Upload,
   ClipboardList,
@@ -22,11 +23,16 @@ import Workreports from "./Workreports";
 import logo from "../../assets/logo.png";
 
 // ✅ Navbar copied from AdminDashboard with title adjusted
-const Navbar = ({ onProfileSettings, onLogout, profilePhoto }) => {
+const Navbar = ({
+  onProfileSettings,
+  onAttendance,
+  onLogout,
+  profilePhoto,
+}) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
-    <nav className="sticky bg-gradient-to-r from-white via-gray-400 to-gray-100 flex items-center justify-between h-20 px-8 fixed top-0 left-0 right-0 z-30 select-none">
+    <nav className="fixed top-0 left-0 right-0 z-50 flex h-20 items-center justify-between bg-gradient-to-r from-white via-gray-200 to-gray-100 px-8 select-none shadow-sm">
       {/* Left logo */}
       <div className="flex items-center">
         <img
@@ -46,10 +52,12 @@ const Navbar = ({ onProfileSettings, onLogout, profilePhoto }) => {
       {/* Right profile dropdown */}
       <div className="relative">
         <button
+          type="button"
           className="flex items-center focus:outline-none"
           onClick={() => setDropdownOpen(!dropdownOpen)}
         >
           <img
+            key={profilePhoto || "default-employee-avatar"}
             src={profilePhoto || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='50' fill='%23e5e7eb'/%3E%3Ccircle cx='50' cy='37' r='18' fill='%239ca3af'/%3E%3Cpath d='M15 92c2-22 16-33 35-33s33 11 35 33' fill='%239ca3af'/%3E%3C/svg%3E"}
             alt="Profile"
             className="h-10 w-10 rounded-full object-cover border-2 border-black shadow-md"
@@ -58,6 +66,7 @@ const Navbar = ({ onProfileSettings, onLogout, profilePhoto }) => {
         {dropdownOpen && (
           <div className="absolute right-0 mt-2 w-44 bg-white rounded shadow-lg border py-2">
             <button
+              type="button"
               className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
               onClick={() => {
                 setDropdownOpen(false);
@@ -67,15 +76,17 @@ const Navbar = ({ onProfileSettings, onLogout, profilePhoto }) => {
               Profile Settings
             </button>
             <button
+              type="button"
               className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
               onClick={() => {
                 setDropdownOpen(false);
-                onLogout();
+                onAttendance();
               }}
             >
               Attendance
             </button>
             <button
+              type="button"
               className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
               onClick={() => {
                 setDropdownOpen(false);
@@ -109,22 +120,14 @@ const EmployeeDashboard = () => {
 
   // Load the profile photo belonging to the logged-in employee.
   const loadProfilePhoto = useCallback(() => {
-    const photo =
+    return (
       localStorage.getItem("employeeProfilePhoto") ||
       localStorage.getItem("profilePhoto") ||
-      "";
-
-    return photo;
+      ""
+    );
   }, []);
 
-  const [profilePhoto, setProfilePhoto] = useState(() => {
-    const photo =
-      localStorage.getItem("employeeProfilePhoto") ||
-      localStorage.getItem("profilePhoto") ||
-      "";
-
-    return photo;
-  });
+  const [profilePhoto, setProfilePhoto] = useState("");
 
   // Load the saved profile photo from the database after login.
   useEffect(() => {
@@ -132,11 +135,19 @@ const EmployeeDashboard = () => {
 
     const fetchProfilePhoto = async () => {
       try {
+        const storedUser = JSON.parse(localStorage.getItem("userData") || "{}");
         const token =
           localStorage.getItem("employeeAuthToken") ||
-          localStorage.getItem("authToken");
+          localStorage.getItem("authToken") ||
+          localStorage.getItem("token") ||
+          storedUser.token ||
+          storedUser.authToken ||
+          "";
 
         if (!token) {
+          if (isMounted) {
+            setProfilePhoto("");
+          }
           return;
         }
 
@@ -164,12 +175,16 @@ const EmployeeDashboard = () => {
           profile.photo ||
           "";
 
-        if (isMounted && photo) {
-          setProfilePhoto(photo);
+        if (!isMounted) return;
+
+        setProfilePhoto(photo);
+
+        if (photo) {
           localStorage.setItem("employeeProfilePhoto", photo);
           localStorage.setItem("profilePhoto", photo);
-        } else if (isMounted && !photo) {
-          setProfilePhoto(loadProfilePhoto());
+        } else {
+          localStorage.removeItem("employeeProfilePhoto");
+          localStorage.removeItem("profilePhoto");
         }
       } catch (error) {
         console.error("Error loading employee profile photo:", error);
@@ -188,20 +203,25 @@ const EmployeeDashboard = () => {
   }, [loadProfilePhoto]);
 
   useEffect(() => {
-    setProfilePhoto(loadProfilePhoto());
-  }, [activeTab, loadProfilePhoto]);
-
-  useEffect(() => {
     const handleProfilePhotoUpdate = (event) => {
-      if (event.key === "employeeProfilePhoto" || event.key === "profilePhoto") {
+      if (
+        event.key === "employeeProfilePhoto" ||
+        event.key === "profilePhoto"
+      ) {
         setProfilePhoto(loadProfilePhoto());
       }
     };
 
+    const handleProfileUpdated = () => {
+      setProfilePhoto(loadProfilePhoto());
+    };
+
     window.addEventListener("storage", handleProfilePhotoUpdate);
+    window.addEventListener("employeeProfileUpdated", handleProfileUpdated);
 
     return () => {
       window.removeEventListener("storage", handleProfilePhotoUpdate);
+      window.removeEventListener("employeeProfileUpdated", handleProfileUpdated);
     };
   }, [loadProfilePhoto]);
 
@@ -225,14 +245,20 @@ const EmployeeDashboard = () => {
 
   const handleProfileSettings = () => setActiveTab("Profile");
 
+  const handleAttendance = () => setActiveTab("Attendance");
+
   // ✅ Modified handleLogout to navigate to the login page and prevent going back
   const handleLogout = () => {
     // Clear any authentication tokens or user data
     localStorage.removeItem("authToken");
+    localStorage.removeItem("token");
     localStorage.removeItem("userData");
     localStorage.removeItem("employeeAuthToken");
+    localStorage.removeItem("hrAuthToken");
     localStorage.removeItem("employeeProfilePhoto");
     localStorage.removeItem("profilePhoto");
+
+    setProfilePhoto("");
 
     // Replace the current entry in history stack to prevent going back
     navigate("/login", { replace: true });
@@ -271,6 +297,12 @@ const EmployeeDashboard = () => {
               label="Apply for Leave"
               desc="Submit or track leave requests."
               onClick={() => setActiveTab("Leave Management")}
+            />
+            <DashboardCard
+              icon={CalendarDays}
+              label="Attendance"
+              desc="Check in, check out, and view your attendance history."
+              onClick={() => setActiveTab("Attendance")}
             />
             <DashboardCard
               icon={FileText}
@@ -320,6 +352,9 @@ const EmployeeDashboard = () => {
       case "Leave Management":
         return <Leavemanagement />;
 
+      case "Attendance":
+        return <Attendance />;
+
       case "Notifications":
         return <EmployeeEmailNotifications />;
 
@@ -340,6 +375,7 @@ const EmployeeDashboard = () => {
     <div className="min-h-screen bg-gray-50 text-gray-900 relative">
       <Navbar
         onProfileSettings={handleProfileSettings}
+        onAttendance={handleAttendance}
         onLogout={handleLogout}
         profilePhoto={profilePhoto}
       />
@@ -355,12 +391,11 @@ const EmployeeDashboard = () => {
 
       {/* Main content */}
       <main
-        className={`flex-1 overflow-auto transition-all duration-200 ${
+        className={`min-h-screen min-w-0 flex-1 overflow-auto pt-28 px-8 transition-all duration-200 ${
           isSidebarOpen ? "ml-64" : "ml-20"
-        } mt-0`}
-        style={{ paddingLeft: isSidebarOpen ? "2rem" : "1rem" }} // ✅ Match Admin layout
+        }`}
       >
-        <div className="mt-6">{renderContent()}</div>
+        <div className="mt-2 min-w-0">{renderContent()}</div>
 
         <footer className="text-xs text-gray-500 p-4 text-right">
           © {new Date().getFullYear()} HRMS Employee Dashboard UI

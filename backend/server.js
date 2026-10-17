@@ -1,4 +1,4 @@
-// src/server.js
+ // src/server.js
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -16,10 +16,10 @@ import interviewRoutes from "./routes/interviewRoutes.js";
 import candidateRoutes from "./routes/candidateRoutes.js";
 import workReports from "./routes/workReportRoutes.js";
 import roleRoutes from "./routes/roleRoutes.js";
-import profilRoutes from "./routes/profileRoutes.js"
-import user from './routes/userRoutes.js';
+import profilRoutes from "./routes/profileRoutes.js";
+import user from "./routes/userRoutes.js";
 import holidayRoutes from "./routes/holidayRoutes.js";
-
+import attendanceRoutes from "./routes/attendanceRoutes.js";
 
 dotenv.config();
 
@@ -32,11 +32,8 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-
-app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
-
 
 app.use("/api/auth", authRoutes);
 app.use("/api/leaves", leaveRoutes);
@@ -45,16 +42,15 @@ app.use("/api/offer-letters", offerletterRoutes);
 app.use("/api/meetings", meetingRoutes);
 app.use("/api/employees", employees);
 app.use("/api/payslips", payslipRoutes);
-app.use('/api/interviews', interviewRoutes);
-app.use('/api/documents',documents);
-app.use('/api/candidates',candidateRoutes);
-app.use("/api/work-reports",workReports);
-app.use('/api/leaves', leaveRoutes);
+app.use("/api/interviews", interviewRoutes);
+app.use("/api/documents", documents);
+app.use("/api/candidates", candidateRoutes);
+app.use("/api/work-reports", workReports);
 app.use("/api/holidays", holidayRoutes);
-app.use("/api/roles",roleRoutes);
-app.use("/api/profiles",profilRoutes);
-app.use('/api/users', user);
-
+app.use("/api/roles", roleRoutes);
+app.use("/api/profiles", profilRoutes);
+app.use("/api/users", user);
+app.use("/api/attendance", attendanceRoutes);
 
 // 🔹 Health Check
 app.get("/", (req, res) => {

@@ -1,4 +1,5 @@
-import React, {useRef } from "react";
+
+import React, { useRef } from "react";
 import {
   LayoutDashboard,
   Upload,
@@ -13,18 +14,27 @@ import {
 
 const SidebarItem = ({ icon: Icon, label, active, onClick, isSidebarOpen, className = "" }) => (
   <div
+    role="button"
+    tabIndex={0}
+    aria-current={active ? "page" : undefined}
     onClick={onClick}
-    className={`flex items-center gap-2 px-4 py-2 rounded-md cursor-pointer transition-colors text-lg hover:scale-105
-      ${
-        active
-          ? "bg-gray-700 text-white"
-          : "text-black hover:bg-gray-200 hover:text-black"
+    onKeyDown={(event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        onClick();
       }
-      ${!isSidebarOpen && "overflow-hidden"}
-    `}
+    }}
+    className={`group relative flex min-h-11 items-center rounded-xl py-3 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
+      isSidebarOpen ? "gap-3 px-3" : "justify-center px-2"
+    } ${
+      active
+        ? "bg-yellow-400 font-semibold text-gray-950 shadow-sm"
+        : "text-gray-600 hover:bg-gray-100 hover:text-gray-950"
+    }`}
+    title={!isSidebarOpen ? label : undefined}
   >
-    <Icon size={18} className={className} />
-    {isSidebarOpen && <span className={`text-lg ${className}`}>{label}</span>}
+    <Icon size={19} className={`shrink-0 ${className}`} />
+    {isSidebarOpen && <span className={`truncate text-sm ${className}`}>{label}</span>}
   </div>
 );
 
@@ -48,26 +58,33 @@ const EmployeeSidebar = ({ isSidebarOpen, setIsSidebarOpen, activeTab, setActive
   //   };
   // }, [isSidebarOpen, setIsSidebarOpen]);
 
-
   return (
     <aside
       ref={sidebarRef} // Attach the ref to the sidebar
-      className={`${
-        isSidebarOpen ? "w-66" : "w-19"
-      } transition-all duration-300 bg-gray-100 border-gray-100 shadow-sm fixed left-0 top-20 h-full z-50`}
+      className={`fixed left-0 top-20 z-40 flex h-[calc(100vh-5rem)] flex-col overflow-hidden border-r border-gray-200 bg-white shadow-lg transition-all duration-300 ease-in-out ${
+        isSidebarOpen ? "w-64" : "w-20"
+      }`}
     >
       {/* Sidebar header */}
-      <div className="flex items-center p-4">
+      <div className={`flex shrink-0 items-center border-b border-gray-100 px-4 py-4 ${isSidebarOpen ? "justify-between" : "justify-center"}`}>
+        {isSidebarOpen && (
+          <span className="text-xs font-bold uppercase tracking-[0.18em] text-gray-400">
+            Employee
+          </span>
+        )}
         <button
+          type="button"
           onClick={() => setIsSidebarOpen((s) => !s)}
-          className="p-2 rounded-lg text-gray-800 hover:bg-gray-200"
+          className="rounded-xl p-2.5 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-950 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          aria-expanded={isSidebarOpen}
         >
-          <PanelLeft size={22} />
+          <PanelLeft size={21} />
         </button>
       </div>
 
       {/* Sidebar navigation */}
-      <nav className="px-2 pb-2 pt-0 space-y-1 text-sm bg-gray-100 h-full">
+      <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto overflow-x-hidden px-3 py-4 pb-8 text-sm" aria-label="Employee navigation">
         <SidebarItem
           icon={LayoutDashboard}
           label="Dashboard"

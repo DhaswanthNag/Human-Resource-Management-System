@@ -8,6 +8,7 @@ import { Users, Plus, Clock, CreditCard } from "lucide-react";
 import Rolemanagement from "./Rolemanagement";
 import AdminProfilePage from "./Profile";
 import EmailNotifications from "./Emailnotifications";
+import Attendance from "./Attendance";
 import {
   ResponsiveContainer,
   PieChart,
@@ -33,11 +34,11 @@ import axios from "axios";
 
 const API_URL = process.env.REACT_APP_API_BASE || "http://localhost:5000/api";
 
-const Navbar = ({ onProfileSettings, onLogout, profilePhoto }) => {
+const Navbar = ({ onProfileSettings, onAttendance, onLogout, profilePhoto }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
-    <nav className="sticky bg-gradient-to-r from-white via-gray-400 to-gray-100 flex items-center justify-between h-20 px-8 fixed top-0 left-0 right-0 z-30 select-none">
+    <nav className="fixed top-0 left-0 right-0 z-50 flex h-20 items-center justify-between bg-gradient-to-r from-white via-gray-200 to-gray-100 px-8 select-none shadow-sm">
       {/* Left logo */}
       <div className="flex items-center">
         <img
@@ -69,7 +70,7 @@ const Navbar = ({ onProfileSettings, onLogout, profilePhoto }) => {
         {dropdownOpen && (
           <div className="absolute right-0 mt-2 w-44 bg-white rounded shadow-lg border py-2">
             <button
-              className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+              className="w-full text-left px-4 py-2 text-gray-700 hover:bg-yellow-50 hover:text-yellow-700"
               onClick={() => {
                 setDropdownOpen(false);
                 onProfileSettings();
@@ -78,16 +79,16 @@ const Navbar = ({ onProfileSettings, onLogout, profilePhoto }) => {
               Profile Settings
             </button>
             <button
-              className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+              className="w-full text-left px-4 py-2 text-gray-700 hover:bg-yellow-50 hover:text-yellow-700"
               onClick={() => {
                 setDropdownOpen(false);
-                onLogout();
+                onAttendance();
               }}
             >
               Attendance
             </button>
             <button
-              className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+              className="w-full text-left px-4 py-2 text-gray-700 hover:bg-yellow-50 hover:text-yellow-700"
               onClick={() => {
                 setDropdownOpen(false);
                 onLogout();
@@ -148,6 +149,10 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState("Dashboard");
   const navigate = useNavigate(); // ✅ Initialize useNavigate
+
+  const handleAttendance = () => {
+    setActiveTab("Attendance");
+  };
 
   const [adminProfileData, setAdminProfileData] = useState({
     profilePhoto: "",
@@ -532,6 +537,10 @@ export default function AdminDashboard() {
         return <Calendarandmeeting meetings={meetings} setMeetings={setMeetings} />;
       case "Profile":
         return <AdminProfilePage />;
+
+      case "Attendance":
+        return <Attendance />;
+
       case "Email Notifications":
         return <EmailNotifications />;
       case "Interview Panel":
@@ -565,6 +574,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-50 text-gray-900 relative">
       <Navbar
         onProfileSettings={handleProfileSettings}
+        onAttendance={handleAttendance}
         onLogout={handleLogout}
         profilePhoto={profilePhoto}
       />
@@ -576,12 +586,11 @@ export default function AdminDashboard() {
       />
       {/* Main */}
       <main
-        className={`flex-1 p-0 transition-all duration-300 ${
+        className={`min-h-screen min-w-0 flex-1 pt-24 px-6 transition-all duration-300 ${
           sidebarOpen ? "ml-64" : "ml-20"
-        } mt-0`}
-        style={{ paddingLeft: sidebarOpen ? "2rem" : "1rem" }} // 2rem gap when sidebar open, 1rem when closed
+        }`}
       >
-        <div className="mt-6">{renderContent()}</div>
+        <div className="mt-2">{renderContent()}</div>
 
         <footer className="text-xs text-gray-500 p-4 text-right">
           © {new Date().getFullYear()} HRMS Admin Dashboard UI

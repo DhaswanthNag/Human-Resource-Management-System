@@ -6,8 +6,6 @@ import upload from "../middlewares/upload.js";
 const router = express.Router();
 
 
-
-
 router.post("/", employeeController.createEmployee);
 router.get("/", employeeController.getEmployees);
 router.get("/with-docs", employeeController.getEmployeesWithDocuments);

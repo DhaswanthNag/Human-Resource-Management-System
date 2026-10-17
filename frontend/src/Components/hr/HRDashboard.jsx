@@ -1,10 +1,9 @@
-
- // src/Components/hr/HRDashboard.jsx
+// src/Components/hr/HRDashboard.jsx
 import React, {useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ Import useNavigate for redirection
+import { useNavigate } from "react-router-dom"; 
 import HrSidebar from "../sidebar/HrSidebar";
 import Calendarandmeeting from "./Calendarandmeeting";
-import Offerletter from "./Offerletter"; // ✅ Import your OfferLetter component
+import Offerletter from "./Offerletter"; 
 import Payslip from "./Payslip";
 import Joiningformalities from "./Joiningformalities";
 import CandidateManagement from "./CandidateManagement"
@@ -13,6 +12,7 @@ import Leavemanagement from "./Leavemanagement"
 import HRProfilePage from "./Profile";
 import HREmailNotifications from "./EmailNotifications";
 import HRTaskManagement from "./Taskmanagement";
+import Attendance from "./Attendance";
 import {
   Users,
   Clock,
@@ -34,14 +34,14 @@ import {
 } from "recharts";
 import Interviewpanel from "./Interviewpanel";
 import logo from "../../assets/logo.png";
-import axios from "axios"; // ✅ Added for fetching shortlisted/rejected candidates
+import axios from "axios"; 
 
-// ✅ Added Navbar (same as AdminDashboard)
-const Navbar = ({ onProfileSettings, onLogout, profilePhoto }) => {
+// Navbar 
+const Navbar = ({ onProfileSettings, onLogout, profilePhoto, setActiveTab }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
-    <nav className="sticky bg-gradient-to-r from-white via-gray-400 to-gray-100 flex items-center justify-between h-20 px-8 fixed top-0 left-0 right-0 z-30 select-none">
+    <nav className="fixed top-0 left-0 right-0 z-50 flex h-20 items-center justify-between bg-gradient-to-r from-white via-gray-200 to-gray-100 px-8 select-none shadow-sm">
       {/* Left logo */}
       <div className="flex items-center">
         <img
@@ -85,7 +85,7 @@ const Navbar = ({ onProfileSettings, onLogout, profilePhoto }) => {
               className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
               onClick={() => {
                 setDropdownOpen(false);
-                onLogout();
+                setActiveTab("Attendance");
               }}
             >
               Attendance
@@ -465,6 +465,8 @@ export default function AdminDashboard() {
         return <Workreports />;
       case "Email Notifications":
         return <HREmailNotifications/>;
+      case "Attendance":
+        return <Attendance />;
       default:
         return (
           <div className="p-4">
@@ -482,6 +484,7 @@ export default function AdminDashboard() {
         onProfileSettings={handleProfileSettings}
         onLogout={handleLogout}
         profilePhoto={profilePhoto}
+        setActiveTab={setActiveTab}
       />
 
       {/* Sidebar with badge counts */}
@@ -498,13 +501,12 @@ export default function AdminDashboard() {
 
       {/* Main */}
       <main
-        className={`flex-1 p-2 md:p-0 transition-all duration-300 ${
+        className={`min-h-screen min-w-0 flex-1 pt-24 px-6 transition-all duration-300 ${
           sidebarOpen ? "ml-64" : "ml-20"
-        } mt-0`}
-        style={{ paddingLeft: sidebarOpen ? "2rem" : "1rem" }}
+        }`}
       >
         {/* Dynamic Content */}
-        <div className="mt-6">{renderContent()}</div>
+        <div className="mt-2">{renderContent()}</div>
 
         <footer className="text-xs text-gray-500 p-4 text-right">
           © {new Date().getFullYear()} HRMS Hr Dashboard UI
