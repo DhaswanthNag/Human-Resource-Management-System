@@ -79,7 +79,7 @@ export default function HrSidebar({ sidebarOpen, setSidebarOpen, activeTab, setA
         <button
           type="button"
           onClick={() => setSidebarOpen((s) => !s)}
-          className="rounded-xl p-2.5 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-950 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          className="rounded-xl p-2.5 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-950"
           aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           aria-expanded={sidebarOpen}
         >

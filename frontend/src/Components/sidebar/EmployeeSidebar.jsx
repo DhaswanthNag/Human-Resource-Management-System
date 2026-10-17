@@ -75,7 +75,7 @@ const EmployeeSidebar = ({ isSidebarOpen, setIsSidebarOpen, activeTab, setActive
         <button
           type="button"
           onClick={() => setIsSidebarOpen((s) => !s)}
-          className="rounded-xl p-2.5 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-950 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          className="rounded-xl p-2.5 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-950"
           aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           aria-expanded={isSidebarOpen}
         >
