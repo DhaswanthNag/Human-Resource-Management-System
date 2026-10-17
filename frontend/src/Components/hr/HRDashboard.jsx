@@ -36,44 +36,55 @@ import Interviewpanel from "./Interviewpanel";
 import logo from "../../assets/logo.png";
 import axios from "axios"; 
 
-// Navbar 
+// Navbar Component
 const Navbar = ({ onProfileSettings, onLogout, profilePhoto, setActiveTab }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 flex h-20 items-center justify-between bg-gradient-to-r from-white via-gray-200 to-gray-100 px-8 select-none shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 flex min-h-20 w-full items-center justify-between gap-2 border-b border-gray-200 bg-white px-3 py-3 shadow-sm select-none sm:px-5 md:px-8">
       {/* Left logo */}
-      <div className="flex items-center">
+      <div className="flex shrink-0 items-center">
         <img
           src={logo}
           alt="Logo"
-          className="h-12 w-auto ml-2 shrink-0 transform scale-[1.5] origin-left"
+          className="ml-1 h-10 w-auto shrink-0 origin-left transform scale-[1.5] sm:ml-2 sm:h-12"
         />
       </div>
 
-      {/* Centered text */}
-      <div className="flex-1 text-center">
-        <span className="font-extrabold text-3xl text-gray-700 tracking-wide drop-shadow-lg select-text">
-          HRMS HR
-        </span>
+      {/* Centered professional title */}
+      <div className="flex min-w-0 flex-1 flex-col items-center justify-center px-1 text-center">
+        <h1 className="max-w-full text-sm font-bold leading-tight tracking-wider text-gray-800 sm:text-lg sm:tracking-[0.14em] md:text-xl">
+          HRMS <span className="font-medium text-gray-500">|</span>{" "}
+          <span className="whitespace-nowrap">HR OPERATIONS</span>
+        </h1>
+        <div className="mt-1.5 flex items-center gap-1.5 sm:mt-2">
+          <span className="h-0.5 w-4 rounded-full bg-gray-300 sm:w-8" />
+          <span className="h-1 w-5 rounded-full bg-yellow-500 sm:w-8" />
+          <span className="h-0.5 w-4 rounded-full bg-gray-300 sm:w-8" />
+        </div>
       </div>
 
       {/* Right profile dropdown */}
-      <div className="relative">
+      <div className="relative z-10 flex shrink-0 items-center">
         <button
-          className="flex items-center focus:outline-none"
-          onClick={() => setDropdownOpen(!dropdownOpen)}
+          type="button"
+          aria-label="Open HR profile menu"
+          aria-expanded={dropdownOpen}
+          className="rounded-full p-1 transition hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+          onClick={() => setDropdownOpen((open) => !open)}
         >
           <img
             src={profilePhoto}
             alt="Profile"
-            className="h-10 w-10 rounded-full object-cover border-2 border-black shadow-md"
+            className="h-9 w-9 rounded-full border-2 border-gray-700 object-cover shadow-sm sm:h-10 sm:w-10"
           />
         </button>
+
         {dropdownOpen && (
-          <div className="absolute right-0 mt-2 w-44 bg-white rounded shadow-lg border py-2">
+          <div className="absolute right-0 top-full mt-3 w-48 overflow-hidden rounded-xl border border-gray-200 bg-white py-2 shadow-xl">
             <button
-              className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+              type="button"
+              className="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition hover:bg-yellow-50 hover:text-gray-900"
               onClick={() => {
                 setDropdownOpen(false);
                 onProfileSettings();
@@ -82,7 +93,8 @@ const Navbar = ({ onProfileSettings, onLogout, profilePhoto, setActiveTab }) => 
               Profile Settings
             </button>
             <button
-              className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+              type="button"
+              className="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition hover:bg-yellow-50 hover:text-gray-900"
               onClick={() => {
                 setDropdownOpen(false);
                 setActiveTab("Attendance");
@@ -90,8 +102,10 @@ const Navbar = ({ onProfileSettings, onLogout, profilePhoto, setActiveTab }) => 
             >
               Attendance
             </button>
+            <div className="my-1 border-t border-gray-100" />
             <button
-              className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+              type="button"
+              className="w-full px-4 py-2.5 text-left text-sm font-medium text-red-600 transition hover:bg-red-50"
               onClick={() => {
                 setDropdownOpen(false);
                 onLogout();
