@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, UserCheck, LayoutDashboard, UserPlus, Star, Users, CheckCircle, Clock, Award, X } from 'lucide-react';
 import axios from 'axios';
@@ -64,6 +63,97 @@ const CandidateDropdown = ({ value, onChange, required = true }) => {
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
       {!loading && !error && employees.length === 0 && (
         <p className="mt-1 text-sm text-slate-500">No employees found.</p>
+      )}
+    </div>
+  );
+};
+
+// Interviewer Dropdown Component
+const InterviewerDropdown = ({ value, onChange, required = true }) => {
+  const [interviewers, setInterviewers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchInterviewers = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+          setError('Please log in again to load interviewers.');
+          return;
+        }
+
+        const response = await axios.get(
+          'http://localhost:5000/api/users/interviewers',
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+
+        const data = Array.isArray(response.data)
+          ? response.data
+          : response.data.users || response.data.data || [];
+
+        const filteredInterviewers = data.filter((user) => {
+          const role = String(user.role || '').trim().toLowerCase();
+          return user.user_id && ['admin', 'hr'].includes(role);
+        });
+
+        setInterviewers(filteredInterviewers);
+      } catch (err) {
+        console.error(
+          'Error fetching HR/Admin interviewers:',
+          err.response?.data || err.message
+        );
+        setError(
+          err.response?.status === 401
+            ? 'Your session has expired. Please log in again.'
+            : err.response?.status === 403
+              ? 'Only Admin/HR accounts can load interviewers.'
+              : 'Unable to load HR/Admin accounts. Please check the backend API.'
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInterviewers();
+  }, []);
+
+  return (
+    <div>
+      <select
+        name="interviewer_name"
+        value={value}
+        onChange={onChange}
+        required={required}
+        disabled={loading || Boolean(error) || interviewers.length === 0}
+        className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 disabled:cursor-not-allowed disabled:bg-slate-100"
+      >
+        <option value="">
+          {loading
+            ? 'Loading interviewers...'
+            : error
+              ? 'Interviewers unavailable'
+              : interviewers.length === 0
+                ? 'No HR/Admin accounts found'
+                : 'Select HR/Admin interviewer'}
+        </option>
+        {interviewers.map((user) => (
+          <option key={user.user_id} value={user.name || user.user_id}>
+            {user.user_id} - {user.name || 'Name not available'} ({String(user.role).toUpperCase()})
+          </option>
+        ))}
+      </select>
+      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {!loading && !error && interviewers.length === 0 && (
+        <p className="mt-1 text-sm text-slate-500">No HR/Admin accounts found.</p>
       )}
     </div>
   );
@@ -269,14 +359,9 @@ const AssignForm = ({ onSuccess }) => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Interviewer Name</label>
-          <input
-            type="text"
-            name="interviewer_name"
-            placeholder="Enter interviewer name"
+          <InterviewerDropdown
             value={formData.interviewer_name}
             onChange={handleChange}
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            required
           />
         </div>
 
@@ -380,14 +465,14 @@ const FeedbackForm = ({ onSuccess }) => {
 
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Interviewer Name</label>
-          <input
-            type="text"
-            name="interviewer"
-            placeholder="Enter interviewer name"
+          <InterviewerDropdown
             value={formData.interviewer}
-            onChange={handleChange}
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            required
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                interviewer: e.target.value
+              })
+            }
           />
         </div>
 
