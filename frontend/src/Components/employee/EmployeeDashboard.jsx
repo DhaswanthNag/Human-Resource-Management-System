@@ -45,8 +45,8 @@ const Navbar = ({
       {/* Centered professional title */}
       <div className="flex min-w-0 flex-1 flex-col items-center justify-center px-1 text-center">
         <h1 className="max-w-full text-sm font-bold leading-tight tracking-wider text-gray-800 sm:text-lg sm:tracking-[0.14em] md:text-xl">
-          HRMS <span className="font-medium text-gray-500">|</span>{" "}
-          <span className="whitespace-nowrap">EMPLOYEE PORTAL</span>
+          EMPLOYEE <span className="font-medium text-gray-500">|</span>{" "}
+          <span className="whitespace-nowrap">WORKSPACE</span>
         </h1>
         <div className="mt-1.5 flex items-center gap-1.5 sm:mt-2">
           <span className="h-0.5 w-4 rounded-full bg-gray-300 sm:w-8" />

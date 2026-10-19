@@ -36,17 +36,24 @@ const createEmployee = async (req, res) => {
 };
 
 // ---------------------- Get Employees List ----------------------
+
 const getEmployees = async (req, res) => {
   try {
-    const employees = await pool.query(
-      `SELECT emp_id, created_at, COALESCE(decision, 'pending') AS decision
-       FROM employees
-       ORDER BY emp_id ASC`
+    const result = await pool.query(
+      `SELECT user_id, name
+       FROM public.users
+       WHERE LOWER(role) = 'employee'
+       ORDER BY user_id ASC`
     );
-    return res.json({ employees: employees.rows });
+
+    return res.json({
+      employees: result.rows
+    });
   } catch (err) {
     console.error("❌ Error fetching employees:", err);
-    return res.status(500).json({ error: "Failed to fetch employees" });
+    return res.status(500).json({
+      error: "Failed to fetch employees"
+    });
   }
 };
 

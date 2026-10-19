@@ -1,3 +1,4 @@
+
 const pool = require('../config/db');
 /* assigncontrollers*/
 const submitAssign = async (req, res) => {
@@ -5,7 +6,7 @@ const submitAssign = async (req, res) => {
     const { candidate_id, interviewer_name, round } = req.body;
 
     const result = await pool.query(
-      'INSERT INTO assign (candidate_id, interviewer_name, round) VALUES ($1, $2, $3) RETURNING *',
+      'INSERT INTO assign (candidate_name, interviewer_name, round) VALUES ($1, $2, $3) RETURNING *',
       [candidate_id, interviewer_name, round]
     );
 
@@ -41,7 +42,6 @@ const getAssignments = async (req, res) => {
   }
 };
 
-
 /* dashboardcontrollers*/
 
 const getDashboardStats = async (req, res) => {
@@ -49,13 +49,13 @@ const getDashboardStats = async (req, res) => {
     const totalResult = await pool.query('SELECT COUNT(*) FROM schedules');
     const completedResult = await pool.query("SELECT COUNT(*) FROM schedules WHERE status = 'completed'");
     const pendingResult = await pool.query("SELECT COUNT(*) FROM schedules WHERE status = 'pending'");
-    const shortlistedResult = await pool.query('SELECT COUNT(*) FROM shortlist');
+    const shortlistedResult = await pool.query("SELECT COUNT(*) FROM shortlist WHERE LOWER(status) = 'shortlisted'");
 
     res.json({
-      totalInterviews: parseInt(totalResult.rows[0].count),
-      completed: parseInt(completedResult.rows[0].count),
-      pending: parseInt(pendingResult.rows[0].count),
-      shortlisted: parseInt(shortlistedResult.rows[0].count)
+      totalInterviews: parseInt(totalResult.rows[0].count, 10),
+      completed: parseInt(completedResult.rows[0].count, 10),
+      pending: parseInt(pendingResult.rows[0].count, 10),
+      shortlisted: parseInt(shortlistedResult.rows[0].count, 10)
     });
   } catch (err) {
     console.error('Dashboard error:', err.message);
@@ -63,16 +63,15 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
-
 /*schedulecontrollers*/
 
 const addSchedule = async (req, res) => {
-  const { candidate_id, role, date, time ,status} = req.body;
+  const { candidate_id, role, date, time, status } = req.body;
 
   try {
     const result = await pool.query(
-      'INSERT INTO schedules(candidate_id, role, date, time, status) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [candidate_id, role, date, time, status ]
+      'INSERT INTO schedules (candidate_name, role, date, time, status) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [candidate_id, role, date, time, status]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -84,8 +83,6 @@ const addSchedule = async (req, res) => {
 // GET /api/schedules
 const getAllSchedules = async (req, res) => {
   try {
-
-
     const result = await pool.query('SELECT * FROM schedules ORDER BY date, time');
     res.json(result.rows);
   } catch (err) {
@@ -94,25 +91,24 @@ const getAllSchedules = async (req, res) => {
   }
 };
 
-module.exports = {
-  addSchedule,
-  getAllSchedules,
-};
 /* feedbackcontrollers*/
-
 
 // POST /api/feedbacks
 const submitFeedback = async (req, res) => {
   const { candidate_id, interviewer, feedback, rating } = req.body;
 
-  if (!candidate_id || !interviewer || !feedback || rating === undefined) {
+  if (!candidate_id || !interviewer || !feedback || rating === undefined || rating === null) {
     return res.status(400).json({ error: 'All fields including rating are required' });
   }
 
   try {
     // Save feedback to DB, adjust table and column names as per your schema
-    const query = `INSERT INTO feedbacks (candidate_id, interviewer, feedback, rating) VALUES ($1, $2, $3, $4) RETURNING *`;
-    const values = [candidate_id, interviewer, feedback, rating];
+    const query = `
+      INSERT INTO feedbacks (candidate_name, interviewer, feedback, rating)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *
+    `;
+    const values = [candidate_id, interviewer, feedback, Number(rating)];
 
     const result = await pool.query(query, values);
     res.status(201).json({ message: 'Feedback submitted successfully', feedback: result.rows[0] });
@@ -122,7 +118,6 @@ const submitFeedback = async (req, res) => {
   }
 };
 
-
 /*shortlistcontrollers*/
 
 const submitShortlist = async (req, res) => {
@@ -131,12 +126,19 @@ const submitShortlist = async (req, res) => {
 
     const { candidate_id, status } = req.body;
 
+    if (!candidate_id || !status) {
+      return res.status(400).json({ error: 'Candidate Id and status are required' });
+    }
+
     const result = await pool.query(
-      'INSERT INTO shortlist (candidate_id, status) VALUES ($1, $2) RETURNING *',
+      'INSERT INTO shortlist (candidate_name, status) VALUES ($1, $2) RETURNING *',
       [candidate_id, status]
     );
 
-    res.status(201).json(result.rows[0]);
+    res.status(201).json({
+      ...result.rows[0],
+      candidate_id: result.rows[0].candidate_name
+    });
   } catch (error) {
     console.error('Error submitting shortlist:', error.message);
     res.status(500).json({ error: 'Internal server error' });
@@ -146,7 +148,7 @@ const submitShortlist = async (req, res) => {
 const getShortlists = async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT *
+      SELECT *, candidate_name AS candidate_id
       FROM shortlist
     `);
 
@@ -156,7 +158,6 @@ const getShortlists = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
 
 module.exports = {
   submitAssign,

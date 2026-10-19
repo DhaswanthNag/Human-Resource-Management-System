@@ -1,69 +1,102 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Calendar,LayoutDashboard, Star, Users, CheckCircle, Clock, Award, X } from 'lucide-react';
+import {
+  Calendar,
+  LayoutDashboard,
+  Star,
+  Users,
+  CheckCircle,
+  Clock,
+  Award,
+  X,
+  ArrowUpRight,
+  UserRound,
+  MessageSquare,
+  CalendarDays,
+  RefreshCw
+} from 'lucide-react';
 import axios from 'axios';
+
 // Dashboard Component
 const Dashboard = ({ onShortlistedClick, stats }) => {
   const { total, completed, pending, shortlisted } = stats;
 
+  const cards = [
+    {
+      label: 'Total Interviews',
+      value: total,
+      icon: Users,
+      iconStyle: 'bg-gray-100 text-gray-700',
+      accent: 'bg-gray-800'
+    },
+    {
+      label: 'Completed',
+      value: completed,
+      icon: CheckCircle,
+      iconStyle: 'bg-yellow-100 text-yellow-700',
+      accent: 'bg-yellow-500'
+    },
+    {
+      label: 'Pending',
+      value: pending,
+      icon: Clock,
+      iconStyle: 'bg-gray-100 text-gray-600',
+      accent: 'bg-gray-400'
+    },
+    {
+      label: 'Shortlisted',
+      value: shortlisted,
+      icon: Award,
+      iconStyle: 'bg-yellow-100 text-yellow-700',
+      accent: 'bg-yellow-500',
+    }
+  ];
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center">
-        <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg mr-4">
-          <Users className="text-blue-600 dark:text-blue-400" size={24} />
-        </div>
-        <div>
-          <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Interviews</p>
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mt-1">{total}</h2>
-        </div>
-      </div>
-
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center">
-        <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg mr-4">
-          <CheckCircle className="text-green-600 dark:text-green-400" size={24} />
-        </div>
-        <div>
-          <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Completed</p>
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mt-1">{completed}</h2>
-        </div>
-      </div>
-
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center">
-        <div className="bg-amber-100 dark:bg-amber-900/30 p-3 rounded-lg mr-4">
-          <Clock className="text-amber-600 dark:text-amber-400" size={24} />
-        </div>
-        <div>
-          <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Pending</p>
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mt-1">{pending}</h2>
-        </div>
-      </div>
-
-      <div
-        className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center cursor-pointer hover:shadow-md transition-shadow"
-        onClick={onShortlistedClick}
-      >
-        <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-lg mr-4">
-          <Award className="text-purple-600 dark:text-purple-400" size={24} />
-        </div>
-        <div>
-          <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Shortlisted</p>
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mt-1">{shortlisted}</h2>
-        </div>
-      </div>
+    <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {cards.map(({ label, value, icon: Icon, iconStyle, accent, clickable }) => (
+        <button
+          key={label}
+          type="button"
+          onClick={clickable ? onShortlistedClick : undefined}
+          aria-label={clickable ? 'View shortlisted candidates' : label}
+          className={`group relative flex min-w-0 items-center gap-4 overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 text-left shadow-sm transition duration-200 hover:shadow-md ${
+            clickable
+              ? 'cursor-pointer hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-yellow-500'
+              : 'cursor-default'
+          }`}
+        >
+          <span className={`absolute inset-y-0 left-0 w-1 ${accent}`} />
+          <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${iconStyle}`}>
+            <Icon size={23} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-medium text-gray-500">{label}</span>
+            <span className="mt-1 block text-2xl font-bold tracking-tight text-gray-900">
+              {value}
+            </span>
+          </span>
+          {clickable && (
+            <ArrowUpRight
+              size={17}
+              className="shrink-0 text-gray-400 transition group-hover:text-yellow-600"
+            />
+          )}
+        </button>
+      ))}
     </div>
   );
 };
 
-
-
 // ScheduleForm Component
 const ScheduleForm = ({ onSuccess }) => {
   const [formData, setFormData] = useState({
-    candidate_id: "",
-    role: "",
-    date: "",
-    time: "",
-    status: "completed"
+    candidate_id: '',
+    role: '',
+    date: '',
+    time: '',
+    status: 'pending'
   });
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -74,107 +107,138 @@ const ScheduleForm = ({ onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
+
     try {
-      const response = await axios.post("http://localhost:5000/api/interviews/schedule", formData);
+      const response = await axios.post(
+        'http://localhost:5000/api/interviews/schedule',
+        formData
+      );
 
       if (response.status === 201) {
-        alert("Interview scheduled successfully!");
+        alert('Interview scheduled successfully!');
         setFormData({
-          candidate_id: "",
-          role: "",
-          date: "",
-          time: "",
-          status: "completed"
+          candidate_id: '',
+          role: '',
+          date: '',
+          time: '',
+          status: 'pending'
         });
         onSuccess?.();
       }
     } catch (error) {
-      console.error("Error scheduling interview:", error);
-      alert("Scheduling failed.");
+      console.error('Error scheduling interview:', error);
+      alert(error.response?.data?.error || 'Scheduling failed.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
+  const fieldClass =
+    'mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500';
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-      <div className="flex items-center mb-6">
-        <div className="bg-gray-200 dark:bg-blue-900/30 p-2 rounded-lg mr-3">
-          <Calendar className="text-gray-700 dark:text-blue-400" size={20} />
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-5 sm:px-7">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-yellow-100 text-yellow-700">
+          <Calendar size={21} />
         </div>
-        <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Schedule Interview</h2>
+        <div>
+          <h2 className="text-lg font-bold text-gray-900 sm:text-xl">
+            Schedule Interview
+          </h2>
+          <p className="mt-0.5 text-sm text-gray-500">
+            Add the candidate and interview details below.
+          </p>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Candidate Name</label>
-          <input
-            type="text"
-            name="candidate_id"
-            placeholder="Enter candidate name"
-            value={formData.candidate_id}
-            onChange={handleChange}
-            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
-          <input
-            type="text"
-            name="role"
-            placeholder="Enter role"
-            value={formData.role}
-            onChange={handleChange}
-            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
-            required
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="space-y-5 p-5 sm:p-7">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+            <label className="block text-sm font-semibold text-gray-700">
+              Candidate Name
+            </label>
+            <input
+              type="text"
+              name="candidate_id"
+              placeholder="Enter candidate name"
+              value={formData.candidate_id}
+              onChange={handleChange}
+              className={fieldClass}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700">
+              Role
+            </label>
+            <input
+              type="text"
+              name="role"
+              placeholder="Enter role"
+              value={formData.role}
+              onChange={handleChange}
+              className={fieldClass}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700">
+              Date
+            </label>
             <input
               type="date"
               name="date"
               value={formData.date}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
+              className={fieldClass}
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time</label>
+            <label className="block text-sm font-semibold text-gray-700">
+              Time
+            </label>
             <input
               type="time"
               name="time"
               value={formData.time}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
+              className={fieldClass}
               required
             />
           </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-semibold text-gray-700">
+              Status
+            </label>
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              className={fieldClass}
+            >
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-          <select
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
+        <div className="flex justify-end border-t border-gray-100 pt-5">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gray-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-200 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
           >
-            <option value="pending">Pending</option>
-            <option value="completed">Completed</option>
-          </select>
+            <CalendarDays size={17} />
+            {submitting ? 'Scheduling...' : 'Schedule Interview'}
+          </button>
         </div>
-
-        <button
-          type="submit"
-          className="w-full bg-gray-700 hover:bg-gray-900 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
-        >
-          Schedule Interview
-        </button>
       </form>
     </div>
   );
@@ -183,13 +247,14 @@ const ScheduleForm = ({ onSuccess }) => {
 // FeedbackForm Component
 const FeedbackForm = ({ onSuccess }) => {
   const [formData, setFormData] = useState({
-    candidate_id: "",
-    interviewer: "",
-    feedback: "",
+    candidate_id: '',
+    interviewer: '',
+    feedback: '',
     rating: 0
   });
 
   const [hoverRating, setHoverRating] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -207,103 +272,154 @@ const FeedbackForm = ({ onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!formData.rating) {
+      alert('Please select a rating.');
+      return;
+    }
+
+    setSubmitting(true);
+
     try {
-      const response = await axios.post("http://localhost:5000/api/interviews/feedback", formData);
+      const response = await axios.post(
+        'http://localhost:5000/api/interviews/feedback',
+        formData
+      );
 
       if (response.status === 201) {
-        alert("Feedback submitted successfully!");
+        alert('Feedback submitted successfully!');
         setFormData({
-          candidate_id: "",
-          interviewer: "",
-          feedback: "",
+          candidate_id: '',
+          interviewer: '',
+          feedback: '',
           rating: 0
         });
         setHoverRating(0);
         onSuccess?.();
       }
     } catch (error) {
-      console.error("Error submitting feedback:", error);
-      alert("Feedback submission failed.");
+      console.error('Error submitting feedback:', error);
+      alert(error.response?.data?.error || 'Feedback submission failed.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
+  const fieldClass =
+    'mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500';
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-      <div className="flex items-center mb-6">
-        <div className="bg-gray-200 dark:bg-blue-900/30 p-2 rounded-lg mr-3">
-          <Star className="text-gray-700 dark:text-blue-400" size={20} />
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-5 sm:px-7">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-yellow-100 text-yellow-700">
+          <Star size={21} />
         </div>
-        <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Submit Feedback</h2>
+        <div>
+          <h2 className="text-lg font-bold text-gray-900 sm:text-xl">
+            Submit Feedback
+          </h2>
+          <p className="mt-0.5 text-sm text-gray-500">
+            Record your assessment of the candidate.
+          </p>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Candidate Name</label>
-          <input
-            type="text"
-            name="candidate_id"
-            placeholder="Enter candidate name"
-            value={formData.candidate_id}
-            onChange={handleChange}
-            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
-            required
-          />
-        </div>
+      <form onSubmit={handleSubmit} className="space-y-5 p-5 sm:p-7">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700">
+              Candidate Name
+            </label>
+            <input
+              type="text"
+              name="candidate_id"
+              placeholder="Enter candidate name"
+              value={formData.candidate_id}
+              onChange={handleChange}
+              className={fieldClass}
+              required
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Interviewer Name</label>
-          <input
-            type="text"
-            name="interviewer"
-            placeholder="Enter interviewer name"
-            value={formData.interviewer}
-            onChange={handleChange}
-            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
-            required
-          />
-        </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700">
+              Interviewer Name
+            </label>
+            <input
+              type="text"
+              name="interviewer"
+              placeholder="Enter interviewer name"
+              value={formData.interviewer}
+              onChange={handleChange}
+              className={fieldClass}
+              required
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Feedback</label>
-          <textarea
-            name="feedback"
-            placeholder="Enter your feedback"
-            value={formData.feedback}
-            onChange={handleChange}
-            rows={4}
-            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500  transition duration-300 dark:bg-gray-700 dark:text-white"
-            required
-          />
-        </div>
+          <div className="md:col-span-2">
+            <label className="block text-sm font-semibold text-gray-700">
+              Feedback
+            </label>
+            <textarea
+              name="feedback"
+              placeholder="Enter your feedback"
+              value={formData.feedback}
+              onChange={handleChange}
+              rows={4}
+              className={`${fieldClass} resize-y`}
+              required
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rating</label>
-          <div className="flex space-x-1">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <svg
-                key={star}
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill={
-                  star <= (hoverRating || formData.rating) ? "gold" : "lightgray"
-                }
-                onMouseEnter={() => setHoverRating(star)}
-                onMouseLeave={() => setHoverRating(0)}
-                onClick={() => handleRatingClick(star)}
-                className="w-8 h-8 cursor-pointer"
-              >
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.97a1 1 0 00.95.69h4.173c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.286 3.97c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.539-1.118l1.285-3.97a1 1 0 00-.364-1.118L2.05 9.397c-.783-.57-.38-1.81.588-1.81h4.173a1 1 0 00.95-.69l1.286-3.97z" />
-              </svg>
-            ))}
+          <div className="md:col-span-2">
+            <label className="block text-sm font-semibold text-gray-700">
+              Rating
+            </label>
+            <div
+              className="mt-2 flex flex-wrap items-center gap-1"
+              role="group"
+              aria-label="Candidate rating"
+            >
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  aria-label={`${star} star${star > 1 ? 's' : ''}`}
+                  aria-pressed={formData.rating === star}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onMouseLeave={() => setHoverRating(0)}
+                  onFocus={() => setHoverRating(star)}
+                  onBlur={() => setHoverRating(0)}
+                  onClick={() => handleRatingClick(star)}
+                  className="rounded-md p-1 transition hover:scale-110 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                >
+                  <Star
+                    size={30}
+                    className={
+                      star <= (hoverRating || formData.rating)
+                        ? 'fill-yellow-400 text-yellow-500'
+                        : 'text-gray-300'
+                    }
+                  />
+                </button>
+              ))}
+              <span className="ml-2 text-sm font-medium text-gray-500">
+                {formData.rating ? `${formData.rating}/5` : 'Select rating'}
+              </span>
+            </div>
           </div>
         </div>
 
-        <button
-          type="submit"
-          className="w-full bg-gray-700 hover:bg-gray-900 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
-        >
-          Submit Feedback
-        </button>
+        <div className="flex justify-end border-t border-gray-100 pt-5">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gray-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-200 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+          >
+            <MessageSquare size={17} />
+            {submitting ? 'Submitting...' : 'Submit Feedback'}
+          </button>
+        </div>
       </form>
     </div>
   );
@@ -315,6 +431,7 @@ const HRInterviewPanel = () => {
   const [darkMode,] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [shortlistedCandidates, setShortlistedCandidates] = useState([]);
+  const [shortlistLoading, setShortlistLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -327,7 +444,10 @@ const HRInterviewPanel = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/interviews/dashboard");
+      const response = await axios.get(
+        'http://localhost:5000/api/interviews/dashboard'
+      );
+
       if (response.status === 200) {
         setStats({
           total: response.data.totalInterviews,
@@ -337,7 +457,7 @@ const HRInterviewPanel = () => {
         });
       }
     } catch (error) {
-      console.error("Error fetching dashboard stats:", error);
+      console.error('Error fetching dashboard stats:', error);
     }
   };
 
@@ -351,24 +471,39 @@ const HRInterviewPanel = () => {
         setMenuOpen(false);
       }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleShortlistedClick = async () => {
+    setShortlistLoading(true);
+    setIsModalOpen(true);
+
     try {
-      // API call would go here in a real implementation
-      // Mock data for demonstration
-      const mockData = [
-        // { name: "John Doe", role: "Frontend Developer" },
-        // { name: "Jane Smith", role: "UX Designer" },
-        // { name: "Michael Brown", role: "Backend Engineer" },
-        // { name: "Sarah Johnson", role: "Product Manager" }
-      ];
-      setShortlistedCandidates(mockData);
-      setIsModalOpen(true);
+      const response = await axios.get(
+        'http://localhost:5000/api/interviews/shortlist'
+      );
+
+      const rows = Array.isArray(response.data) ? response.data : [];
+
+      setShortlistedCandidates(
+        rows.map((candidate) => ({
+          ...candidate,
+          name:
+            candidate.candidate_name ||
+            candidate.name ||
+            candidate.candidate_id ||
+            'Unnamed candidate',
+          role: candidate.role || 'Role not specified',
+          status: candidate.status || 'Shortlisted'
+        }))
+      );
     } catch (error) {
-      console.error("Error fetching shortlisted candidates:", error);
+      console.error('Error fetching shortlisted candidates:', error);
+      alert(error.response?.data?.error || 'Could not load shortlisted candidates.');
+    } finally {
+      setShortlistLoading(false);
     }
   };
 
@@ -377,100 +512,184 @@ const HRInterviewPanel = () => {
   };
 
   const tabClass = (tabName) =>
-    `px-5 py-3 rounded-lg transition-all flex items-center font-medium ${
+    `inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-yellow-400 sm:px-5 ${
       activeTab === tabName
-        ? 'bg-gray-700 dark:bg-blue-900/40 text-white dark:text-blue-300'
-        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+        ? 'bg-gray-800 text-white shadow-sm'
+        : 'text-gray-600 hover:bg-yellow-50 hover:text-gray-900'
     }`;
 
   return (
     <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
-    <div className="p-0 sm:p-0 bg-gray-50 dark:from-gray-900 dark:via-gray-800 mt-6 dark:to-gray-700 min-h-screen text-gray-800 dark:text-gray-200 transition-colors duration-300">
-
+      <div className="mt-4 min-h-screen bg-gray-50 p-3 text-gray-800 transition-colors duration-300 sm:p-5 lg:p-6">
         {/* Header */}
-        {/* <header className="flex items-center justify-between py-5 bg-blue-900 mb-8">
-          <div className="relative" ref={menuRef}>
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-yellow-700">
+              Human Resources
+            </p>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+              Interview Dashboard
+            </h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Monitor interview progress and candidate outcomes.
+            </p>
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-100 dark:text-white">
-            Interview Panel Dashboard
-          </h1>
-        </header> */}
+
+          <button
+            type="button"
+            onClick={fetchStats}
+            className="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:border-yellow-400 hover:bg-yellow-50 sm:self-auto"
+          >
+            <RefreshCw size={16} /> Refresh stats
+          </button>
+        </div>
 
         {/* Tab Navigation */}
-        <nav className="bg-white dark:bg-gray-800 shadow-sm ml-4 mr-4 rounded-xl p-2 mb-8 border border-gray-100 dark:border-gray-700">
-          <div className="flex flex-wrap justify-center gap-x-8 sm:gap-x-16 lg:gap-x-32 gap-y-4 px-4">
-            <button onClick={() => setActiveTab('dashboard')} className={tabClass('dashboard')}>
-              <LayoutDashboard size={18} className="mr-2 inline" /> Dashboard
+        <nav className="mb-6 rounded-2xl border border-gray-200 bg-white p-2 shadow-sm">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={tabClass('dashboard')}
+            >
+              <LayoutDashboard size={18} /> Dashboard
             </button>
-            <button onClick={() => setActiveTab('schedule')} className={tabClass('schedule')}>
-              <Calendar size={18} className="mr-2 inline" /> Schedule
+
+            <button
+              onClick={() => setActiveTab('schedule')}
+              className={tabClass('schedule')}
+            >
+              <Calendar size={18} /> Schedule
             </button>
-            {/* <button onClick={() => setActiveTab('assign')} className={tabClass('assign')}>
-              <UserPlus size={18} className="mr-2 inline" /> Assign
-            </button> */}
-            <button onClick={() => setActiveTab('feedback')} className={tabClass('feedback')}>
-              <Star size={18} className="mr-2 inline" /> Feedback
+
+            <button
+              onClick={() => setActiveTab('feedback')}
+              className={tabClass('feedback')}
+            >
+              <Star size={18} /> Feedback
             </button>
-            {/* <button onClick={() => setActiveTab('shortlist')} className={tabClass('shortlist')}>
-              <UserCheck size={18} className="mr-2 inline" /> Shortlist
-            </button> */}
           </div>
         </nav>
 
         {/* Main Content */}
-        <main className="max-w-6xl mx-auto ml-6 mr-4">
+        <main className="mx-auto w-full max-w-7xl">
           {activeTab === 'dashboard' && (
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Interview Dashboard</h1>
-              <Dashboard stats={stats} onShortlistedClick={handleShortlistedClick} />
+              
+              <Dashboard
+                stats={stats}
+                onShortlistedClick={handleShortlistedClick}
+              />
+
+              <button
+                type="button"
+                onClick={handleShortlistedClick}
+                disabled={shortlistLoading}
+                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-yellow-400 hover:bg-yellow-50 disabled:opacity-60"
+              >
+                <Award size={18} className="text-yellow-600" />
+                {shortlistLoading
+                  ? 'Loading shortlisted candidates...'
+                  : 'View shortlisted candidates'}
+              </button>
             </div>
           )}
+
           {activeTab === 'schedule' && <ScheduleForm onSuccess={fetchStats} />}
-          {/* {activeTab === 'assign' && <AssignForm onSuccess={() => console.log("Success")} />} */}
           {activeTab === 'feedback' && <FeedbackForm onSuccess={fetchStats} />}
-          {/* {activeTab === 'shortlist' && <ShortlistForm />} */}
+
         </main>
 
         {/* Shortlisted Candidates Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-              <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Shortlisted Candidates</h2>
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 p-3 backdrop-blur-sm sm:p-5"
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) closeModal();
+            }}
+          >
+            <div className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-gray-200 bg-white shadow-2xl">
+              <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 sm:px-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-100 text-yellow-700">
+                    <Award size={20} />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900">
+                      Shortlisted Candidates
+                    </h2>
+                    <p className="text-sm text-gray-500">
+                      {shortlistedCandidates.length} candidate(s)
+                    </p>
+                  </div>
+                </div>
+
                 <button
+                  type="button"
                   onClick={closeModal}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                  aria-label="Close shortlisted candidates"
+                  className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 >
-                  <X size={24} />
+                  <X size={21} />
                 </button>
               </div>
 
-              <div className="p-6">
-                {shortlistedCandidates.length > 0 ? (
-                  <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+              <div className="p-5 sm:p-6">
+                {shortlistLoading ? (
+                  <div className="flex items-center justify-center gap-2 py-10 text-sm text-gray-500">
+                    <RefreshCw size={18} className="animate-spin" />
+                    Loading candidates...
+                  </div>
+                ) : shortlistedCandidates.length > 0 ? (
+                  <ul className="divide-y divide-gray-100">
                     {shortlistedCandidates.map((candidate, index) => (
-                      <li key={index} className="py-4 first:pt-0 last:pb-0">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">{candidate.name}</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">{candidate.role}</p>
+                      <li
+                        key={
+                          candidate.id ||
+                          candidate.candidate_id ||
+                          `${candidate.name}-${index}`
+                        }
+                        className="flex flex-col gap-3 py-4 first:pt-0 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-600">
+                            <UserRound size={19} />
                           </div>
-                          <span className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-medium px-3 py-1 rounded-full">
-                            Shortlisted
-                          </span>
+                          <div className="min-w-0">
+                            <p className="truncate font-semibold text-gray-900">
+                              {candidate.name}
+                            </p>
+                            <p className="mt-0.5 text-sm text-gray-500">
+                              {candidate.role}
+                            </p>
+                          </div>
                         </div>
+
+                        <span className="inline-flex w-fit items-center rounded-full border border-yellow-200 bg-yellow-50 px-3 py-1 text-xs font-semibold capitalize text-yellow-800">
+                          {candidate.status}
+                        </span>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-gray-500 dark:text-gray-400 text-center py-6">No shortlisted candidates found.</p>
+                  <div className="py-10 text-center">
+                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 text-gray-500">
+                      <Users size={23} />
+                    </div>
+                    <p className="font-semibold text-gray-800">
+                      No shortlisted candidates found
+                    </p>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Candidates will appear here when shortlist records are available.
+                    </p>
+                  </div>
                 )}
               </div>
 
-              <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+              <div className="flex justify-end border-t border-gray-100 bg-gray-50 px-5 py-4 sm:px-6">
                 <button
+                  type="button"
                   onClick={closeModal}
-                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                  className="rounded-xl bg-gray-800 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-200"
                 >
                   Close
                 </button>
@@ -484,3 +703,4 @@ const HRInterviewPanel = () => {
 };
 
 export default HRInterviewPanel;
+ 

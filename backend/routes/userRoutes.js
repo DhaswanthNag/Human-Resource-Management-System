@@ -148,6 +148,31 @@ router.get(
   }
 );
 
+// Fetch HR/Admin accounts for the interview assignment dropdown.
+router.get(
+  '/interviewers',
+  authenticateToken,
+  authorizeRoles("admin", "hr"),
+  async (req, res) => {
+    try {
+      const db = require('../config/db');
+      const result = await db.query(`
+        SELECT user_id, name, role
+        FROM public.users
+        WHERE LOWER(TRIM(role)) IN ('admin', 'hr')
+        ORDER BY user_id ASC
+      `);
+
+      return res.status(200).json({ users: result.rows });
+    } catch (error) {
+      console.error('Error fetching interviewers:', error);
+      return res.status(500).json({
+        error: 'Unable to fetch interviewers'
+      });
+    }
+  }
+);
+
 router.get('/:userId', authenticateToken, authorizeRoles("admin"), viewUser);
 router.put('/:userId', authenticateToken, authorizeRoles("admin"), updateUserDetails);
 router.delete('/:userId', authenticateToken, authorizeRoles("admin"), deleteUserAccount);
