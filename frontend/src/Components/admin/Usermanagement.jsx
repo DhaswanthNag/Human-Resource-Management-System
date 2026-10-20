@@ -1,12 +1,16 @@
-
 import React, { useCallback, useEffect, useState } from "react";
-
 import {
   PlusIcon,
   PencilSquareIcon,
   TrashIcon,
   MagnifyingGlassIcon,
-  ShareIcon,
+  EnvelopeIcon,
+  UsersIcon,
+  UserGroupIcon,
+  UserIcon,
+  XMarkIcon,
+  CheckIcon,
+  ClipboardDocumentIcon,
 } from "@heroicons/react/24/outline";
 
 const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000/api/users";
@@ -304,52 +308,82 @@ export default function UserManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="flex min-h-screen w-full min-w-0 flex-col overflow-x-hidden bg-gray-50 text-gray-800">
       {/* --- Header --- */}
-      <header className="px-6 py-5 mr-4 ml-4 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-lg">
-        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-700">User Management</h1>
+      <header className="mx-auto flex w-full max-w-7xl flex-col items-stretch justify-between gap-5 px-4 py-6 sm:px-6 md:flex-row md:items-center lg:px-8">
+        <div className="min-w-0">
+          <div className="mb-2 flex items-center gap-2">
+            <span className="h-1 w-8 rounded-full bg-yellow-400"></span>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500">
+              ADMINISTRATION
+            </span>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+            User Management
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
+            Manage employee accounts, roles, positions, and account instructions.
+          </p>
+        </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <div className="relative w-full sm:w-72">
-            <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
+        <div className="flex w-full flex-col gap-3 sm:flex-row md:w-auto md:items-center">
+          <div className="relative w-full sm:min-w-0 sm:flex-1 md:w-72 md:flex-none">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder="Search employees..."
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-gray-700 shadow-sm outline-none transition placeholder:text-gray-400 focus:border-yellow-400 focus:ring-4 focus:ring-yellow-100"
             />
           </div>
 
           <button
             onClick={openAddUserModal}
-            className="bg-gray-600 hover:bg-gray-800 text-white px-4 py-2.5 rounded-lg flex items-center justify-center shadow-md transition"
+            className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-yellow-400 px-5 py-3 text-sm font-bold text-gray-900 shadow-sm transition hover:bg-yellow-300 focus:outline-none focus:ring-4 focus:ring-yellow-200 sm:w-auto"
           >
-            <PlusIcon className="w-5 h-5 mr-2" /> Add Employee
+            <span className="flex h-6 w-6 items-center justify-center rounded-md">
+              <PlusIcon className="h-5 w-5 text-gray-900" />
+            </span>
+            Add Employee
           </button>
         </div>
       </header>
 
-      {/* --- Stats Cards --- */}
-      <div className="px-6 py-6 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-6">
-        <StatCard title="Total Employees" value={stats.employees} color="blue" />
-        <StatCard title="Total HR's" value={stats.hr} color="green" />
-        <StatCard title="Total Members" value={stats.total} color="yellow" />
+      <div className="mx-auto w-full max-w-7xl px-4 pb-6 sm:px-6 lg:px-8">
+        {/* --- Stats Cards --- */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <StatCard title="Total Employees" value={stats.employees} color="blue" />
+          <StatCard title="Total HR's" value={stats.hr} color="blue" />
+          <StatCard title="Total Members" value={stats.total} color="yellow" />
+        </div>
       </div>
 
       {/* --- Employee Table --- */}
-      <main className="flex-1 px-6 pb-10">
-        <div className="bg-white rounded-xl shadow-lg border overflow-hidden">
-          <div className="border-b px-6 py-4 flex justify-between items-center bg-gray-50">
-            <h2 className="text-lg font-medium text-gray-800">Employee Directory</h2>
-            <span className="text-sm text-gray-500">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-10 sm:px-6 lg:px-8">
+        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <div className="flex flex-col gap-2 border-b border-gray-200 bg-gray-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-50">
+                <UsersIcon className="h-5 w-5 text-gray-700" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-gray-900 sm:text-lg">
+                  Employee Directory
+                </h2>
+                <p className="mt-1 text-xs text-gray-500">
+                  View and manage registered accounts
+                </p>
+              </div>
+            </div>
+            <span className="inline-flex w-fit items-center rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-600">
               {filteredUsers.length} {filteredUsers.length === 1 ? "employee" : "employees"}
             </span>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-sm table-auto border-collapse">
-              <thead className="bg-gray-100 border-b">
+            <table className="w-full min-w-[760px] border-collapse text-left text-sm">
+              <thead className="border-b border-gray-200 bg-gray-100">
                 <tr>
                   <Th>ID</Th>
                   <Th>Employee</Th>
@@ -359,43 +393,78 @@ export default function UserManagement() {
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-100">
                 {filteredUsers.map((user, index) => {
                   const userId = user._id || user.id || user.user_id;
 
                   return (
-                    <tr key={userId || index} className="hover:bg-gray-50 transition">
-                      <td className="py-4 px-4 text-center">{userId || "N/A"}</td>
-
-                      <td className="py-4 px-4">
-                        <div className="font-medium text-gray-900">{user.name}</div>
-                        <div className="text-sm text-gray-500">{user.email}</div>
+                    <tr key={userId || index} className="transition hover:bg-yellow-50/40">
+                      <td className="max-w-36 break-all px-4 py-4 text-xs font-medium text-gray-500">
+                        {userId || "N/A"}
                       </td>
 
-                      <td className="py-4 px-4 text-center capitalize">{user.role}</td>
-                      <td className="py-4 px-4 text-center">{user.position}</td>
+                      <td className="px-4 py-4">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-50">
+                            <UserIcon className="h-5 w-5 text-gray-600" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="break-words font-semibold text-gray-900">
+                              {user.name}
+                            </div>
+                            <div className="mt-1 break-all text-xs text-gray-500">
+                              {user.email}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
 
-                      <td className="py-4 px-4">
-                        <div className="flex gap-3 justify-center">
+                      <td className="px-4 py-4">
+                        <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold capitalize ${
+                          user.role === "admin"
+                            ? "border-red-200 bg-red-50 text-red-500"
+                            : user.role === "hr"
+                            ? "border-orange-200 bg-orange-50 text-orange-500"
+                            : "border-blue-200 bg-blue-50 text-blue-500"
+                        }`}>
+                          {user.role}
+                        </span>
+                      </td>
+
+                      <td className="px-4 py-4 text-gray-600">
+                        {user.position || "—"}
+                      </td>
+
+                      <td className="px-4 py-4">
+                        <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => openEditUserModal(user)}
-                            className="text-yellow-500 hover:text-yellow-600 flex items-center gap-1"
+                            title="Edit employee"
+                            aria-label="Edit employee"
+                            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gray-50 px-3 py-2 text-xs font-semibold text-yellow-600 transition hover:bg-yellow-50"
                           >
-                            <PencilSquareIcon className="w-4 h-4" /> Edit
+                            <PencilSquareIcon className="h-4 w-4 text-yellow-500" />
+                            Edit
                           </button>
 
                           <button
                             onClick={() => shareCredentials(userId)}
-                            className="text-green-500 hover:text-green-700 flex items-center gap-1"
+                            title="Send account instructions"
+                            aria-label="Send account instructions"
+                            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gray-50 px-3 py-2 text-xs font-semibold text-green-700 transition hover:bg-green-50"
                           >
-                            <ShareIcon className="w-4 h-4" /> Send Email
+                            <EnvelopeIcon className="h-4 w-4 text-green-600" />
+                            Email
                           </button>
 
                           <button
                             onClick={() => deleteUser(userId)}
-                            className="text-red-600 hover:text-red-900 flex items-center gap-1"
+                            title="Delete employee"
+                            aria-label="Delete employee"
+                            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gray-50 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50"
                           >
-                            <TrashIcon className="w-4 h-4" /> Delete
+                            <TrashIcon className="h-4 w-4 text-red-500" />
+                            Delete
                           </button>
                         </div>
                       </td>
@@ -405,37 +474,65 @@ export default function UserManagement() {
 
                 {filteredUsers.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="py-6 text-center text-gray-500 text-sm">
-                      {users.length === 0
-                        ? "No employees added yet"
-                        : "No employees found matching your search"}
+                    <td colSpan={5} className="px-4 py-14 text-center">
+                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50">
+                        <MagnifyingGlassIcon className="h-7 w-7 text-gray-400" />
+                      </div>
+                      <p className="mt-4 font-semibold text-gray-800">
+                        {users.length === 0
+                          ? "No employees added yet"
+                          : "No employees found matching your search"}
+                      </p>
+                      <p className="mt-1 text-sm text-gray-500">
+                        {users.length === 0
+                          ? "Add an employee to get started."
+                          : "Try searching with a different name, email, or role."}
+                      </p>
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+
+          <div className="flex flex-col gap-2 border-t border-gray-100 bg-gray-50 px-4 py-3 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <span>Showing {filteredUsers.length} of {users.length} users</span>
+            <span>Manage accounts securely through the admin panel</span>
+          </div>
         </div>
       </main>
 
       {/* --- Modal --- */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-gray-950/60 p-3 backdrop-blur-sm sm:p-5">
           <form
             onSubmit={handleFormSubmit}
-            className="bg-white w-full max-w-md rounded-xl shadow-xl transition-transform transform scale-100"
+            className="my-auto w-full max-w-lg overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl"
           >
-            <div className="bg-gray-700 px-6 py-4 rounded-t-xl">
-              <h2 className="text-lg font-semibold text-white">
-                {editingUser ? "Edit Employee" : "Add New Employee"}
-              </h2>
+            <div className="flex items-center justify-between gap-4 bg-gray-800 px-5 py-5 sm:px-6">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-yellow-300">
+                  User Administration
+                </p>
+                <h2 className="mt-1 text-lg font-bold text-white sm:text-xl">
+                  {editingUser ? "Edit Employee" : "Add New Employee"}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setModalOpen(false)}
+                aria-label="Close modal"
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-50 text-gray-600 transition hover:bg-gray-100"
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="space-y-5 p-5 sm:p-6">
               <Input label="Full Name" name="name" value={form.name} onChange={handleFormChange} required />
               <Input label="Email" type="email" name="email" value={form.email} onChange={handleFormChange} required />
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Select
                   label="Role"
                   name="role"
@@ -448,19 +545,20 @@ export default function UserManagement() {
               </div>
             </div>
 
-            <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 rounded-b-xl">
+            <div className="flex flex-col-reverse gap-3 border-t border-gray-100 bg-gray-50 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100"
+                className="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-100"
               >
                 Cancel
               </button>
 
               <button
                 type="submit"
-                className="px-5 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-yellow-400 px-5 py-2.5 text-sm font-bold text-gray-900 transition hover:bg-yellow-300 focus:outline-none focus:ring-4 focus:ring-yellow-200"
               >
+                <PlusIcon className="h-4 w-4" />
                 {editingUser ? "Update Employee" : "Add Employee"}
               </button>
             </div>
@@ -470,14 +568,17 @@ export default function UserManagement() {
 
       {/* --- Newly Created User Credentials Modal --- */}
       {credentials && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-gray-950/70 p-3 backdrop-blur-sm sm:p-5">
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="credentials-modal-title"
-            className="w-full max-w-lg rounded-2xl bg-white shadow-2xl"
+            className="my-auto w-full max-w-lg overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl"
           >
-            <div className="rounded-t-2xl bg-gray-800 px-6 py-5 text-white">
+            <div className="bg-gray-800 px-5 py-5 text-white sm:px-6">
+              <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gray-50">
+                <CheckIcon className="h-6 w-6 text-green-600" />
+              </div>
               <h2 id="credentials-modal-title" className="text-xl font-bold">
                 User Created Successfully
               </h2>
@@ -486,8 +587,8 @@ export default function UserManagement() {
               </p>
             </div>
 
-            <div className="space-y-5 p-6">
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+            <div className="space-y-5 p-5 sm:p-6">
+              <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm leading-6 text-yellow-900">
                 Save these credentials now. The temporary password
                 will not be displayed again after you close this window.
               </div>
@@ -497,21 +598,22 @@ export default function UserManagement() {
                   User ID
                 </label>
 
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   <input
                     id="new-user-id"
                     type="text"
                     readOnly
                     value={credentials.userId}
                     onFocus={(e) => e.target.select()}
-                    className="min-w-0 flex-1 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm"
+                    className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100"
                   />
 
                   <button
                     type="button"
                     onClick={() => copyToClipboard(credentials.userId, "User ID")}
-                    className="rounded-lg bg-gray-700 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-50 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-100"
                   >
+                    <ClipboardDocumentIcon className="h-4 w-4 text-gray-600" />
                     Copy ID
                   </button>
                 </div>
@@ -522,14 +624,14 @@ export default function UserManagement() {
                   Temporary Password
                 </label>
 
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   <input
                     id="new-user-password"
                     type="text"
                     readOnly
                     value={credentials.temporaryPassword}
                     onFocus={(e) => e.target.select()}
-                    className="min-w-0 flex-1 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm"
+                    className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100"
                   />
 
                   <button
@@ -537,25 +639,27 @@ export default function UserManagement() {
                     onClick={() =>
                       copyToClipboard(credentials.temporaryPassword, "Password")
                     }
-                    className="rounded-lg bg-gray-700 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-50 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-100"
                   >
+                    <ClipboardDocumentIcon className="h-4 w-4 text-gray-600" />
                     Copy Password
                   </button>
                 </div>
               </div>
 
               {copyMessage && (
-                <p role="status" className="text-sm font-medium text-green-700">
+                <p role="status" className="rounded-lg bg-gray-50 p-3 text-sm font-medium text-green-700">
                   {copyMessage}
                 </p>
               )}
 
-              <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+              <div className="flex flex-col gap-3 border-t border-gray-100 pt-4 sm:flex-row">
                 <button
                   type="button"
                   onClick={copyAllCredentials}
-                  className="flex-1 rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700"
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-yellow-400 px-4 py-3 text-sm font-bold text-gray-900 transition hover:bg-yellow-300 focus:outline-none focus:ring-4 focus:ring-yellow-200"
                 >
+                  <ClipboardDocumentIcon className="h-5 w-5" />
                   Copy All Credentials
                 </button>
 
@@ -565,7 +669,7 @@ export default function UserManagement() {
                     setCredentials(null);
                     setCopyMessage("");
                   }}
-                  className="rounded-lg border border-gray-300 px-5 py-3 font-semibold text-gray-700 hover:bg-gray-100"
+                  className="rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-100"
                 >
                   Close
                 </button>
@@ -581,18 +685,28 @@ export default function UserManagement() {
 /* --- Reusable Components --- */
 function StatCard({ title, value, color = "blue" }) {
   const colorMap = {
-    blue: "bg-blue-100 text-blue-600",
-    green: "bg-green-100 text-green-600",
-    yellow: "bg-yellow-100 text-yellow-600",
+    blue: "text-gray-800",
+    green: "text-green-600",
+    yellow: "text-yellow-600",
   };
 
+  const Icon =
+    color === "blue"
+      ? UsersIcon
+      : color === "yellow"
+      ? UserGroupIcon
+      : UserIcon;
+
   return (
-    <div className="bg-white rounded-xl shadow-md p-5 border flex justify-between items-center">
-      <div>
+    <div className="group flex min-w-0 items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-yellow-300 hover:shadow-md sm:p-6">
+      <div className="min-w-0">
         <h3 className="text-sm font-medium text-gray-500">{title}</h3>
-        <p className="text-2xl font-semibold text-gray-900">{value}</p>
+        <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900">{value}</p>
+        <p className="mt-1 text-xs text-gray-500">Based on current search results</p>
       </div>
-      <div className={`${colorMap[color]} p-3 rounded-full font-bold text-lg`}>●</div>
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gray-50">
+        <Icon className={`h-6 w-6 ${colorMap[color]}`} />
+      </div>
     </div>
   );
 }
@@ -600,10 +714,11 @@ function StatCard({ title, value, color = "blue" }) {
 function Input({ label, ...props }) {
   return (
     <div>
-      <label className="block mb-1 text-sm font-medium text-gray-700">{label}</label>
+      <label htmlFor={props.id || props.name} className="mb-1.5 block text-sm font-semibold text-gray-700">{label}</label>
       <input
         {...props}
-        className="w-full px-4 py-2.5 rounded-md border focus:outline-none focus:ring-2 focus:ring-yellow-500 transition duration-300 text-sm"
+        id={props.id || props.name}
+        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-yellow-400 focus:ring-4 focus:ring-yellow-100"
       />
     </div>
   );
@@ -612,10 +727,11 @@ function Input({ label, ...props }) {
 function Select({ label, options = [], ...props }) {
   return (
     <div>
-      <label className="block mb-1 text-sm font-medium text-gray-700">{label}</label>
+      <label htmlFor={props.id || props.name} className="mb-1.5 block text-sm font-semibold text-gray-700">{label}</label>
       <select
         {...props}
-        className="w-full px-4 py-2.5 rounded-md border focus:ring-1 focus:ring-yellow-600 focus:border-yellow-500 text-sm"
+        id={props.id || props.name}
+        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-yellow-400 focus:ring-4 focus:ring-yellow-100"
       >
         {options.map((o) => (
           <option key={o} value={o}>
@@ -629,7 +745,7 @@ function Select({ label, options = [], ...props }) {
 
 function Th({ children }) {
   return (
-    <th className="py-3 px-4 text-xs font-medium uppercase tracking-wide text-gray-500 text-center">
+    <th className="whitespace-nowrap px-4 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-500">
       {children}
     </th>
   );
