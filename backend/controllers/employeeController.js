@@ -3,34 +3,24 @@ const pool = require("../config/db");
 // ---------------------- Create New Employee ----------------------
 const createEmployee = async (req, res) => {
   const { emp_id } = req.body;
-
   if (!emp_id) {
     return res.status(400).json({ error: "emp_id is required" });
   }
-
   try {
-    const existing = await pool.query(
-      `SELECT emp_id FROM employees WHERE emp_id = $1 LIMIT 1`,
-      [emp_id]
-    );
-
-    if (existing.rows.length > 0) {
-      return res.status(400).json({ error: "Employee already exists" });
-    }
-
     const result = await pool.query(
       `INSERT INTO employees (emp_id, created_at, decision)
        VALUES ($1, NOW(), 'pending')
+       ON CONFLICT (emp_id) DO UPDATE
+       SET emp_id = EXCLUDED.emp_id
        RETURNING emp_id, created_at, decision`,
       [emp_id]
     );
-
-    return res.status(201).json({
-      message: `✅ Employee ${emp_id} created`,
+    return res.status(200).json({
+      message: "Employee entry is ready",
       employee: result.rows[0],
     });
   } catch (err) {
-    console.error("❌ Error creating employee entry:", err);
+    console.error("Error creating employee entry:", err);
     return res.status(500).json({ error: "Failed to create employee entry" });
   }
 };
