@@ -227,17 +227,17 @@ const HRJoiningModalities = () => {
 
   return (
     // Changed padding to be responsive
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 md:p-8">
-      <header className="mb-8 mt-2">
+    <div className="min-h-screen w-full overflow-x-hidden bg-gray-50 p-4 sm:p-6 md:p-8">
+      <header className="mb-6 mt-2 sm:mb-8">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="mb-3 flex items-center gap-2">
-              <span className="h-1 w-9 rounded-full bg-yellow-400"></span>
+              <span className="h-1 w-9 shrink-0 rounded-full bg-yellow-400"></span>
               <span className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500">
                 EMPLOYEE DOCUMENT VERIFICATION
               </span>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+            <h1 className="break-words text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
               Document Verification Panel
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
@@ -245,9 +245,10 @@ const HRJoiningModalities = () => {
             </p>
           </div>
           <button
+            type="button"
             onClick={fetchEmployees}
             disabled={loading}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-yellow-300 hover:bg-yellow-50 disabled:opacity-50"
+            className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-yellow-300 hover:bg-yellow-50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
             <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
             Refresh
@@ -256,12 +257,13 @@ const HRJoiningModalities = () => {
       </header>
 
       {error && (
-        <div className="mb-5 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          <AlertCircle size={19} className="shrink-0" />
-          {error}
+        <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 sm:items-center">
+          <AlertCircle size={19} className="mt-0.5 shrink-0 sm:mt-0" />
+          <span className="min-w-0 flex-1 break-words">{error}</span>
           <button
+            type="button"
             onClick={fetchEmployees}
-            className="ml-auto font-semibold underline"
+            className="ml-auto shrink-0 font-semibold underline"
           >
             Retry
           </button>
@@ -269,15 +271,15 @@ const HRJoiningModalities = () => {
       )}
 
       {/* Overview cards */}
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div className="flex items-start justify-between">
-            <div>
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
               <p className="text-sm font-medium text-gray-500">Total Employees</p>
               <h2 className="mt-3 text-3xl font-bold text-gray-900">{totalEmployees}</h2>
               <p className="mt-1 text-xs text-gray-500">Employees in the panel</p>
             </div>
-            <div className="rounded-xl bg-gray-50 p-3 text-gray-700">
+            <div className="shrink-0 rounded-xl bg-gray-50 p-3 text-gray-700">
               <User size={21} />
             </div>
           </div>
@@ -286,14 +288,14 @@ const HRJoiningModalities = () => {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div className="flex items-start justify-between">
-            <div>
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
               <p className="text-sm font-medium text-gray-500">Fully Verified</p>
               <h2 className="mt-3 text-3xl font-bold text-gray-900">{verifiedEmployees}</h2>
               <p className="mt-1 text-xs text-gray-500">All documents approved</p>
             </div>
-            <div className="rounded-xl bg-gray-50 p-3 text-yellow-500">
+            <div className="shrink-0 rounded-xl bg-gray-50 p-3 text-yellow-500">
               <ShieldCheck size={21} />
             </div>
           </div>
@@ -307,14 +309,14 @@ const HRJoiningModalities = () => {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div className="flex items-start justify-between">
-            <div>
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
               <p className="text-sm font-medium text-gray-500">Awaiting Review</p>
               <h2 className="mt-3 text-3xl font-bold text-gray-900">{pendingDocuments}</h2>
               <p className="mt-1 text-xs text-gray-500">Documents pending a decision</p>
             </div>
-            <div className="rounded-xl bg-gray-50 p-3 text-gray-700">
+            <div className="shrink-0 rounded-xl bg-gray-50 p-3 text-gray-700">
               <Clock size={21} />
             </div>
           </div>
@@ -323,14 +325,14 @@ const HRJoiningModalities = () => {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div className="flex items-start justify-between">
-            <div>
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
               <p className="text-sm font-medium text-gray-500">Rejected Documents</p>
               <h2 className="mt-3 text-3xl font-bold text-gray-900">{rejectedDocuments}</h2>
               <p className="mt-1 text-xs text-gray-500">Require employee attention</p>
             </div>
-            <div className="rounded-xl bg-gray-50 p-3 text-red-500">
+            <div className="shrink-0 rounded-xl bg-gray-50 p-3 text-red-500">
               <XCircle size={21} />
             </div>
           </div>
@@ -341,20 +343,20 @@ const HRJoiningModalities = () => {
       </div>
 
       {/* Employee list */}
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-gray-200 bg-white p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-          <div>
+      <section className="min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-gray-200 bg-white p-4 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <div className="rounded-lg bg-yellow-100 p-2 text-yellow-800">
+              <div className="shrink-0 rounded-lg bg-yellow-100 p-2 text-yellow-800">
                 <ClipboardCheck size={19} />
               </div>
-              <h2 className="text-lg font-bold text-gray-900">Employee Joining Formalities</h2>
+              <h2 className="break-words text-lg font-bold text-gray-900">Employee Joining Formalities</h2>
             </div>
             <p className="mt-2 text-sm text-gray-500">
               Select an employee to review their submitted documents.
             </p>
           </div>
-          <div className="relative w-full sm:max-w-xs">
+          <div className="relative w-full min-w-0 lg:max-w-xs">
             <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
@@ -372,7 +374,7 @@ const HRJoiningModalities = () => {
             <p className="text-sm font-medium">Loading employees...</p>
           </div>
         ) : filteredEmployees.length === 0 ? (
-          <div className="px-6 py-20 text-center text-gray-500">
+          <div className="px-4 py-16 text-center text-gray-500 sm:px-6 sm:py-20">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100">
               <FileText size={25} className="text-gray-500" />
             </div>
@@ -381,9 +383,9 @@ const HRJoiningModalities = () => {
           </div>
         ) : (
           // Added a max-width container and auto margins to center the content
-          <div className="max-w-8xl mx-auto">
+          <div className="mx-auto w-full max-w-7xl">
             {/* Modified grid columns for responsiveness. It will be 1 col on mobile, 2 on tablets, and 3 on desktops. */}
-            <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 sm:p-6 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 sm:gap-5 sm:p-6 xl:grid-cols-3">
               {filteredEmployees.map((emp) => {
                 const { percentage, completed, total } = calculateProgress(emp.documents);
                 const rejected = (emp.documents || []).filter(
@@ -393,17 +395,17 @@ const HRJoiningModalities = () => {
                 return (
                   <div
                     key={emp.emp_id}
-                    className="group flex flex-col rounded-2xl border border-gray-200 bg-white p-5 transition duration-200 hover:-translate-y-0.5 hover:border-yellow-300 hover:shadow-lg"
+                    className="group flex min-w-0 flex-col rounded-2xl border border-gray-200 bg-white p-4 transition duration-200 hover:-translate-y-0.5 hover:border-yellow-300 hover:shadow-lg sm:p-5"
                   >
-                    <div className="mb-5 flex items-center gap-3">
+                    <div className="mb-5 flex min-w-0 items-center gap-3">
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gray-100 transition group-hover:bg-yellow-100">
                         <User size={23} className="text-gray-700" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h2 className="truncate font-bold text-gray-900">
+                        <h2 className="break-words font-bold text-gray-900">
                           {emp.name || "Unknown"}
                         </h2>
-                        <p className="mt-1 text-sm text-gray-500">ID: {emp.emp_id}</p>
+                        <p className="mt-1 break-all text-sm text-gray-500">ID: {emp.emp_id}</p>
                       </div>
                       <span
                         className={`h-2.5 w-2.5 shrink-0 rounded-full ${
@@ -423,17 +425,17 @@ const HRJoiningModalities = () => {
                       ></span>
                     </div>
 
-                    <p className="mb-5 flex items-center text-sm text-gray-500">
-                      <Calendar size={16} className="mr-2 shrink-0 text-gray-400" />
-                      <span>Joining Date: {emp.joiningDate || "Not Specified"}</span>
+                    <p className="mb-5 flex min-w-0 items-start gap-2 text-sm text-gray-500">
+                      <Calendar size={16} className="mt-0.5 shrink-0 text-gray-400" />
+                      <span className="min-w-0 break-words">Joining Date: {emp.joiningDate || "Not Specified"}</span>
                     </p>
 
-                    <div className="mb-5 rounded-xl bg-gray-50 p-4">
-                      <div className="mb-2 flex items-center justify-between">
-                        <span className="text-sm font-semibold text-gray-700">
+                    <div className="mb-5 rounded-xl bg-gray-50 p-3 sm:p-4">
+                      <div className="mb-2 flex items-center justify-between gap-2">
+                        <span className="min-w-0 break-words text-sm font-semibold text-gray-700">
                           Verification progress
                         </span>
-                        <span className="text-sm font-bold text-gray-900">
+                        <span className="shrink-0 text-sm font-bold text-gray-900">
                           {percentage}%
                         </span>
                       </div>
@@ -445,7 +447,7 @@ const HRJoiningModalities = () => {
                           }`}
                         />
                       </div>
-                      <div className="mt-2 flex justify-between text-xs text-gray-500">
+                      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500">
                         <span>{completed}/{total} verified</span>
                         {rejected > 0 && (
                           <span className="font-semibold text-red-600">{rejected} rejected</span>
@@ -453,9 +455,9 @@ const HRJoiningModalities = () => {
                       </div>
                     </div>
 
-                    <div className="mb-5 flex items-center gap-2 text-sm text-gray-600">
-                      <ShieldCheck size={17} className="shrink-0 text-gray-500" />
-                      <span>
+                    <div className="mb-5 flex min-w-0 items-start gap-2 text-sm text-gray-600">
+                      <ShieldCheck size={17} className="mt-0.5 shrink-0 text-gray-500" />
+                      <span className="min-w-0 break-words">
                         {total === 0
                           ? "Awaiting document uploads"
                           : completed === total
@@ -465,6 +467,7 @@ const HRJoiningModalities = () => {
                     </div>
 
                     <button
+                      type="button"
                       onClick={() => {
                         setSelectedIndex(employees.findIndex(
                           (item) => String(item.emp_id) === String(emp.emp_id)
@@ -472,7 +475,7 @@ const HRJoiningModalities = () => {
                         setActionError(null);
                         setActionMessage(null);
                       }}
-                      className="mt-auto inline-flex items-center justify-center gap-2 rounded-xl bg-yellow-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2"
+                      className="mt-auto inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-yellow-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2"
                     >
                       <Eye size={17} />
                       View Documents
@@ -488,7 +491,7 @@ const HRJoiningModalities = () => {
       {/* Modal */}
       {selectedEmployee && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/70 p-3 backdrop-blur-sm sm:p-5"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/70 p-2 backdrop-blur-sm sm:p-4 md:p-5"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) {
               setSelectedIndex(null);
@@ -498,46 +501,47 @@ const HRJoiningModalities = () => {
           }}
         >
           {/* Adjusted modal width to be responsive */}
-          <div className="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl md:max-w-2xl lg:max-w-4xl">
-            <header className="flex items-center justify-between gap-4 border-b border-gray-200 bg-gray-50 p-5 sm:p-6">
-              <div className="flex min-w-0 items-center gap-3">
+          <div className="flex max-h-[92dvh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl md:max-w-2xl lg:max-w-4xl">
+            <header className="flex shrink-0 items-center justify-between gap-3 border-b border-gray-200 bg-gray-50 p-4 sm:gap-4 sm:p-6">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
                 <div className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-yellow-100 text-yellow-800 sm:flex">
                   <ShieldCheck size={22} />
                 </div>
                 <div className="min-w-0">
-                  <h2 className="truncate text-lg font-bold text-gray-900 sm:text-xl">
+                  <h2 className="break-words text-base font-bold text-gray-900 sm:text-xl">
                     Verify Documents - {selectedEmployee.name || selectedEmployee.emp_id}
                   </h2>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-1 break-all text-sm text-gray-500">
                     Employee ID: {selectedEmployee.emp_id}
                   </p>
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => {
                   setSelectedIndex(null);
                   setActionError(null);
                   setActionMessage(null);
                 }}
-                className="shrink-0 rounded-lg p-2 text-gray-500 transition hover:bg-gray-200 hover:text-gray-900"
+                className="shrink-0 rounded-lg p-2 text-gray-500 transition hover:bg-gray-200 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 aria-label="Close verification modal"
               >
                 <X size={22} />
               </button>
             </header>
 
-            <main className="flex-grow overflow-y-auto p-4 sm:p-6">
+            <main className="min-h-0 flex-grow overflow-y-auto p-3 sm:p-6">
               {actionError && (
-                <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-                  <AlertCircle size={18} className="shrink-0" />
-                  {actionError}
+                <div className="mb-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 sm:items-center">
+                  <AlertCircle size={18} className="mt-0.5 shrink-0 sm:mt-0" />
+                  <span className="min-w-0 break-words">{actionError}</span>
                 </div>
               )}
 
               {actionMessage && (
-                <div className="mb-4 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-800">
-                  <CheckCircle size={18} className="shrink-0" />
-                  {actionMessage}
+                <div className="mb-4 flex items-start gap-2 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-800 sm:items-center">
+                  <CheckCircle size={18} className="mt-0.5 shrink-0 sm:mt-0" />
+                  <span className="min-w-0 break-words">{actionMessage}</span>
                 </div>
               )}
 
@@ -550,26 +554,27 @@ const HRJoiningModalities = () => {
                     // On small screens, items will stack vertically, otherwise they are in a row.
                     <div
                       key={doc.id}
-                      className="mb-4 rounded-xl border border-gray-200 bg-white p-4 transition hover:border-yellow-300 sm:p-5"
+                      className="mb-4 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-yellow-300 sm:p-5"
                     >
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div className="flex min-w-0 gap-3">
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-700">
                             <FileText size={19} />
                           </div>
-                          <div className="min-w-0">
-                            <p className="font-bold text-gray-900">
+                          <div className="min-w-0 flex-1">
+                            <p className="break-words font-bold text-gray-900">
                               {doc.document_name || doc.name || "Joining Document"}
                             </p>
                             {doc.description && (
-                              <p className="mt-1 text-sm leading-5 text-gray-500">
+                              <p className="mt-1 break-words text-sm leading-5 text-gray-500">
                                 {doc.description}
                               </p>
                             )}
                             {doc.file_name ? (
                               <button
+                                type="button"
                                 onClick={() => handlePreview(doc.id, doc.file_name)}
-                                className="mt-3 inline-flex max-w-full items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-left text-sm font-medium text-gray-700 transition hover:border-yellow-300 hover:bg-yellow-50"
+                                className="mt-3 inline-flex min-h-10 max-w-full items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-left text-sm font-medium text-gray-700 transition hover:border-yellow-300 hover:bg-yellow-50"
                               >
                                 <Eye size={16} className="shrink-0 text-gray-500" />
                                 <span className="break-all">{doc.file_name}</span>
@@ -596,18 +601,20 @@ const HRJoiningModalities = () => {
 
                       <div className="mt-4 flex flex-col gap-2 border-t border-gray-100 pt-4 sm:flex-row sm:justify-end">
                         <button
+                          type="button"
                           onClick={() => handleDocumentStatus(doc.id, "verified")}
                           disabled={isUpdating || status === "verified"}
-                          className="inline-flex items-center justify-center gap-2 rounded-lg bg-yellow-400 px-4 py-2.5 text-sm font-bold text-gray-900 transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-yellow-400 px-4 py-2.5 text-sm font-bold text-gray-900 transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                         >
                           <CheckCircle size={16} />
                           {isUpdating ? "Updating..." : "Verify"}
                         </button>
 
                         <button
+                          type="button"
                           onClick={() => handleDocumentStatus(doc.id, "rejected")}
                           disabled={isUpdating || status === "rejected"}
-                          className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                         >
                           <XCircle size={16} />
                           {isUpdating ? "Updating..." : "Reject"}
@@ -625,14 +632,15 @@ const HRJoiningModalities = () => {
               )}
             </main>
 
-            <footer className="flex justify-end border-t border-gray-200 bg-gray-50 p-4 sm:p-5">
+            <footer className="flex shrink-0 justify-end border-t border-gray-200 bg-gray-50 p-4 sm:p-5">
               <button
+                type="button"
                 onClick={() => {
                   setSelectedIndex(null);
                   setActionError(null);
                   setActionMessage(null);
                 }}
-                className="rounded-xl border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-100"
+                className="min-h-10 w-full rounded-xl border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 sm:w-auto"
               >
                 Close
               </button>
@@ -644,18 +652,18 @@ const HRJoiningModalities = () => {
       {/* Document Preview Popup */}
       {previewUrl && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-950/80 p-2 backdrop-blur-sm sm:p-5"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-950/80 p-2 backdrop-blur-sm sm:p-4 md:p-5"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) closePreview();
           }}
         >
-          <div className="flex h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-gray-700 bg-white shadow-2xl">
-            <header className="flex items-center justify-between gap-3 border-b border-gray-200 bg-gray-900 px-4 py-3 text-white sm:px-6">
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="hidden rounded-lg bg-yellow-400 p-2 text-gray-900 sm:block">
+          <div className="flex h-[94dvh] max-h-[94dvh] w-full max-w-6xl flex-col overflow-hidden rounded-xl border border-gray-700 bg-white shadow-2xl sm:rounded-2xl">
+            <header className="flex shrink-0 items-center justify-between gap-2 border-b border-gray-200 bg-gray-900 px-3 py-3 text-white sm:gap-3 sm:px-6">
+              <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+                <div className="hidden shrink-0 rounded-lg bg-yellow-400 p-2 text-gray-900 sm:block">
                   <FileText size={20} />
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <h2 className="truncate text-sm font-bold sm:text-base">
                     Document Preview
                   </h2>
@@ -664,18 +672,19 @@ const HRJoiningModalities = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex shrink-0 items-center gap-2">
+              <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
                 <a
                   href={previewUrl}
                   download={previewName || "document"}
-                  className="inline-flex items-center gap-2 rounded-lg bg-yellow-400 px-3 py-2 text-xs font-bold text-gray-900 transition hover:bg-yellow-300 sm:text-sm"
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-yellow-400 px-2.5 py-2 text-xs font-bold text-gray-900 transition hover:bg-yellow-300 sm:px-3 sm:text-sm"
                 >
                   <Download size={15} />
                   <span className="hidden sm:inline">Download</span>
                 </a>
                 <button
+                  type="button"
                   onClick={closePreview}
-                  className="rounded-lg p-2 text-gray-300 transition hover:bg-gray-700 hover:text-white"
+                  className="rounded-lg p-2 text-gray-300 transition hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   aria-label="Close document preview"
                 >
                   <X size={21} />
@@ -683,16 +692,16 @@ const HRJoiningModalities = () => {
               </div>
             </header>
 
-            <div className="flex min-h-0 flex-1 items-center justify-center bg-gray-100 p-2 sm:p-4">
+            <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-gray-100 p-2 sm:p-4">
               {previewContentType.startsWith("image/") ||
               previewContentType === "application/pdf" ? (
                 <iframe
                   src={previewUrl}
                   title={`Preview of ${previewName}`}
-                  className="h-full w-full rounded-lg border border-gray-200 bg-white"
+                  className="h-full min-h-0 w-full rounded-lg border border-gray-200 bg-white"
                 />
               ) : (
-                <div className="max-w-md rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+                <div className="max-w-md rounded-2xl border border-gray-200 bg-white p-5 text-center shadow-sm sm:p-8">
                   <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-yellow-100 text-yellow-800">
                     <FileText size={27} />
                   </div>
@@ -705,7 +714,7 @@ const HRJoiningModalities = () => {
                   <a
                     href={previewUrl}
                     download={previewName || "document"}
-                    className="mt-5 inline-flex items-center gap-2 rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-700"
+                    className="mt-5 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-700"
                   >
                     <Download size={16} />
                     Download Document

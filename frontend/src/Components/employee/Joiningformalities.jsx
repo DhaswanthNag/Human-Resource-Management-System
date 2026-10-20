@@ -396,20 +396,19 @@ const EmployeeJoiningFormalities = () => {
     : 0;
 
   return (
-    <div className="min-h-screen w-full bg-gray-50">
-      
+    <div className="min-h-screen w-full overflow-x-hidden bg-gray-50">
       {/* Header */}
       {/* Professional page heading */}
       <header className="px-4 pt-6 sm:px-6 md:px-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="mb-3 flex items-center gap-2">
-              <span className="h-1 w-9 rounded-full bg-yellow-400"></span>
+              <span className="h-1 w-9 shrink-0 rounded-full bg-yellow-400"></span>
               <span className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500">
                 Employee Onboarding
               </span>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+            <h1 className="break-words text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
               Document Submission Panel
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
@@ -418,12 +417,12 @@ const EmployeeJoiningFormalities = () => {
           </div>
 
           {/* Refresh Button */}
-          <div className="flex shrink-0 items-center sm:pt-1 sm:ml-auto">
+          <div className="flex w-full shrink-0 items-center sm:w-auto sm:pt-1 sm:ml-auto">
             <button
               type="button"
               onClick={handleRefresh}
               disabled={loading || submitting}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-700 shadow-sm transition duration-200 hover:border-yellow-300 hover:bg-yellow-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-700 shadow-sm transition duration-200 hover:border-yellow-300 hover:bg-yellow-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
             >
               <RefreshCw
                 size={16}
@@ -436,22 +435,22 @@ const EmployeeJoiningFormalities = () => {
       </header>
 
       {/* Progress Summary */}
-      <div className="mx-4 mt-6 rounded-2xl border border-gray-200 bg-white px-5 py-6 shadow-sm sm:mx-6 sm:px-6 md:mx-8">
+      <div className="mx-4 mt-6 rounded-2xl border border-gray-200 bg-white px-4 py-5 shadow-sm sm:mx-6 sm:px-6 sm:py-6 md:mx-8">
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <div className="flex items-center mb-2 sm:mb-0">
-            <CheckCircle size={22} className="text-gray-700 mr-2" />
-            <span className="text-lg font-medium text-gray-700">
+          <div className="mb-1 flex min-w-0 items-center sm:mb-0">
+            <CheckCircle size={22} className="mr-2 shrink-0 text-gray-700" />
+            <span className="break-words text-base font-medium text-gray-700 sm:text-lg">
               Progress: {docsCompleted}/{totalDocs} documents
             </span>
           </div>
-          <div className="flex w-full items-center sm:max-w-md">
+          <div className="flex w-full min-w-0 items-center sm:max-w-md">
             <div className="mr-3 h-3 w-full overflow-hidden rounded-full bg-gray-100">
               <div
                 className="h-3 rounded-full bg-gray-700 transition-all duration-300"
                 style={{ width: `${percentage}%` }}
               ></div>
             </div>
-            <span className="text-sm font-medium text-gray-700">
+            <span className="shrink-0 text-sm font-medium text-gray-700">
               {percentage}%
             </span>
           </div>
@@ -459,11 +458,12 @@ const EmployeeJoiningFormalities = () => {
       </div>
 
       {/* Tabs */}
-      <div className="w-full px-4 sm:px-6 mt-6 mb-5">
-        <div className="max-w-6xl mx-auto flex justify-center">
-          <div className="inline-flex w-full sm:w-auto items-center gap-2 rounded-2xl border border-gray-200 bg-gray-100/80 p-2 shadow-sm">
+      <div className="mb-5 mt-6 w-full px-4 sm:px-6">
+        <div className="mx-auto flex max-w-6xl justify-center">
+          <div className="inline-flex w-full items-center gap-1.5 rounded-2xl border border-gray-200 bg-gray-100/80 p-1.5 shadow-sm sm:w-auto sm:gap-2 sm:p-2">
             <button
-              className={`flex flex-1 sm:flex-none items-center justify-center gap-2.5 px-5 sm:px-8 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+              type="button"
+              className={`flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-200 sm:flex-none sm:gap-2.5 sm:px-8 ${
                 activeTab === "dashboard"
                   ? "bg-yellow-400 text-gray-900 shadow-md ring-1 ring-yellow-500/40"
                   : "bg-transparent text-gray-600 hover:bg-white hover:text-gray-900"
@@ -472,16 +472,18 @@ const EmployeeJoiningFormalities = () => {
             >
               <LayoutDashboard
                 size={19}
+                className="shrink-0"
                 strokeWidth={activeTab === "dashboard" ? 2.5 : 2}
               />
               <span>Dashboard</span>
               {activeTab === "dashboard" && (
-                <span className="ml-1 h-1.5 w-1.5 rounded-full bg-gray-800" />
+                <span className="ml-0.5 hidden h-1.5 w-1.5 shrink-0 rounded-full bg-gray-800 xs:inline-block sm:ml-1 sm:inline-block" />
               )}
             </button>
 
             <button
-              className={`flex flex-1 sm:flex-none items-center justify-center gap-2.5 px-5 sm:px-8 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+              type="button"
+              className={`flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-200 sm:flex-none sm:gap-2.5 sm:px-8 ${
                 activeTab === "documents"
                   ? "bg-yellow-400 text-gray-900 shadow-md ring-1 ring-yellow-500/40"
                   : "bg-transparent text-gray-600 hover:bg-white hover:text-gray-900"
@@ -490,11 +492,12 @@ const EmployeeJoiningFormalities = () => {
             >
               <FileText
                 size={19}
+                className="shrink-0"
                 strokeWidth={activeTab === "documents" ? 2.5 : 2}
               />
               <span>Documents</span>
               {activeTab === "documents" && (
-                <span className="ml-1 h-1.5 w-1.5 rounded-full bg-gray-800" />
+                <span className="ml-0.5 hidden h-1.5 w-1.5 shrink-0 rounded-full bg-gray-800 xs:inline-block sm:ml-1 sm:inline-block" />
               )}
             </button>
           </div>
@@ -502,10 +505,10 @@ const EmployeeJoiningFormalities = () => {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 p-2 bg-gray-50">
+      <main className="flex-1 bg-gray-50 px-4 pb-6 sm:px-6 md:px-8">
         {activeTab === "dashboard" && (
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:mb-8 lg:grid-cols-3 lg:gap-6">
               <ProgressCard
                 title="Documents Uploaded"
                 completed={docsCompleted}
@@ -523,52 +526,52 @@ const EmployeeJoiningFormalities = () => {
               />
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
-              <h2 className="text-lg font-medium text-gray-800 mb-6 flex items-center">
-                <AlertCircle size={20} className="mr-2 text-gray-700" />
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
+              <h2 className="mb-5 flex items-center text-lg font-medium text-gray-800 sm:mb-6">
+                <AlertCircle size={20} className="mr-2 shrink-0 text-gray-700" />
                 Next Steps
               </h2>
-              <ul className="space-y-4">
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center mt-0.5">
-                    <span className="text-gray-700 text-sm font-bold">1</span>
+              <ul className="space-y-5 sm:space-y-4">
+                <li className="flex items-start gap-3 sm:gap-0">
+                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-yellow-100">
+                    <span className="text-sm font-bold text-gray-700">1</span>
                   </div>
-                  <div className="ml-4">
-                    <p className="text-gray-800 font-medium">
+                  <div className="min-w-0 sm:ml-4">
+                    <p className="break-words font-medium text-gray-800">
                       Complete document submission
                     </p>
-                    <p className="text-gray-600 text-sm mt-1">
+                    <p className="mt-1 text-sm leading-5 text-gray-600">
                       Upload all required documents to proceed with verification
                     </p>
-                    <div className="mt-2 w-full bg-gray-100 rounded-full h-2">
+                    <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-100">
                       <div
-                        className="bg-yellow-400 h-2 rounded-full"
+                        className="h-2 rounded-full bg-yellow-400 transition-all duration-300"
                         style={{ width: `${percentage}%` }}
                       ></div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="mt-1 text-xs text-gray-500">
                       {docsCompleted} of {totalDocs} documents uploaded
                     </p>
                   </div>
                 </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center mt-0.5">
-                    <span className="text-gray-500 text-sm font-bold">2</span>
+                <li className="flex items-start gap-3 sm:gap-0">
+                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100">
+                    <span className="text-sm font-bold text-gray-500">2</span>
                   </div>
-                  <div className="ml-4">
-                    <p className="text-gray-500 font-medium">HR verification</p>
-                    <p className="text-gray-400 text-sm mt-1">
+                  <div className="min-w-0 sm:ml-4">
+                    <p className="break-words font-medium text-gray-500">HR verification</p>
+                    <p className="mt-1 text-sm leading-5 text-gray-400">
                       Your documents will be reviewed by the HR team
                     </p>
                   </div>
                 </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center mt-0.5">
-                    <span className="text-gray-500 text-sm font-bold">3</span>
+                <li className="flex items-start gap-3 sm:gap-0">
+                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100">
+                    <span className="text-sm font-bold text-gray-500">3</span>
                   </div>
-                  <div className="ml-4">
-                    <p className="text-gray-500 font-medium">Account setup</p>
-                    <p className="text-gray-400 text-sm mt-1">
+                  <div className="min-w-0 sm:ml-4">
+                    <p className="break-words font-medium text-gray-500">Account setup</p>
+                    <p className="mt-1 text-sm leading-5 text-gray-400">
                       You will receive system access credentials
                     </p>
                   </div>
@@ -579,20 +582,20 @@ const EmployeeJoiningFormalities = () => {
         )}
 
         {activeTab === "documents" && (
-          <div className="max-w-5xl mx-auto">
+          <div className="mx-auto max-w-5xl">
             {/* Employee ID */}
-            <div className="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-200">
-              <h1 className="text-2xl font-bold flex justify-center items-center w-full text-gray-800 mb-6">
+            <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:mb-8 sm:p-6">
+              <h1 className="mb-5 flex w-full items-center justify-center text-center text-xl font-bold text-gray-800 sm:mb-6 sm:text-2xl">
                 Employee Information
               </h1>
 
-              <div className="flex justify-center items-center w-full">
+              <div className="flex w-full items-center justify-center">
                 <div className="w-full max-w-md">
-                  <label className="block text-sm font-medium text-gray-700 mb-2 ml-2">
+                  <label className="mb-2 ml-1 block text-sm font-medium text-gray-700 sm:ml-2">
                     Employee ID
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                       <User size={18} className="text-gray-400" />
                     </div>
                     <input
@@ -604,7 +607,7 @@ const EmployeeJoiningFormalities = () => {
                         localStorage.setItem(EMPLOYEE_ID_KEY, empId);
                       }}
                       onBlur={() => loadEmployeeDocuments(employeeData.emp_id)}
-                      className="pl-10 w-full px-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 transition duration-300"
+                      className="w-full rounded-lg border border-gray-200 py-3 pl-10 pr-4 transition duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-500"
                       placeholder="Enter your Employee ID"
                     />
                   </div>
@@ -613,48 +616,50 @@ const EmployeeJoiningFormalities = () => {
             </div>
 
             {/* Documents */}
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
-              <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
+            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+              <div className="border-b border-gray-200 bg-gray-50 px-4 py-4 sm:px-6 sm:py-5">
                 <h2 className="text-lg font-semibold text-gray-800">Required Documents</h2>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="mt-1 text-sm leading-5 text-gray-600">
                   Upload all documents to complete your onboarding process
                 </p>
               </div>
 
               <div className="divide-y divide-gray-200">
                 {documents.map((doc, index) => (
-                  <div key={index} className="p-6 hover:bg-yellow-50 transition-colors">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-start">
-                          <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center mr-4 flex-shrink-0">
-                            <FileText size={18} className="text-gray-700" />
-                          </div>
-                          <div>
-                            <h3 className="font-medium text-gray-800">{doc.name}</h3>
-                            <p className="text-sm text-gray-600 mt-1">{doc.description}</p>
+                  <div key={index} className="p-4 transition-colors hover:bg-yellow-50 sm:p-6">
+                    <div className="mb-4 flex flex-col justify-between gap-3 sm:gap-4 md:flex-row md:items-start">
+                      <div className="flex min-w-0 flex-1 items-start">
+                        <div className="mr-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-100 sm:mr-4">
+                          <FileText size={18} className="text-gray-700" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="break-words font-medium text-gray-800">{doc.name}</h3>
+                          <p className="mt-1 break-words text-sm leading-5 text-gray-600">
+                            {doc.description}
+                          </p>
 
-                            {doc.previewURL && (
-                              <div className="flex items-center mt-2">
-                                <button
-                                  type="button"
-                                  onClick={() => setPreviewDocument(doc)}
-                                  className="text-sm font-semibold text-gray-700 hover:text-gray-950 flex items-center rounded-lg px-2 py-1 -ml-2 hover:bg-yellow-50 transition-colors"
-                                >
-                                  <FileText size={16} className="mr-2 text-yellow-600" />
-                                  {doc.fileName || "View uploaded file"}
-                                </button>
-                                <span className="text-sm text-gray-500 mx-2">•</span>
-                                <span className="text-sm text-gray-500">Uploaded {doc.date}</span>
-                              </div>
-                            )}
-                          </div>
+                          {doc.previewURL && (
+                            <div className="mt-2 flex min-w-0 flex-col items-start gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setPreviewDocument(doc)}
+                                className="inline-flex max-w-full min-w-0 items-center rounded-lg px-2 py-1 text-left text-sm font-semibold text-gray-700 transition-colors hover:bg-yellow-50 hover:text-gray-950 sm:-ml-2"
+                              >
+                                <FileText size={16} className="mr-2 shrink-0 text-yellow-600" />
+                                <span className="break-all">{doc.fileName || "View uploaded file"}</span>
+                              </button>
+                              <span className="hidden text-sm text-gray-500 sm:inline">•</span>
+                              <span className="break-words text-xs text-gray-500 sm:text-sm">
+                                Uploaded {doc.date}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
 
-                      <div className="flex-shrink-0">
+                      <div className="flex shrink-0 items-center self-start md:pt-1">
                         <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                          className={`inline-flex max-w-full items-center rounded-full px-3 py-1 text-xs font-medium ${
                             doc.decision === "verified"
                               ? "bg-green-100 text-green-800"
                               : doc.decision === "submitted"
@@ -669,25 +674,26 @@ const EmployeeJoiningFormalities = () => {
                       </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <label className="flex-1 cursor-pointer">
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                      <label className="min-w-0 flex-1 cursor-pointer">
                         <input
                           type="file"
                           className="hidden"
                           onChange={(e) => handleFileChange(e, index)}
                         />
-                        <div className="flex items-center justify-center px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-yellow-50 transition-colors">
-                          <Upload size={16} className="mr-2" />
-                          {doc.file || doc.docId ? "Replace File" : "Upload File"}
+                        <div className="flex min-h-11 w-full items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-yellow-50">
+                          <Upload size={16} className="mr-2 shrink-0" />
+                          <span>{doc.file || doc.docId ? "Replace File" : "Upload File"}</span>
                         </div>
                       </label>
 
                       {(doc.file || doc.docId) && (
                         <button
+                          type="button"
                           onClick={() => handleFileDelete(index)}
-                          className="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                          className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:w-auto"
                         >
-                          <Trash2 size={16} className="mr-2" />
+                          <Trash2 size={16} className="mr-2 shrink-0" />
                           Remove
                         </button>
                       )}
@@ -696,11 +702,12 @@ const EmployeeJoiningFormalities = () => {
                 ))}
               </div>
 
-              <div className="px-6 py-5 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div className="flex flex-col items-stretch gap-4 border-t border-gray-200 bg-gray-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
                 <button
+                  type="button"
                   onClick={handleSubmit}
                   disabled={!employeeData.emp_id.trim() || docsCompleted !== totalDocs || submitting || loading}
-                  className="px-8 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gray-900 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-transparent bg-gray-900 px-5 py-3 text-center text-sm font-medium text-white shadow-sm transition-colors hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:px-8 sm:text-base"
                 >
                   {submitting ? "Submitting..." : "Submit All Documents"}
                 </button>
@@ -713,29 +720,29 @@ const EmployeeJoiningFormalities = () => {
       {/* Document Preview Popup */}
       {previewDocument?.previewURL && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/80 p-2 backdrop-blur-sm sm:p-5"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/80 p-2 backdrop-blur-sm sm:p-4 md:p-5"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setPreviewDocument(null);
           }}
         >
-          <div className="flex h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-gray-700 bg-white shadow-2xl">
-            <header className="flex items-center justify-between gap-3 border-b border-gray-200 bg-gray-900 px-4 py-3 text-white sm:px-6">
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="hidden rounded-lg bg-yellow-400 p-2 text-gray-900 sm:block">
+          <div className="flex h-[92dvh] max-h-[92dvh] w-full max-w-6xl flex-col overflow-hidden rounded-xl border border-gray-700 bg-white shadow-2xl sm:rounded-2xl">
+            <header className="flex shrink-0 items-center justify-between gap-2 border-b border-gray-200 bg-gray-900 px-3 py-3 text-white sm:gap-3 sm:px-6">
+              <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+                <div className="hidden shrink-0 rounded-lg bg-yellow-400 p-2 text-gray-900 sm:block">
                   <FileText size={20} />
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <h2 className="truncate text-sm font-bold sm:text-base">Document Preview</h2>
                   <p className="mt-0.5 truncate text-xs text-gray-300">
                     {previewDocument.fileName || previewDocument.name}
                   </p>
                 </div>
               </div>
-              <div className="flex shrink-0 items-center gap-2">
+              <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
                 <a
                   href={previewDocument.previewURL}
                   download={previewDocument.fileName || "document"}
-                  className="inline-flex items-center gap-2 rounded-lg bg-yellow-400 px-3 py-2 text-xs font-bold text-gray-900 transition hover:bg-yellow-300 sm:text-sm"
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-yellow-400 px-2.5 py-2 text-xs font-bold text-gray-900 transition hover:bg-yellow-300 sm:px-3 sm:text-sm"
                 >
                   <Download size={15} />
                   <span className="hidden sm:inline">Download</span>
@@ -743,14 +750,14 @@ const EmployeeJoiningFormalities = () => {
                 <button
                   type="button"
                   onClick={() => setPreviewDocument(null)}
-                  className="rounded-lg p-2 text-gray-300 transition hover:bg-gray-700 hover:text-white"
+                  className="rounded-lg p-2 text-gray-300 transition hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   aria-label="Close document preview"
                 >
                   <X size={21} />
                 </button>
               </div>
             </header>
-            <div className="flex min-h-0 flex-1 items-center justify-center bg-gray-100 p-2 sm:p-4">
+            <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-gray-100 p-2 sm:p-4">
               {previewDocument.file?.type?.startsWith("image/") ||
               /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(previewDocument.fileName || "") ? (
                 <img
@@ -762,7 +769,7 @@ const EmployeeJoiningFormalities = () => {
                 <iframe
                   src={previewDocument.previewURL}
                   title={`Preview of ${previewDocument.fileName || previewDocument.name}`}
-                  className="h-full w-full rounded-lg border border-gray-200 bg-white"
+                  className="h-full min-h-0 w-full rounded-lg border border-gray-200 bg-white"
                 />
               )}
             </div>
@@ -791,24 +798,24 @@ const ProgressCard = ({ title, completed, total }) => {
   };
 
   return (
-    <div className="bg-white overflow-hidden shadow rounded-xl p-6 border border-gray-200 hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-gray-500">{title}</h3>
-        {getStatusIcon()}
+    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-6">
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <h3 className="min-w-0 break-words text-sm font-medium text-gray-500">{title}</h3>
+        <div className="shrink-0">{getStatusIcon()}</div>
       </div>
-      <div className="flex items-baseline mb-4">
+      <div className="mb-4 flex items-baseline">
         <p className="text-3xl font-semibold text-gray-900">
           {completed}/{total}
         </p>
       </div>
       <div className="mb-2">
-        <div className="flex items-center justify-between text-sm mb-1">
+        <div className="mb-1 flex items-center justify-between gap-2 text-sm">
           <span className="text-gray-500">Progress</span>
-          <span className="font-medium text-gray-700">{percentage}%</span>
+          <span className="shrink-0 font-medium text-gray-700">{percentage}%</span>
         </div>
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-2 overflow-hidden rounded-full bg-gray-100">
           <div
-            className={`h-full rounded-full ${getStatusColor()}`}
+            className={`h-full rounded-full transition-all duration-300 ${getStatusColor()}`}
             style={{ width: `${percentage}%` }}
           ></div>
         </div>
