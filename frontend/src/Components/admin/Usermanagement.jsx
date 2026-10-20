@@ -424,8 +424,8 @@ export default function UserManagement() {
                           user.role === "admin"
                             ? "border-red-200 bg-red-50 text-red-500"
                             : user.role === "hr"
-                            ? "border-orange-200 bg-orange-50 text-orange-500"
-                            : "border-blue-200 bg-blue-50 text-blue-500"
+                            ? "border-blue-200 bg-blue-50 text-blue-500"
+                            : "border-orange-200 bg-orange-50 text-orange-500"
                         }`}>
                           {user.role}
                         </span>
