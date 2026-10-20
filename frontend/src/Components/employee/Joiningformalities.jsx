@@ -410,7 +410,7 @@ const EmployeeJoiningFormalities = () => {
               </span>
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
-              Joining Formalities
+              Document Submission Panel
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
               Upload your required documents and track their verification progress.

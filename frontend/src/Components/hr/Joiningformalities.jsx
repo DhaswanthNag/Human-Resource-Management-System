@@ -234,11 +234,11 @@ const HRJoiningModalities = () => {
             <div className="mb-3 flex items-center gap-2">
               <span className="h-1 w-9 rounded-full bg-yellow-400"></span>
               <span className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500">
-                Human Resources
+                EMPLOYEE DOCUMENT VERIFICATION
               </span>
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
-              Verify Panel
+              Document Verification Panel
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
               Review employee joining documents and update verification status.
@@ -277,7 +277,7 @@ const HRJoiningModalities = () => {
               <h2 className="mt-3 text-3xl font-bold text-gray-900">{totalEmployees}</h2>
               <p className="mt-1 text-xs text-gray-500">Employees in the panel</p>
             </div>
-            <div className="rounded-xl bg-gray-100 p-3 text-gray-700">
+            <div className="rounded-xl bg-gray-50 p-3 text-gray-700">
               <User size={21} />
             </div>
           </div>
@@ -293,7 +293,7 @@ const HRJoiningModalities = () => {
               <h2 className="mt-3 text-3xl font-bold text-gray-900">{verifiedEmployees}</h2>
               <p className="mt-1 text-xs text-gray-500">All documents approved</p>
             </div>
-            <div className="rounded-xl bg-yellow-100 p-3 text-yellow-800">
+            <div className="rounded-xl bg-gray-50 p-3 text-yellow-500">
               <ShieldCheck size={21} />
             </div>
           </div>
@@ -314,7 +314,7 @@ const HRJoiningModalities = () => {
               <h2 className="mt-3 text-3xl font-bold text-gray-900">{pendingDocuments}</h2>
               <p className="mt-1 text-xs text-gray-500">Documents pending a decision</p>
             </div>
-            <div className="rounded-xl bg-gray-100 p-3 text-gray-700">
+            <div className="rounded-xl bg-gray-50 p-3 text-gray-700">
               <Clock size={21} />
             </div>
           </div>
@@ -330,7 +330,7 @@ const HRJoiningModalities = () => {
               <h2 className="mt-3 text-3xl font-bold text-gray-900">{rejectedDocuments}</h2>
               <p className="mt-1 text-xs text-gray-500">Require employee attention</p>
             </div>
-            <div className="rounded-xl bg-gray-100 p-3 text-gray-700">
+            <div className="rounded-xl bg-gray-50 p-3 text-red-500">
               <XCircle size={21} />
             </div>
           </div>
@@ -472,7 +472,7 @@ const HRJoiningModalities = () => {
                         setActionError(null);
                         setActionMessage(null);
                       }}
-                      className="mt-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2"
+                      className="mt-auto inline-flex items-center justify-center gap-2 rounded-xl bg-yellow-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2"
                     >
                       <Eye size={17} />
                       View Documents
