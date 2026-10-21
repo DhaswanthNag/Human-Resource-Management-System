@@ -1,3 +1,4 @@
+// frontend/src/Components/hr/Interviewpanel.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Calendar,
@@ -16,20 +17,31 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 
+// Shared authentication configuration for protected HR APIs
+const getAuthConfig = () => {
+  const token = localStorage.getItem('token');
+  return {
+    headers: token
+      ? { Authorization: `Bearer ${token}` }
+      : {}
+  };
+};
+
 // Candidate Dropdown Component
 const CandidateDropdown = ({ value, onChange, required = true }) => {
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
   useEffect(() => {
     const fetchCandidates = async () => {
       try {
         setLoading(true);
         setError('');
-        const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5000/api/candidates', {
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
-        });
+        const response = await axios.get(
+          'http://localhost:5000/api/candidates',
+          getAuthConfig()
+        );
         const data = Array.isArray(response.data)
           ? response.data
           : response.data.candidates || response.data.data || [];
@@ -37,14 +49,17 @@ const CandidateDropdown = ({ value, onChange, required = true }) => {
       } catch (err) {
         console.error('Error fetching candidates:', err.response?.data || err.message);
         setError(err.response?.status === 401
-          ? 'Please log in again to load candidates.'
-          : 'Unable to load candidates. Please check the backend.');
+          ? 'Your session is invalid or expired. Please log in again.'
+          : err.response?.status === 403
+            ? 'You do not have permission to view these candidates.'
+            : 'Unable to load candidates. Please check the backend.');
       } finally {
         setLoading(false);
       }
     };
     fetchCandidates();
   }, []);
+
   return (
     <div>
       <select
@@ -77,7 +92,6 @@ const CandidateDropdown = ({ value, onChange, required = true }) => {
   );
 };
 
-
 // Interviewer Dropdown Component
 const InterviewerDropdown = ({ value, onChange, required = true }) => {
   const [interviewers, setInterviewers] = useState([]);
@@ -89,7 +103,6 @@ const InterviewerDropdown = ({ value, onChange, required = true }) => {
       try {
         setLoading(true);
         setError('');
-
         const token = localStorage.getItem('token');
 
         if (!token) {
@@ -99,11 +112,7 @@ const InterviewerDropdown = ({ value, onChange, required = true }) => {
 
         const response = await axios.get(
           'http://localhost:5000/api/users/interviewers',
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
+          getAuthConfig()
         );
 
         const data = Array.isArray(response.data)
@@ -117,13 +126,10 @@ const InterviewerDropdown = ({ value, onChange, required = true }) => {
 
         setInterviewers(filteredInterviewers);
       } catch (err) {
-        console.error(
-          'Error fetching HR/Admin interviewers:',
-          err.response?.data || err.message
-        );
+        console.error('Error fetching HR/Admin interviewers:', err.response?.data || err.message);
         setError(
           err.response?.status === 401
-            ? 'Your session has expired. Please log in again.'
+            ? 'Your session is invalid or expired. Please log in again.'
             : err.response?.status === 403
               ? 'Only Admin/HR accounts can load interviewers.'
               : 'Unable to load HR/Admin accounts. Please check the backend API.'
@@ -158,7 +164,6 @@ const InterviewerDropdown = ({ value, onChange, required = true }) => {
         {interviewers.map((user, index) => {
           const userId = user.user_id || user.userId;
           const name = user.name || user.full_name || user.fullName || user.username;
-
           return (
             <option key={userId || index} value={name || userId}>
               {userId} - {name || 'Name not available'} ({String(user.role).toUpperCase()})
@@ -206,6 +211,7 @@ const Dashboard = ({ onShortlistedClick, stats }) => {
       icon: Award,
       iconStyle: 'bg-yellow-100 text-yellow-700',
       accent: 'bg-yellow-500',
+      clickable: true
     }
   ];
 
@@ -229,15 +235,10 @@ const Dashboard = ({ onShortlistedClick, stats }) => {
           </span>
           <span className="min-w-0 flex-1">
             <span className="block text-sm font-medium text-gray-500">{label}</span>
-            <span className="mt-1 block text-2xl font-bold tracking-tight text-gray-900">
-              {value}
-            </span>
+            <span className="mt-1 block text-2xl font-bold tracking-tight text-gray-900">{value}</span>
           </span>
           {clickable && (
-            <ArrowUpRight
-              size={17}
-              className="shrink-0 text-gray-400 transition group-hover:text-yellow-600"
-            />
+            <ArrowUpRight size={17} className="shrink-0 text-gray-400 transition group-hover:text-yellow-600" />
           )}
         </button>
       ))}
@@ -257,23 +258,26 @@ const ScheduleForm = ({ onSuccess }) => {
   const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitting(true);
 
+    if (!localStorage.getItem('token')) {
+      alert('Your session has expired. Please log in again.');
+      return;
+    }
+
+    setSubmitting(true);
     try {
       const response = await axios.post(
         'http://localhost:5000/api/interviews/schedule',
-        formData
+        formData,
+        getAuthConfig()
       );
 
-      if (response.status === 201) {
+      if (response.status === 200 || response.status === 201) {
         alert('Interview scheduled successfully!');
         setFormData({
           candidate_id: '',
@@ -282,11 +286,15 @@ const ScheduleForm = ({ onSuccess }) => {
           time: '',
           status: 'pending'
         });
-        onSuccess?.();
+        await onSuccess?.();
       }
     } catch (error) {
-      console.error('Error scheduling interview:', error);
-      alert(error.response?.data?.error || 'Scheduling failed.');
+      console.error('Error scheduling interview:', error.response?.data || error.message);
+      if (error.response?.status === 401) {
+        alert('Your session is invalid or expired. Please log in again.');
+      } else {
+        alert(error.response?.data?.message || error.response?.data?.error || 'Failed to schedule interview. Please try again.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -302,92 +310,39 @@ const ScheduleForm = ({ onSuccess }) => {
           <Calendar size={21} />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-gray-900 sm:text-xl">
-            Schedule Interview
-          </h2>
-          <p className="mt-0.5 text-sm text-gray-500">
-            Add the candidate and interview details below.
-          </p>
+          <h2 className="text-lg font-bold text-gray-900 sm:text-xl">Schedule Interview</h2>
+          <p className="mt-0.5 text-sm text-gray-500">Add the candidate and interview details below.</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5 p-5 sm:p-7">
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-semibold text-gray-700">
-              Candidate Name
-            </label>
-            <CandidateDropdown
-              value={formData.candidate_id}
-              onChange={handleChange}
-            />
+            <label className="block text-sm font-semibold text-gray-700">Candidate Name</label>
+            <CandidateDropdown value={formData.candidate_id} onChange={handleChange} />
           </div>
-
           <div>
-            <label className="block text-sm font-semibold text-gray-700">
-              Role
-            </label>
-            <input
-              type="text"
-              name="role"
-              placeholder="Enter role"
-              value={formData.role}
-              onChange={handleChange}
-              className={fieldClass}
-              required
-            />
+            <label className="block text-sm font-semibold text-gray-700">Role</label>
+            <input type="text" name="role" placeholder="Enter role" value={formData.role} onChange={handleChange} className={fieldClass} required />
           </div>
-
           <div>
-            <label className="block text-sm font-semibold text-gray-700">
-              Date
-            </label>
-            <input
-              type="date"
-              name="date"
-              value={formData.date}
-              onChange={handleChange}
-              className={fieldClass}
-              required
-            />
+            <label className="block text-sm font-semibold text-gray-700">Date</label>
+            <input type="date" name="date" value={formData.date} onChange={handleChange} className={fieldClass} required />
           </div>
-
           <div>
-            <label className="block text-sm font-semibold text-gray-700">
-              Time
-            </label>
-            <input
-              type="time"
-              name="time"
-              value={formData.time}
-              onChange={handleChange}
-              className={fieldClass}
-              required
-            />
+            <label className="block text-sm font-semibold text-gray-700">Time</label>
+            <input type="time" name="time" value={formData.time} onChange={handleChange} className={fieldClass} required />
           </div>
-
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-700">
-              Status
-            </label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className={fieldClass}
-            >
+            <label className="block text-sm font-semibold text-gray-700">Status</label>
+            <select name="status" value={formData.status} onChange={handleChange} className={fieldClass}>
               <option value="pending">Pending</option>
               <option value="completed">Completed</option>
             </select>
           </div>
         </div>
-
         <div className="flex justify-end border-t border-gray-100 pt-5">
-          <button
-            type="submit"
-            disabled={submitting}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gray-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-200 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-          >
+          <button type="submit" disabled={submitting} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gray-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-200 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">
             <CalendarDays size={17} />
             {submitting ? 'Scheduling...' : 'Schedule Interview'}
           </button>
@@ -405,22 +360,15 @@ const FeedbackForm = ({ onSuccess }) => {
     feedback: '',
     rating: 0
   });
-
   const [hoverRating, setHoverRating] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleRatingClick = (value) => {
-    setFormData({
-      ...formData,
-      rating: value
-    });
+    setFormData({ ...formData, rating: value });
   };
 
   const handleSubmit = async (e) => {
@@ -431,15 +379,20 @@ const FeedbackForm = ({ onSuccess }) => {
       return;
     }
 
-    setSubmitting(true);
+    if (!localStorage.getItem('token')) {
+      alert('Your session has expired. Please log in again.');
+      return;
+    }
 
+    setSubmitting(true);
     try {
       const response = await axios.post(
         'http://localhost:5000/api/interviews/feedback',
-        formData
+        formData,
+        getAuthConfig()
       );
 
-      if (response.status === 201) {
+      if (response.status === 201 || response.status === 200) {
         alert('Feedback submitted successfully!');
         setFormData({
           candidate_id: '',
@@ -448,11 +401,15 @@ const FeedbackForm = ({ onSuccess }) => {
           rating: 0
         });
         setHoverRating(0);
-        onSuccess?.();
+        await onSuccess?.();
       }
     } catch (error) {
-      console.error('Error submitting feedback:', error);
-      alert(error.response?.data?.error || 'Feedback submission failed.');
+      console.error('Error submitting feedback:', error.response?.data || error.message);
+      if (error.response?.status === 401) {
+        alert('Your session is invalid or expired. Please log in again.');
+      } else {
+        alert(error.response?.data?.error || error.response?.data?.message || 'Feedback submission failed.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -468,61 +425,28 @@ const FeedbackForm = ({ onSuccess }) => {
           <Star size={21} />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-gray-900 sm:text-xl">
-            Submit Feedback
-          </h2>
-          <p className="mt-0.5 text-sm text-gray-500">
-            Record your assessment of the candidate.
-          </p>
+          <h2 className="text-lg font-bold text-gray-900 sm:text-xl">Submit Feedback</h2>
+          <p className="mt-0.5 text-sm text-gray-500">Record your assessment of the candidate.</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5 p-5 sm:p-7">
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-semibold text-gray-700">
-              Candidate Name
-            </label>
-            <CandidateDropdown
-              value={formData.candidate_id}
-              onChange={handleChange}
-            />
+            <label className="block text-sm font-semibold text-gray-700">Candidate Name</label>
+            <CandidateDropdown value={formData.candidate_id} onChange={handleChange} />
           </div>
-
           <div>
-            <label className="block text-sm font-semibold text-gray-700">
-              Interviewer Name
-            </label>
-            <InterviewerDropdown
-              value={formData.interviewer}
-              onChange={handleChange}
-            />
+            <label className="block text-sm font-semibold text-gray-700">Interviewer Name</label>
+            <InterviewerDropdown value={formData.interviewer} onChange={handleChange} />
           </div>
-
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-700">
-              Feedback
-            </label>
-            <textarea
-              name="feedback"
-              placeholder="Enter your feedback"
-              value={formData.feedback}
-              onChange={handleChange}
-              rows={4}
-              className={`${fieldClass} resize-y`}
-              required
-            />
+            <label className="block text-sm font-semibold text-gray-700">Feedback</label>
+            <textarea name="feedback" placeholder="Enter your feedback" value={formData.feedback} onChange={handleChange} rows={4} className={`${fieldClass} resize-y`} required />
           </div>
-
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-700">
-              Rating
-            </label>
-            <div
-              className="mt-2 flex flex-wrap items-center gap-1"
-              role="group"
-              aria-label="Candidate rating"
-            >
+            <label className="block text-sm font-semibold text-gray-700">Rating</label>
+            <div className="mt-2 flex flex-wrap items-center gap-1" role="group" aria-label="Candidate rating">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
@@ -536,14 +460,7 @@ const FeedbackForm = ({ onSuccess }) => {
                   onClick={() => handleRatingClick(star)}
                   className="rounded-md p-1 transition hover:scale-110 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 >
-                  <Star
-                    size={30}
-                    className={
-                      star <= (hoverRating || formData.rating)
-                        ? 'fill-yellow-400 text-yellow-500'
-                        : 'text-gray-300'
-                    }
-                  />
+                  <Star size={30} className={star <= (hoverRating || formData.rating) ? 'fill-yellow-400 text-yellow-500' : 'text-gray-300'} />
                 </button>
               ))}
               <span className="ml-2 text-sm font-medium text-gray-500">
@@ -552,13 +469,8 @@ const FeedbackForm = ({ onSuccess }) => {
             </div>
           </div>
         </div>
-
         <div className="flex justify-end border-t border-gray-100 pt-5">
-          <button
-            type="submit"
-            disabled={submitting}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gray-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-200 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-          >
+          <button type="submit" disabled={submitting} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gray-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-200 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">
             <MessageSquare size={17} />
             {submitting ? 'Submitting...' : 'Submit Feedback'}
           </button>
@@ -571,7 +483,7 @@ const FeedbackForm = ({ onSuccess }) => {
 // Main InterviewPanelDashboard Component
 const HRInterviewPanel = () => {
   const [, setMenuOpen] = useState(false);
-  const [darkMode,] = useState(false);
+  const [darkMode] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [shortlistedCandidates, setShortlistedCandidates] = useState([]);
   const [shortlistLoading, setShortlistLoading] = useState(false);
@@ -586,21 +498,27 @@ const HRInterviewPanel = () => {
   });
 
   const fetchStats = async () => {
+    if (!localStorage.getItem('token')) {
+      console.error('Cannot fetch interview statistics: no authentication token found.');
+      return;
+    }
+
     try {
       const response = await axios.get(
-        'http://localhost:5000/api/interviews/dashboard'
+        'http://localhost:5000/api/interviews/dashboard',
+        getAuthConfig()
       );
 
       if (response.status === 200) {
         setStats({
-          total: response.data.totalInterviews,
-          completed: response.data.completed,
-          pending: response.data.pending,
-          shortlisted: response.data.shortlisted
+          total: Number(response.data.totalInterviews ?? response.data.total ?? 0),
+          completed: Number(response.data.completed ?? 0),
+          pending: Number(response.data.pending ?? 0),
+          shortlisted: Number(response.data.shortlisted ?? 0)
         });
       }
     } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
+      console.error('Error fetching dashboard stats:', error.response?.data || error.message);
     }
   };
 
@@ -620,12 +538,18 @@ const HRInterviewPanel = () => {
   }, []);
 
   const handleShortlistedClick = async () => {
+    if (!localStorage.getItem('token')) {
+      alert('Your session has expired. Please log in again.');
+      return;
+    }
+
     setShortlistLoading(true);
     setIsModalOpen(true);
 
     try {
       const response = await axios.get(
-        'http://localhost:5000/api/interviews/shortlist'
+        'http://localhost:5000/api/interviews/shortlist',
+        getAuthConfig()
       );
 
       const rows = Array.isArray(response.data) ? response.data : [];
@@ -633,18 +557,18 @@ const HRInterviewPanel = () => {
       setShortlistedCandidates(
         rows.map((candidate) => ({
           ...candidate,
-          name:
-            candidate.candidate_name ||
-            candidate.name ||
-            candidate.candidate_id ||
-            'Unnamed candidate',
+          name: candidate.candidate_name || candidate.name || candidate.candidate_id || 'Unnamed candidate',
           role: candidate.role || 'Role not specified',
           status: candidate.status || 'Shortlisted'
         }))
       );
     } catch (error) {
-      console.error('Error fetching shortlisted candidates:', error);
-      alert(error.response?.data?.error || 'Could not load shortlisted candidates.');
+      console.error('Error fetching shortlisted candidates:', error.response?.data || error.message);
+      if (error.response?.status === 401) {
+        alert('Your session is invalid or expired. Please log in again.');
+      } else {
+        alert(error.response?.data?.error || error.response?.data?.message || 'Could not load shortlisted candidates.');
+      }
     } finally {
       setShortlistLoading(false);
     }
@@ -667,17 +591,15 @@ const HRInterviewPanel = () => {
         {/* Header */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-yellow-700">
-              Human Resources
-            </p>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
-              Interview Dashboard
-            </h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Monitor interview progress and candidate outcomes.
-            </p>
+            <div className="mb-3 flex items-center gap-2">
+              <span className="h-1 w-9 shrink-0 rounded-full bg-yellow-400" />
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500">
+                INTERVIEW & RECRUITMENT PANEL.HR
+              </span>
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Interview Dashboard</h1>
+            <p className="mt-1 text-sm text-gray-500">Monitor interview progress and candidate outcomes.</p>
           </div>
-
           <button
             type="button"
             onClick={fetchStats}
@@ -690,24 +612,13 @@ const HRInterviewPanel = () => {
         {/* Tab Navigation */}
         <nav className="mb-6 rounded-2xl border border-gray-200 bg-white p-2 shadow-sm">
           <div className="flex flex-wrap items-center justify-center gap-2">
-            <button
-              onClick={() => setActiveTab('dashboard')}
-              className={tabClass('dashboard')}
-            >
+            <button onClick={() => setActiveTab('dashboard')} className={tabClass('dashboard')}>
               <LayoutDashboard size={18} /> Dashboard
             </button>
-
-            <button
-              onClick={() => setActiveTab('schedule')}
-              className={tabClass('schedule')}
-            >
+            <button onClick={() => setActiveTab('schedule')} className={tabClass('schedule')}>
               <Calendar size={18} /> Schedule
             </button>
-
-            <button
-              onClick={() => setActiveTab('feedback')}
-              className={tabClass('feedback')}
-            >
+            <button onClick={() => setActiveTab('feedback')} className={tabClass('feedback')}>
               <Star size={18} /> Feedback
             </button>
           </div>
@@ -717,12 +628,7 @@ const HRInterviewPanel = () => {
         <main className="mx-auto w-full max-w-7xl">
           {activeTab === 'dashboard' && (
             <div>
-              
-              <Dashboard
-                stats={stats}
-                onShortlistedClick={handleShortlistedClick}
-              />
-
+              <Dashboard stats={stats} onShortlistedClick={handleShortlistedClick} />
               <button
                 type="button"
                 onClick={handleShortlistedClick}
@@ -730,16 +636,12 @@ const HRInterviewPanel = () => {
                 className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-yellow-400 hover:bg-yellow-50 disabled:opacity-60"
               >
                 <Award size={18} className="text-yellow-600" />
-                {shortlistLoading
-                  ? 'Loading shortlisted candidates...'
-                  : 'View shortlisted candidates'}
+                {shortlistLoading ? 'Loading shortlisted candidates...' : 'View shortlisted candidates'}
               </button>
             </div>
           )}
-
           {activeTab === 'schedule' && <ScheduleForm onSuccess={fetchStats} />}
           {activeTab === 'feedback' && <FeedbackForm onSuccess={fetchStats} />}
-
         </main>
 
         {/* Shortlisted Candidates Modal */}
@@ -757,15 +659,10 @@ const HRInterviewPanel = () => {
                     <Award size={20} />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-gray-900">
-                      Shortlisted Candidates
-                    </h2>
-                    <p className="text-sm text-gray-500">
-                      {shortlistedCandidates.length} candidate(s)
-                    </p>
+                    <h2 className="text-lg font-bold text-gray-900">Shortlisted Candidates</h2>
+                    <p className="text-sm text-gray-500">{shortlistedCandidates.length} candidate(s)</p>
                   </div>
                 </div>
-
                 <button
                   type="button"
                   onClick={closeModal}
@@ -779,18 +676,13 @@ const HRInterviewPanel = () => {
               <div className="p-5 sm:p-6">
                 {shortlistLoading ? (
                   <div className="flex items-center justify-center gap-2 py-10 text-sm text-gray-500">
-                    <RefreshCw size={18} className="animate-spin" />
-                    Loading candidates...
+                    <RefreshCw size={18} className="animate-spin" /> Loading candidates...
                   </div>
                 ) : shortlistedCandidates.length > 0 ? (
                   <ul className="divide-y divide-gray-100">
                     {shortlistedCandidates.map((candidate, index) => (
                       <li
-                        key={
-                          candidate.id ||
-                          candidate.candidate_id ||
-                          `${candidate.name}-${index}`
-                        }
+                        key={candidate.id || candidate.candidate_id || `${candidate.name}-${index}`}
                         className="flex flex-col gap-3 py-4 first:pt-0 sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div className="flex min-w-0 items-center gap-3">
@@ -798,15 +690,10 @@ const HRInterviewPanel = () => {
                             <UserRound size={19} />
                           </div>
                           <div className="min-w-0">
-                            <p className="truncate font-semibold text-gray-900">
-                              {candidate.name}
-                            </p>
-                            <p className="mt-0.5 text-sm text-gray-500">
-                              {candidate.role}
-                            </p>
+                            <p className="truncate font-semibold text-gray-900">{candidate.name}</p>
+                            <p className="mt-0.5 text-sm text-gray-500">{candidate.role}</p>
                           </div>
                         </div>
-
                         <span className="inline-flex w-fit items-center rounded-full border border-yellow-200 bg-yellow-50 px-3 py-1 text-xs font-semibold capitalize text-yellow-800">
                           {candidate.status}
                         </span>
@@ -818,9 +705,7 @@ const HRInterviewPanel = () => {
                     <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 text-gray-500">
                       <Users size={23} />
                     </div>
-                    <p className="font-semibold text-gray-800">
-                      No shortlisted candidates found
-                    </p>
+                    <p className="font-semibold text-gray-800">No shortlisted candidates found</p>
                     <p className="mt-1 text-sm text-gray-500">
                       Candidates will appear here when shortlist records are available.
                     </p>

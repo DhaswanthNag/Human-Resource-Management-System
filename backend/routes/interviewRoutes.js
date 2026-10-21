@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const {
+  authenticateToken,
+  authorizeRoles
+} = require('../middlewares/authMiddleware');
+const {
   submitAssign,
   getAssignments,
   getDashboardStats,
@@ -11,22 +15,16 @@ const {
   getShortlists
 } = require('../controllers/interviewController');
 
-// Assign
+router.use(authenticateToken);
+router.use(authorizeRoles('admin', 'hr'));
+
 router.post('/assign', submitAssign);
 router.get('/assign', getAssignments);
-
-// Dashboard
 router.get('/dashboard', getDashboardStats);
-
-// Schedule
 router.post('/schedule', addSchedule);
 router.get('/schedule', getAllSchedules);
-
-// Shortlist
 router.post('/shortlist', submitShortlist);
 router.get('/shortlist', getShortlists);
-
-// Feedback
 router.post('/feedback', submitFeedback);
 
 module.exports = router;

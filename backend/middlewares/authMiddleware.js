@@ -1,42 +1,40 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  const token = authHeader?.startsWith('Bearer ')
+  const token = authHeader?.startsWith("Bearer ")
     ? authHeader.slice(7).trim()
     : null;
 
   if (!token) {
-    return res.status(401).json({ message: 'Token required' });
+    return res.status(401).json({ message: "Token required" });
   }
 
   if (!process.env.JWT_SECRET) {
-    console.error('JWT_SECRET is not configured');
+    console.error("JWT_SECRET is not configured");
     return res.status(500).json({
-      message: 'Authentication configuration error'
+      message: "Authentication configuration error"
     });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.userId || decoded.user_id;
+    const role = typeof decoded.role === "string"
+      ? decoded.role.trim().toLowerCase()
+      : "";
 
-    req.user = {
-      userId: decoded.userId || decoded.user_id,
-      role: typeof decoded.role === 'string'
-        ? decoded.role.trim().toLowerCase()
-        : ''
-    };
-
-    if (!req.user.userId || !req.user.role) {
+    if (!userId || !role) {
       return res.status(401).json({
-        message: 'Invalid authentication token'
+        message: "Invalid authentication token"
       });
     }
 
+    req.user = { userId, role };
     next();
   } catch (err) {
     return res.status(401).json({
-      message: 'Invalid or expired token'
+      message: "Invalid or expired token"
     });
   }
 };
@@ -51,7 +49,7 @@ const authorizeRoles = (...allowedRoles) => {
 
     if (!userRole || !normalizedRoles.includes(userRole)) {
       return res.status(403).json({
-        message: 'Access denied: Unauthorized role'
+        message: "Access denied: Unauthorized role"
       });
     }
 
