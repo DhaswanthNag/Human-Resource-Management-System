@@ -3,33 +3,35 @@ import { Calendar, UserCheck, LayoutDashboard, UserPlus, Star, Users, CheckCircl
 import axios from 'axios';
 
 // Candidate Dropdown Component
+
 const CandidateDropdown = ({ value, onChange, required = true }) => {
-  const [employees, setEmployees] = useState([]);
+  const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
   useEffect(() => {
-    const fetchEmployees = async () => {
+    const fetchCandidates = async () => {
       try {
         setLoading(true);
         setError('');
-        const response = await axios.get('http://localhost:5000/api/employees');
+        const token = localStorage.getItem('token');
+        const response = await axios.get('http://localhost:5000/api/candidates', {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
         const data = Array.isArray(response.data)
           ? response.data
-          : response.data.employees || response.data.data || [];
-
-        setEmployees(data.filter((employee) => employee.user_id || employee.userId));
+          : response.data.candidates || response.data.data || [];
+        setCandidates(data.filter(candidate => candidate.candidate_id != null || candidate.id != null));
       } catch (err) {
-        console.error('Error fetching employees:', err);
-        setError('Unable to load employees. Please check the backend.');
+        console.error('Error fetching candidates:', err.response?.data || err.message);
+        setError(err.response?.status === 401
+          ? 'Please log in again to load candidates.'
+          : 'Unable to load candidates. Please check the backend.');
       } finally {
         setLoading(false);
       }
     };
-
-    fetchEmployees();
+    fetchCandidates();
   }, []);
-
   return (
     <div>
       <select
@@ -38,35 +40,30 @@ const CandidateDropdown = ({ value, onChange, required = true }) => {
         onChange={onChange}
         required={required}
         disabled={loading || Boolean(error)}
-        className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 disabled:cursor-not-allowed disabled:bg-slate-100"
+        className="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:cursor-not-allowed disabled:bg-gray-100"
       >
         <option value="">
-          {loading ? 'Loading employees...' : error ? 'Employees unavailable' : 'Select employee'}
+          {loading ? 'Loading candidates...' : error ? 'Candidates unavailable' : 'Select candidate'}
         </option>
-        {employees.map((employee, index) => {
-          const userId = employee.user_id || employee.userId;
-          const name =
-            employee.name ||
-            employee.employee_name ||
-            employee.full_name ||
-            employee.fullName ||
-            employee.username ||
-            'Name not available';
-
+        {candidates.map((candidate, index) => {
+          const candidateId = candidate.candidate_id ?? candidate.id;
+          const candidateCode = candidate.candidate_code || `candidate${String(candidateId).padStart(3, '0')}`;
+          const name = candidate.name || candidate.candidate_name || candidate.full_name || candidate.fullName || 'Name not available';
           return (
-            <option key={userId || index} value={userId}>
-              {userId} - {name}
+            <option key={candidateId ?? index} value={candidateCode}>
+              ID: {candidateId} | {candidateCode} - {name}
             </option>
           );
         })}
       </select>
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
-      {!loading && !error && employees.length === 0 && (
-        <p className="mt-1 text-sm text-slate-500">No employees found.</p>
+      {!loading && !error && candidates.length === 0 && (
+        <p className="mt-1 text-sm text-gray-500">No candidates found.</p>
       )}
     </div>
   );
 };
+
 
 // Interviewer Dropdown Component
 const InterviewerDropdown = ({ value, onChange, required = true }) => {

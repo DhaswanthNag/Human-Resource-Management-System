@@ -122,7 +122,6 @@ const submitFeedback = async (req, res) => {
 
 const submitShortlist = async (req, res) => {
   try {
-    console.log("Received Body:", req.body);
 
     const { candidate_id, status } = req.body;
 
