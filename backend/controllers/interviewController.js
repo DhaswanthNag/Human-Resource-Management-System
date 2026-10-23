@@ -113,10 +113,9 @@ const getDashboardStats = async (req, res) => {
 
     const shortlisted = await pool.query(
       `SELECT COUNT(*) AS total
-       FROM shortlist s
+       FROM public.shortlist s
        LEFT JOIN public.candidates c
-         ON c.candidate_code = s.candidate_name
-         OR c.candidate_id::text = s.candidate_name
+         ON c.candidate_id = s.candidate_id
        WHERE LOWER(s.status) = 'shortlisted'
          AND ($1::boolean OR c.assigned_hr_user_id = $2)`,
       [admin, userId]
@@ -243,15 +242,24 @@ const submitShortlist = async (req, res) => {
     }
 
     const result = await pool.query(
-      `INSERT INTO shortlist (candidate_name, status)
-       VALUES ($1, $2) RETURNING *`,
-      [candidateIdentifier(candidate), normalizedStatus]
+      `INSERT INTO public.shortlist
+         (candidate_id, status, candidate_code, candidate_name)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (candidate_id)
+       DO UPDATE SET
+         status = EXCLUDED.status,
+         candidate_code = EXCLUDED.candidate_code,
+         candidate_name = EXCLUDED.candidate_name
+       RETURNING *`,
+      [
+        candidate.candidate_id,
+        normalizedStatus,
+        candidate.candidate_code,
+        candidate.name
+      ]
     );
 
-    return res.status(201).json({
-      ...result.rows[0],
-      candidate_id: result.rows[0].candidate_name
-    });
+    return res.status(200).json(result.rows[0]);
   } catch (error) {
     console.error('Error submitting shortlist:', error);
     return res.status(500).json({ error: 'Internal server error' });
@@ -261,13 +269,14 @@ const submitShortlist = async (req, res) => {
 const getShortlists = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT s.*, s.candidate_name AS candidate_id
-       FROM shortlist s
-       LEFT JOIN public.candidates c
-         ON c.candidate_code = s.candidate_name
-         OR c.candidate_id::text = s.candidate_name
+      `SELECT
+         s.*,
+         COALESCE(s.candidate_code, c.candidate_code) AS candidate_code,
+         COALESCE(s.candidate_name, c.name) AS candidate_name
+       FROM public.shortlist s
+       LEFT JOIN public.candidates c ON c.candidate_id = s.candidate_id
        WHERE ($1::boolean OR c.assigned_hr_user_id = $2)
-       ORDER BY s.candidate_name`,
+       ORDER BY s.candidate_id`,
       [isAdmin(req), getUserId(req)]
     );
 

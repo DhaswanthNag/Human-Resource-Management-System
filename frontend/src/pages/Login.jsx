@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import background from "../assets/background1.jpg"; // adjust path if file is in src/assets
 

@@ -252,16 +252,34 @@ export default function AdminDashboard() {
   // Fetch shortlisted/rejected candidates
   const fetchShortlistedCandidates = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/interviews/shortlist");
-      const data = response.data;
+      const storedUser = JSON.parse(localStorage.getItem("userData") || "{}");
+      const token =
+        localStorage.getItem("hrAuthToken") ||
+        localStorage.getItem("authToken") ||
+        localStorage.getItem("token") ||
+        storedUser.token ||
+        storedUser.authToken ||
+        "";
 
-      const shortlisted = data.filter((c) => c.status === "shortlisted");
-      const rejected = data.filter((c) => c.status === "rejected");
+      if (!token) {
+        console.error("No authentication token found. Please log in again.");
+        return;
+      }
 
-      setShortlistedCount(shortlisted.length);
-      setRejectedCount(rejected.length);
+      const response = await axios.get(
+        "http://localhost:5000/api/interviews/shortlist",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const data = Array.isArray(response.data) ? response.data : [];
+      setShortlistedCount(data.filter((c) => c.status?.toLowerCase() === "shortlisted").length);
+      setRejectedCount(data.filter((c) => c.status?.toLowerCase() === "rejected").length);
     } catch (error) {
-      console.error("Error fetching shortlisted/rejected candidates:", error);
+      console.error(
+        "Error fetching shortlisted/rejected candidates:",
+        error.response?.status,
+        error.response?.data || error.message
+      );
     }
   };
 

@@ -1,7 +1,9 @@
- // src/server.js
+// src/server.js
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
 // 🔹 Import Routes
 import authRoutes from "./routes/authRoutes.js";
@@ -24,6 +26,11 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Serve saved offer letter PDFs
+const pdfDirectory = path.resolve(__dirname, "uploads", "offer-letters");
+app.use("/uploads/offer-letters", express.static(pdfDirectory));
 
 app.use(cors({
   origin: "http://localhost:3000",
